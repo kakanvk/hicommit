@@ -5,6 +5,7 @@ import Login from './layouts/Login'
 import { useLogin } from "@/service/LoginContext";
 import { useEffect } from 'react';
 import AdminLayout from './layouts/Admin';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminLayout />} />
       </Routes>
+      <Toaster position="bottom-center" />
     </div>
   )
 }

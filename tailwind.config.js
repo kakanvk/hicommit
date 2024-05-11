@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -9,6 +10,10 @@ module.exports = {
   ],
   prefix: "",
   theme: {
+    fontFamily: {
+      'sans': ['Plus Jakarta Sans', 'system-ui'],
+      'mono': ['JetBrains Mono', 'monospace'],
+    },
     container: {
       center: true,
       padding: "2rem",

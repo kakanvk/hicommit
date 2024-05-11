@@ -1,5 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle";
-import { Search, Bell, Settings, UserRound, LogOut, MessageCircle } from 'lucide-react';
+import { Search, Bell, Settings, UserRound, LogOut } from 'lucide-react';
 
 import {
     DropdownMenu,
@@ -33,8 +33,6 @@ import {
 import { handleLogout } from "@/service/firebase";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { useLogin } from "@/service/LoginContext";
-import { TooltipArrow } from "@radix-ui/react-tooltip";
-import { useState } from "react";
 import { DialogClose } from "@radix-ui/react-dialog";
 
 function Header() {
@@ -125,7 +123,7 @@ function Header() {
                         <DialogHeader>
                             <DialogTitle className="mb-1">Đăng xuất khỏi tài khoản này?</DialogTitle>
                             <DialogDescription>
-                                Bạn sẽ không thể truy cập vào MyLMS, đến khi đăng nhập trở lại.
+                                Bạn sẽ không thể truy cập vào HiCommit, đến khi đăng nhập trở lại.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>

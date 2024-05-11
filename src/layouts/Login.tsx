@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { ModeToggle } from "@/components/mode-toggle";
-import { Home } from 'lucide-react';
 
 import LoginBG from "@/assets/imgs/LoginBG.jpg";
 
@@ -37,7 +36,7 @@ function Login() {
             <div className="absolute top-3 right-4">
                 <ModeToggle />
             </div>
-            <div className="absolute flex flex-col gap-10 bg-white/60 dark:bg-black/70 p-10 rounded-xl backdrop-blur-sm">
+            <div className="absolute flex flex-col gap-10 bg-white/80 dark:bg-black/70 p-10 rounded-xl backdrop-blur-sm border">
                 <div className="flex flex-col items-center">
                     <span className="font-semibold text-lg">Đăng nhập</span>
                     <div className="flex text-3xl font-black gap-[2px]">

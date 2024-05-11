@@ -62,7 +62,7 @@
 }
 
 * {
-    font-family: "Plus Jakarta Sans", sans-serif;
+    /* font-family: "Plus Jakarta Sans", sans-serif; */
     word-spacing: 1.5px;
     scroll-behavior: smooth;
 }
