@@ -38,15 +38,15 @@ import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft } f
 import RingProgress from "@/components/ui/ringProcess";
 import { Button } from "@/components/ui/button";
 import CodeArea from "@/components/ui/code-area";
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogClose } from "@radix-ui/react-dialog";
 
-function Work() {
+function Problem() {
 
     const { course_id, work_id } = useParams();
 
     return (
-        <div className="Work p-6 px-8 pb-[90px] flex flex-col gap-8">
+        <div className="Problem p-6 px-8 pb-[90px] flex flex-col gap-8">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -57,13 +57,13 @@ function Work() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink>
-                            <Link to={`/course/${course_id}`}>Kỹ thuật lập trình</Link>
+                            <Link to={`/course/123`}>Kỹ thuật lập trình</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink>
-                            Bài tập {work_id}
+                            Bài tập 1
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                 </BreadcrumbList>
@@ -284,7 +284,7 @@ function Work() {
                         <div className="flex gap-3 justify-start items-center">
                             <div className="flex items-center gap-2.5">
                                 <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                <span className="text-sm">Lỗi:</span>
+                                <span className="text-sm">Gặp vấn đề:</span>
                             </div>
                             <Badge variant="secondary" className="rounded">2/10</Badge>
                         </div>
@@ -302,4 +302,4 @@ function Work() {
     );
 };
 
-export default Work;
+export default Problem;

@@ -12,9 +12,11 @@ import Message from "@/pages/client/Message";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Course from "@/pages/client/Course";
-import Work from "@/pages/client/Work";
-import Submit from "@/pages/client/SubmitWork";
-import Result from "@/pages/client/Result";
+import Problem from "@/pages/client/Problem";
+import SubmitProblem from "@/pages/client/SubmitProblem";
+import Result from "@/pages/client/Submission";
+import JoinCourse from "@/pages/client/JoinCourse";
+import SubmissionHistory from "@/pages/client/SubmissionHistory";
 
 function ClientLayout() {
 
@@ -65,12 +67,14 @@ function ClientLayout() {
                                             <Route path="contest" element={<Contest />} />
                                             <Route path="course/:course_id">
                                                 <Route path="" element={<Course />} />
-                                                <Route path=":work_id" element={<Work />} />
-                                                <Route path=":work_id/submit">
-                                                    <Route path="" element={<Submit />} />
-                                                    <Route path=":submit_id" element={<Result />} />
-                                                </Route>
+                                                <Route path="join" element={<JoinCourse />} />
                                             </Route>
+                                            <Route path="problem/:problem_id">
+                                                <Route path="" element={<Problem />} />
+                                                <Route path="submit" element={<SubmitProblem />} />
+                                            </Route>
+                                            <Route path="submissions/:problem_id" element={<SubmissionHistory />} />
+                                            <Route path="submission/:submission_id" element={<Result />} />
                                         </Routes>
                                     </div>
                                     <Footer />

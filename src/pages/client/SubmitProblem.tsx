@@ -27,7 +27,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 import { Link } from "react-router-dom";
 
@@ -46,11 +45,11 @@ import {
 } from "@/components/ui/tooltip"
 import { useEffect, useState } from "react";
 
-function SubmitWork() {
+function SubmitProblem() {
 
     const { theme } = useTheme();
 
-    const { course_id, work_id } = useParams();
+    const { problem_id } = useParams();
 
     const navigate = useNavigate();
 
@@ -63,7 +62,7 @@ function SubmitWork() {
 
     const handleSubmit = () => {
         console.log("Submit work: ", code);
-        navigate("/course/1/1/submit/8763121492");
+        navigate("/submission/8763121492");
     }
 
     const handleChangeLanguage = (language: any) => {
@@ -105,7 +104,7 @@ public class Main {
     }, []);
 
     return (
-        <div className="SubmitWork p-6 px-8 pb-[90px] flex flex-col gap-8">
+        <div className="SubmitProblem p-6 px-8 pb-[90px] flex flex-col gap-8">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -116,13 +115,13 @@ public class Main {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/course/${course_id}`}>Kỹ thuật lập trình</Link>
+                            <Link to={`/course/${problem_id}`}>Kỹ thuật lập trình</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/course/${course_id}/${work_id}`}>Bài tập {work_id}</Link>
+                            <Link to={`/problem/${problem_id}`}>Bài tập {problem_id}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -138,13 +137,13 @@ public class Main {
                 <div className="flex-1 flex flex-col gap-3">
                     <p className="text-xl font-bold">
                         Nộp bài:
-                        <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/course/${course_id}/${work_id}`}>
-                            Bài tập {work_id}: In mảng 2 chiều dạng bảng
+                        <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${problem_id}`}>
+                            In mảng 2 chiều dạng bảng
                             <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[20px]"></i>
                         </Link>
                     </p>
                     <div className="flex items-center gap-1.5">
-                        <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${course_id}`}>
+                        <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem_id}`}>
                             <CornerDownRight className="w-3" />Kỹ thuật lập trình
                         </Link>
                         <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">Lab 1: Nhập môn</Badge>
@@ -188,7 +187,7 @@ public class Main {
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <Link to={`/course/${course_id}/${work_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
+                    <Link to={`/course/${problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
                         <ChevronLeft className="w-4" />Quay lại
                     </Link>
                     <div className="flex items-center gap-4">
@@ -213,23 +212,22 @@ public class Main {
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-md">
                                 <DialogHeader>
-                                    <DialogTitle>Commit thay đổi <i className="fa-solid fa-seedling text-primary ml-0.5 translate-y-[-1px]"></i></DialogTitle>
-                                    <DialogDescription>
-                                        Đặt tên cho sự thay đổi này trên GitHub. Đây cũng là tên sẽ hiển thị trên trang lịch sử nộp bài của bạn.
-                                    </DialogDescription>
+                                    <DialogTitle><i className="fa-solid fa-code-commit text-primary mr-2 translate-y-[-1px]"></i>Commit thay đổi</DialogTitle>
                                 </DialogHeader>
-                                <div className="flex items-center space-x-2">
-                                    <div className="grid flex-1 gap-2">
-                                        <Label htmlFor="link" className="sr-only">
-                                            Link
-                                        </Label>
-                                        <Input
-                                            id="link"
-                                            defaultValue="Bài nộp 1"
-                                        />
+                                <DialogDescription>
+                                    <p>
+                                        Đoạn mã này sẽ được gửi lên GitHub, hãy tạo một thông điệp để gợi nhớ về sự thay đổi này:
+                                    </p>
+                                    <div className="flex items-center space-x-2 mt-3">
+                                        <div className="grid flex-1 gap-2">
+                                            <Input
+                                                id="commit"
+                                                defaultValue="Bài nộp 1"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <DialogFooter className="mt-5 justify-end gap-1">
+                                </DialogDescription>
+                                <DialogFooter className="mt-4 justify-end gap-1">
                                     <div className="flex items-center gap-3">
                                         <DialogClose asChild>
                                             <Button type="button" variant="secondary">
@@ -237,7 +235,7 @@ public class Main {
                                             </Button>
                                         </DialogClose>
                                         <Button onClick={() => handleSubmit()}>
-                                            Xác nhận
+                                            Commit
                                         </Button>
                                     </div>
                                 </DialogFooter>
@@ -250,4 +248,4 @@ public class Main {
     );
 };
 
-export default SubmitWork;
+export default SubmitProblem;

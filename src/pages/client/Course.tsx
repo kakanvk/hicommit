@@ -71,7 +71,7 @@ function Course() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink href="">
-                            Kỹ thuật lập trình {course_id}
+                            Kỹ thuật lập trình
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                 </BreadcrumbList>
@@ -194,7 +194,7 @@ function Course() {
                                             </DialogHeader>
                                             <DialogFooter>
                                                 <DialogClose asChild>
-                                                    <Button variant="outline" size="sm">Đóng</Button>
+                                                    <Button variant="secondary" size="sm">Đóng</Button>
                                                 </DialogClose>
                                             </DialogFooter>
                                         </DialogContent>
@@ -253,21 +253,21 @@ function Course() {
                                     </span>
                                 </AccordionTrigger>
                                 <AccordionContent className="text-base flex flex-col gap-1.5">
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="1">
+                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/1">
                                         <div className="flex items-center gap-3">
                                             <i className="fa-solid fa-circle-check text-green-600"></i>
                                             <span>Bài tập 1: Hello World</span>
                                         </div>
                                         <ChevronRight className="w-4 invisible group-hover/work:visible" />
                                     </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="2">
+                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/2">
                                         <div className="flex items-center gap-3">
                                             <i className="fa-solid fa-circle-check text-green-600"></i>
                                             <span>Bài tập 2: Cộng 2 số nguyên</span>
                                         </div>
                                         <ChevronRight className="w-4 invisible group-hover/work:visible" />
                                     </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="3">
+                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/3">
                                         <div className="flex items-center gap-3">
                                             <i className="fa-solid fa-circle-xmark text-red-500"></i>
                                             <span>Bài tập 3: Vòng lặp For</span>
@@ -367,7 +367,7 @@ function Course() {
                         <div className="flex gap-3 justify-start items-center">
                             <div className="flex items-center gap-2.5">
                                 <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                <span className="text-sm">Lỗi:</span>
+                                <span className="text-sm">Gặp vấn đề:</span>
                             </div>
                             <Badge variant="secondary" className="rounded">2/10</Badge>
                         </div>
