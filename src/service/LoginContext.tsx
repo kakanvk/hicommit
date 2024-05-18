@@ -28,9 +28,9 @@ export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     const octokit = new Octokit({ auth: token });
                     const userData = await getGithubProfile(octokit);
 
-                    console.log({ ...userData, email: user.email });
+                    console.log({ ...userData, email: user.email, accessToken: token});
 
-                    setUser({ ...userData, email: user.email } as any);
+                    setUser({ ...userData, email: user.email, accessToken: token} as any);
 
                     setLoading(false);
 

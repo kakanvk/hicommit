@@ -1,7 +1,7 @@
 
 function Loader() {
     return (
-        <div className="Loader fixed inset-0 flex items-center justify-center">
+        <div className="Loader fixed inset-0 flex items-center justify-center bg-zinc-950/40 dark:bg-zinc-950/80" style={{zIndex: 9999}}>
             <div className="loading">
                 <svg viewBox="0 0 187.3 93.7" height="200px" width="300px" className="svgbox">
                     <defs>

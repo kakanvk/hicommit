@@ -5,14 +5,17 @@ import './index.css'
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LoginProvider } from './service/LoginContext.tsx'
+import { ClientUIProvider } from './service/ClientUIContext.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <LoginProvider>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <App />
-        <Toaster />
-      </ThemeProvider>
+      <ClientUIProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <App />
+          <Toaster />
+        </ThemeProvider>
+      </ClientUIProvider>
     </LoginProvider>
   </BrowserRouter>
 )

@@ -17,7 +17,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import RingProgress from "@/components/ui/ringProcess";
-import { CornerDownRight, CalendarDays, UsersRound, GitMerge, Copy, ChevronRight, MessageCircle } from 'lucide-react';
+import { CornerDownRight, CalendarDays, UsersRound, GitMerge, Copy, ChevronRight, MessageCircle, Share2 } from 'lucide-react';
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -215,10 +215,10 @@ function Course() {
                                 <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Button size="icon" variant="outline"><Copy className="w-4" /></Button>
+                                            <Button size="icon" variant="outline"><Share2 className="w-4" /></Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="bottom">
-                                            Copy link khoá học
+                                            Chia sẻ khoá học
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
@@ -256,7 +256,7 @@ function Course() {
                                     <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/1">
                                         <div className="flex items-center gap-3">
                                             <i className="fa-solid fa-circle-check text-green-600"></i>
-                                            <span>Bài tập 1: Hello World</span>
+                                            <span>Bài tập 1: Ước số</span>
                                         </div>
                                         <ChevronRight className="w-4 invisible group-hover/work:visible" />
                                     </Link>

@@ -8,7 +8,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 
 import HomePage from "@/pages/client/Home";
 import Contest from "@/pages/client/Contest";
-import Message from "@/pages/client/Message";
+import Chat from "@/pages/client/Chat";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Course from "@/pages/client/Course";
@@ -60,10 +60,10 @@ function ClientLayout() {
                             <div className="flex flex-1 overflow-hidden">
                                 <Navbar />
                                 <div className="flex flex-col flex-1 bg-white dark:bg-zinc-950 h-full overflow-auto justify-between" ref={clientContentRef}>
-                                    <div>
+                                    <div className="flex-1">
                                         <Routes>
                                             <Route path="" element={<HomePage />} />
-                                            <Route path="message" element={<Message />} />
+                                            <Route path="message/*" element={<Chat />} />
                                             <Route path="contest" element={<Contest />} />
                                             <Route path="course/:course_id">
                                                 <Route path="" element={<Course />} />
@@ -73,11 +73,10 @@ function ClientLayout() {
                                                 <Route path="" element={<Problem />} />
                                                 <Route path="submit" element={<SubmitProblem />} />
                                             </Route>
-                                            <Route path="submissions/:problem_id" element={<SubmissionHistory />} />
                                             <Route path="submission/:submission_id" element={<Result />} />
                                         </Routes>
                                     </div>
-                                    <Footer />
+                                    {!location.pathname.startsWith("/message") && <Footer />}
                                 </div>
                             </div>
                             {

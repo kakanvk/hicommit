@@ -44,10 +44,17 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useEffect, useState } from "react";
+import createGitHubAPI from "@/service/githubService";
+import { useLogin } from "@/service/LoginContext";
+import Loader from "@/components/ui/loader";
+import { set } from "react-hook-form";
 
 function SubmitProblem() {
 
     const { theme } = useTheme();
+
+    const loginContext = useLogin();
+    const githubAPI = createGitHubAPI(loginContext?.user.accessToken);
 
     const { problem_id } = useParams();
 
@@ -55,19 +62,33 @@ function SubmitProblem() {
 
     const [selectedLanguage, setSelectedLanguage] = useState("C");
     const [code, setCode] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [commitMessage, setCommitMessage] = useState("Submit code at " + new Date().toLocaleString());
 
     const defaultLanguage = [
         "C", "C++", "Java"
     ]
 
-    const handleSubmit = () => {
-        console.log("Submit work: ", code);
-        navigate("/submission/8763121492");
+    const handleSubmit = async () => {
+        // console.log("Submit work: ", code);
+        setLoading(true);
+
+        try {
+            const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "main.c", code, commitMessage);
+            console.log(result);
+            setLoading(false);
+            // // navigate("/submission/8763121492");
+        } catch (error) {
+            console.error(error);
+        }
+
     }
 
     const handleChangeLanguage = (language: any) => {
         setSelectedLanguage(language);
-        setCode(initialCodeForLanguage[language.toLowerCase() as keyof typeof initialCodeForLanguage]);
+        if (code === initialCodeForLanguage[selectedLanguage.toLowerCase() as keyof typeof initialCodeForLanguage] || code === "") {
+            setCode(initialCodeForLanguage[language.toLowerCase() as keyof typeof initialCodeForLanguage]);
+        }
     }
 
     const initialCodeForLanguage = {
@@ -105,6 +126,11 @@ public class Main {
 
     return (
         <div className="SubmitProblem p-6 px-8 pb-[90px] flex flex-col gap-8">
+
+            {
+                loading &&
+                <Loader />
+            }
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -115,13 +141,13 @@ public class Main {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/course/${problem_id}`}>Kỹ thuật lập trình</Link>
+                            <Link to={`/course/${problem_id}`}>Olympic Sinh Viên 2023 Khối Chuyên tin</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/problem/${problem_id}`}>Bài tập {problem_id}</Link>
+                            <Link to={`/problem/${problem_id}`}>Ước số</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -138,15 +164,15 @@ public class Main {
                     <p className="text-xl font-bold">
                         Nộp bài:
                         <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${problem_id}`}>
-                            In mảng 2 chiều dạng bảng
+                            Olympic Sinh Viên 2023 - Chuyên tin - Ước số
                             <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[20px]"></i>
                         </Link>
                     </p>
                     <div className="flex items-center gap-1.5">
                         <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem_id}`}>
-                            <CornerDownRight className="w-3" />Kỹ thuật lập trình
+                            <CornerDownRight className="w-3" />Olympic Tin học Sinh Viên 2023
                         </Link>
-                        <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">Lab 1: Nhập môn</Badge>
+                        <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">Khối Chuyên tin</Badge>
                     </div>
                 </div>
                 <TooltipProvider delayDuration={100}>
@@ -187,7 +213,7 @@ public class Main {
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <Link to={`/course/${problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
+                    <Link to={`/problem/${problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
                         <ChevronLeft className="w-4" />Quay lại
                     </Link>
                     <div className="flex items-center gap-4">
@@ -222,7 +248,8 @@ public class Main {
                                         <div className="grid flex-1 gap-2">
                                             <Input
                                                 id="commit"
-                                                defaultValue="Bài nộp 1"
+                                                defaultValue={commitMessage}
+                                                onChange={(e) => setCommitMessage(e.target.value)}
                                             />
                                         </div>
                                     </div>
@@ -234,9 +261,11 @@ public class Main {
                                                 Đóng
                                             </Button>
                                         </DialogClose>
-                                        <Button onClick={() => handleSubmit()}>
-                                            Commit
-                                        </Button>
+                                        <DialogClose asChild>
+                                            <Button onClick={() => handleSubmit()}>
+                                                Commit
+                                            </Button>
+                                        </DialogClose>
                                     </div>
                                 </DialogFooter>
                             </DialogContent>

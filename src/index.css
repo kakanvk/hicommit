@@ -26,6 +26,8 @@
         --input: 240 5.9% 90%;
         --ring: 142.1 76.2% 36.3%;
         --radius: 0.5rem;
+        --scrollbar-thumb-bg: rgb(202, 202, 202);
+        --scrollbar-thumb-bg-hover: rgb(168, 168, 168);
     }
 
     .dark {
@@ -48,6 +50,8 @@
         --border: 240 3.7% 15.9%;
         --input: 240 3.7% 15.9%;
         --ring: 142.4 71.8% 29.2%;
+        --scrollbar-thumb-bg: rgb(61, 61, 61);
+        --scrollbar-thumb-bg-hover: rgb(45, 45, 45);
     }
 }
 
