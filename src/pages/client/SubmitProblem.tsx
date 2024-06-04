@@ -74,10 +74,10 @@ function SubmitProblem() {
         setLoading(true);
 
         try {
-            const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "main.c", code, commitMessage);
+            const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "test-cpp", "main.cpp", code, commitMessage);
             console.log(result);
             setLoading(false);
-            // // navigate("/submission/8763121492");
+            navigate("/problem/1");
         } catch (error) {
             console.error(error);
         }

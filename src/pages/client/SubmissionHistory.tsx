@@ -69,7 +69,7 @@ function SubmissionHistory() {
     const [actions, setActions] = useState<any[]>([]);
 
     const getActions = async () => {
-        const data = await githubAPI.getActionsByBranch('kakanvk', 'hicommit-submissions', 'main');
+        const data = await githubAPI.getActionsByBranch('kakanvk', 'hicommit-submissions', 'test-cpp');
         console.log(data);
         setActions(data);
     }
