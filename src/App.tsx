@@ -1,3 +1,12 @@
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'math-field': React.DetailedHTMLProps<React.HTMLAttributes<MathMLElement>, MathMLElement>;
+    }
+  }
+}
+
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css'
 import ClientLayout from './layouts/Client';

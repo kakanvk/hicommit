@@ -63,7 +63,6 @@ const CodeArea: React.FC<CodeAreaProps> = ({ children, className, ref }) => {
         document.body.removeChild(hiddenDiv);
     };
 
-
     return (
         <div
             className={cn(

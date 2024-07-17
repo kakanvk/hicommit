@@ -17,6 +17,10 @@ import SubmitProblem from "@/pages/client/SubmitProblem";
 import Result from "@/pages/client/Submission";
 import JoinCourse from "@/pages/client/JoinCourse";
 import SubmissionHistory from "@/pages/client/SubmissionHistory";
+import CourseManager from "@/pages/teacher/CourseManager";
+import CourseManagerByID from "@/pages/teacher/CourseManagerByID";
+import { Analysis } from "@/pages/teacher/Analysis";
+import CreateProblem from "@/pages/teacher/CreateProblem";
 
 function ClientLayout() {
 
@@ -73,6 +77,14 @@ function ClientLayout() {
                                                 <Route path="" element={<Problem />} />
                                                 <Route path="submit" element={<SubmitProblem />} />
                                             </Route>
+                                            <Route path="course-manager/">
+                                                <Route path="" element={<CourseManager />} />
+                                                <Route path=":course_id">
+                                                    <Route path="" element={<CourseManagerByID />} />
+                                                    <Route path="problem/create" element={<CreateProblem />} />
+                                                </Route>
+                                            </Route>
+                                            <Route path="analysis" element={<Analysis />} />
                                             <Route path="submission/:submission_id" element={<Result />} />
                                         </Routes>
                                     </div>

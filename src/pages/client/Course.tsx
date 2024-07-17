@@ -348,7 +348,7 @@ function Course() {
                 </div>
                 <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
                     <span className="font-semibold">Tiến độ khoá học</span>
-                    <RingProgress radius={90} stroke={12} progress={30} label="" textSize={28} />
+                    <RingProgress radius={90} stroke={12} progress={30} textSize={28} />
                     <div className="w-full font-medium flex flex-col gap-4 mt-5">
                         <div className="flex gap-3 justify-start items-center">
                             <div className="flex items-center gap-2.5">

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // Hàm khởi tạo các API service với accessToken
 const createGitHubAPI = (accessToken: any) => {
+    
     const githubAPI = axios.create({
         baseURL: 'https://api.github.com',
         headers: {
@@ -9,6 +10,51 @@ const createGitHubAPI = (accessToken: any) => {
             Accept: 'application/vnd.github.v3+json',
         },
     });
+
+    const getRepoInfo = async (owner: any, repo: any, branch: any) => {
+        try {
+            const response = await githubAPI.get(`/repos/${owner}/${repo}/contents`, {
+                params: {
+                    t: new Date().getTime(),
+                    ref: branch,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error getting repo info:', error);
+            throw error;
+        }
+    };
+
+    const createRepo = async (repoName: any, description: any) => {
+        try {
+            const response = await githubAPI.post('/user/repos', {
+                name: repoName,
+                description: description,
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error creating repo:', error);
+            throw error;
+        }
+    }
+
+    // Hàm để tạo một nhánh mới cho repository
+    const createBranchForRepo = async (owner: any, repo: any, branch: any, sha: any) => {
+        try {
+            const response = await githubAPI.post(`/repos/${owner}/${repo}/git/refs`, {
+                ref: `refs/heads/${branch}`,
+                sha: sha,
+            });
+
+            // Nếu repo vừa tạo, không có commit nào thì sao?
+            // => Lấy SHA của branch mặc định là master
+            return response.data;
+        } catch (error) {
+            console.error('Error creating branch:', error);
+            throw error;
+        }
+    };
 
     // Hàm để lấy thông tin SHA của file
     const getFileSha = async (owner: any, repo: any, branch: any, path: any) => {
@@ -74,6 +120,8 @@ const createGitHubAPI = (accessToken: any) => {
     return {
         getFileSha,
         commitFile,
+        getRepoInfo,
+        createRepo,
         getActionInfo,
         getActionsByBranch,
     };

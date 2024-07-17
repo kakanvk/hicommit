@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 
-import { Medal, Home, MessageCircle, Package, Album, PieChart, Github, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Medal, Home, MessageCircle, Package, Album, PieChart, Github, Star, ChevronLeft, ChevronRight, Atom } from 'lucide-react';
 
 import {
     Accordion,
@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 
 import { motion } from "framer-motion";
 import { useClientUI } from '@/service/ClientUIContext';
+import { Separator } from './ui/separator';
 
 function Navbar() {
 
@@ -48,11 +49,14 @@ function Navbar() {
                 animate={{ width: expanded ? "280px" : "fit-content" }}
                 transition={{ duration: 0.2 }}
             >
-                <div className="flex flex-col gap-2 p-4">
+                <div className={`flex flex-col ${expanded ? 'gap-10' : 'gap-3'} p-4`}>
                     <div className="flex flex-col gap-3">
                         {/* {
                             expanded &&
-                            <span className="text-[12px] font-bold opacity-50">KHÁM PHÁ</span>
+                            <div className='flex gap-3 items-center'>
+                                <span className="text-[12px] font-medium opacity-50">Khám phá</span>
+                                <Separator className='flex-1' />
+                            </div>
                         } */}
                         <div className="flex flex-col gap-3 font-medium">
                             <TooltipProvider delayDuration={100}>
@@ -113,7 +117,7 @@ function Navbar() {
                                         <TooltipProvider delayDuration={100}>
                                             <Tooltip>
                                                 <TooltipTrigger>
-                                                    <DropdownMenuTrigger className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/course') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`}>
+                                                    <DropdownMenuTrigger className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/course/') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`}>
                                                         <Package className='w-4 aspect-square' />
                                                     </DropdownMenuTrigger>
                                                 </TooltipTrigger>
@@ -244,35 +248,6 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/analysis') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="analysis">
-                                            <PieChart className={`${expanded && 'mr-3'} w-4 aspect-square`} />
-                                            <motion.span
-                                                initial={{ opacity: 1 }}
-                                                animate={{
-                                                    opacity: !expanded ? 0 : 1,
-                                                }}
-                                                transition={{
-                                                    duration: !expanded ? 0 : 0.4,
-                                                    delay: !expanded ? 0 : 0.4,
-                                                    ease: "easeInOut",
-                                                }}
-                                                style={{ whiteSpace: "nowrap" }}
-                                            >
-                                                {expanded && "Thống kê"}
-                                            </motion.span>
-                                        </Link>
-                                    </TooltipTrigger>
-                                    {
-                                        !expanded &&
-                                        <TooltipContent side="right">
-                                            <p>Thống kê</p>
-                                        </TooltipContent>
-                                    }
-                                </Tooltip>
-                            </TooltipProvider>
-                            <TooltipProvider delayDuration={100}>
-                                <Tooltip>
-                                    <TooltipTrigger>
                                         <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/mygithub') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="mygithub">
                                             <Github className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
@@ -301,6 +276,75 @@ function Navbar() {
                             </TooltipProvider>
                         </div>
                     </div>
+                    <div className="flex flex-col gap-3">
+                        <div className='flex gap-3 items-center'>
+                            {
+                                expanded &&
+                                <span className="text-[12px] font-medium opacity-50">Dành cho giáo viên</span>
+                            }
+                            <Separator className='flex-1' />
+                        </div>
+                        <div className="flex flex-col gap-3 font-medium">
+                            <TooltipProvider delayDuration={100}>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/course-manager') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="/course-manager">
+                                            <Atom className={`${expanded && 'mr-3'} w-4 aspect-square`} />
+                                            <motion.span
+                                                initial={{ opacity: 1 }}
+                                                animate={{
+                                                    opacity: !expanded ? 0 : 1,
+                                                }}
+                                                transition={{
+                                                    duration: !expanded ? 0 : 0.4,
+                                                    delay: !expanded ? 0 : 0.4,
+                                                    ease: "easeInOut",
+                                                }}
+                                                style={{ whiteSpace: "nowrap" }}
+                                            >
+                                                {expanded && "Quản lý khoá học"}
+                                            </motion.span>
+                                        </Link>
+                                    </TooltipTrigger>
+                                    {
+                                        !expanded &&
+                                        <TooltipContent side="right">
+                                            <p>Quản lý khoá học</p>
+                                        </TooltipContent>
+                                    }
+                                </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider delayDuration={100}>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/analysis') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="analysis">
+                                            <PieChart className={`${expanded && 'mr-3'} w-4 aspect-square`} />
+                                            <motion.span
+                                                initial={{ opacity: 1 }}
+                                                animate={{
+                                                    opacity: !expanded ? 0 : 1,
+                                                }}
+                                                transition={{
+                                                    duration: !expanded ? 0 : 0.4,
+                                                    delay: !expanded ? 0 : 0.4,
+                                                    ease: "easeInOut",
+                                                }}
+                                                style={{ whiteSpace: "nowrap" }}
+                                            >
+                                                {expanded && "Thống kê"}
+                                            </motion.span>
+                                        </Link>
+                                    </TooltipTrigger>
+                                    {
+                                        !expanded &&
+                                        <TooltipContent side="right">
+                                            <p>Thống kê</p>
+                                        </TooltipContent>
+                                    }
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
                     <TooltipProvider delayDuration={100}>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -315,8 +359,8 @@ function Navbar() {
                             <TooltipContent side="right" align='center'>
                                 {
                                     expanded ?
-                                    <p>Thu gọn</p>
-                                    : <p>Mở rộng</p>
+                                        <p>Thu gọn</p>
+                                        : <p>Mở rộng</p>
                                 }
                             </TooltipContent>
                         </Tooltip>

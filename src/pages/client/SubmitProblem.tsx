@@ -74,11 +74,18 @@ function SubmitProblem() {
         setLoading(true);
 
         try {
-            const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "test-cpp", "main.cpp", code, commitMessage);
-            console.log(result);
+            // const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "test-cpp", "main.cpp", code, commitMessage);
+            
+            try{
+                const result = await githubAPI.getRepoInfo(loginContext?.user.login, "hicommit-problem", "main");
+            } catch (e){
+                await githubAPI.createRepo("hicommit-problem", "HiCommit Here");
+            }
+            
             setLoading(false);
-            navigate("/problem/1");
+            // navigate("/problem/1");
         } catch (error) {
+            setLoading(false);
             console.error(error);
         }
 

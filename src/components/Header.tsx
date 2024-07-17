@@ -1,5 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle";
-import { Search, Bell, Settings, UserRound, LogOut } from 'lucide-react';
+import { Search, Bell, Settings, UserRound, LogOut, ShieldCheck, SquareArrowOutUpRight } from 'lucide-react';
 
 import {
     DropdownMenu,
@@ -34,6 +34,7 @@ import { handleLogout } from "@/service/firebase";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { useLogin } from "@/service/LoginContext";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { Link } from "react-router-dom";
 
 function Header() {
 
@@ -107,6 +108,11 @@ function Header() {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                            <Link to="/admin" target="blank">
+                                <DropdownMenuItem className="group/link hover:cursor-pointer">
+                                    <ShieldCheck className="mr-2 w-4 aspect-square" />Dành cho quản trị viên<SquareArrowOutUpRight className="absolute right-2.5 w-3.5 aspect-square opacity-0 group-hover/link:opacity-40" />
+                                </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuItem ><UserRound className="mr-2 w-4 aspect-square" />Tài khoản của tôi</DropdownMenuItem>
                             <DropdownMenuItem ><Bell className="mr-2 w-4 aspect-square" />Thông báo</DropdownMenuItem>
                             <DropdownMenuItem ><Settings className="mr-2 w-4 aspect-square" />Cài đặt</DropdownMenuItem>

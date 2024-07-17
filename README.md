@@ -18,5 +18,5 @@ npm run dev
 
 ## Contact
 
-- Facebook: [facebook.com/kakanvk](facebook.com/kakanvk):
+- Facebook: [https://www.facebook.com/kakanvk](facebook.com/kakanvk)
 - Email: caoka5265@gmail.com

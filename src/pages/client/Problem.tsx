@@ -127,7 +127,7 @@ function Problem() {
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-green-600 dark:text-green-500">Mô tả đề bài:</span>
                                     <div className=" text-justify dark:font-normal font-medium">
-                                        <h2>Số <InlineMath math="fib(n)" /> với <InlineMath math="n \geq 0" /> được tính theo công thức sau:</h2>
+                                        <p>Số <InlineMath math="fib(n)" /> với <InlineMath math="n\ge0" /> được tính theo công thức sau:</p>
                                         <BlockMath math={`
                                             fib(n) = 
                                             \\begin{cases} 
@@ -198,7 +198,7 @@ function Problem() {
                                                     </CodeArea>
                                                 </div>
                                                 <div className="flex flex-col gap-3">
-                                                    <span className="text-sm font-semibold opacity-60">Ghi chú:</span>
+                                                    <span className="text-sm font-semibold opacity-70">Ghi chú:</span>
                                                     <div className="text-justify dark:font-normal font-medium text-base">
                                                         <p>
                                                             Ta có <InlineMath math="fib(6) = 8" /> và <InlineMath math="fib(9) = 34" />. Ước số chung lớn nhất của chúng là <InlineMath math="2" />.
@@ -249,8 +249,13 @@ function Problem() {
                                                             <div className="flex flex-col gap-2.5">
                                                                 <span className="font-bold text-sm">Bước 4: Viết mã nguồn</span>
                                                                 <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
-                                                                    Dựa vào yêu cầu đề bài, hãy viết mã nguồn vào file <Badge variant="secondary" className="rounded px-1.5">index.cpp</Badge> để xử lý tất cả các trường hợp cần thiết.
+                                                                    Dựa vào yêu cầu đề bài, hãy viết mã nguồn vào file <Badge variant="secondary" className="rounded px-1.5">main.*</Badge> để xử lý tất cả các trường hợp cần thiết.
                                                                 </p>
+                                                                <div className="border-l-4 pl-3 text-sm">
+                                                                    <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
+                                                                        <strong>*</strong> là phần mở rộng của ngôn ngữ lập trình bạn sử dụng (c, cpp, java).
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                             <div className="flex flex-col gap-2.5">
                                                                 <span className="font-bold text-sm">Bước 5: Thêm các thay đổi vào Git</span>
