@@ -78,7 +78,7 @@ function ContestByID() {
             </Breadcrumb>
             <div className="flex w-full gap-8 2xl:gap-10 relative items-start">
                 <div className="flex-1 flex flex-col gap-3">
-                    <div className="aspect-[6/1] rounded-md border bg-secondary/40 flex justify-center items-center">
+                    <div className="aspect-[6/1] mb-2 rounded-md border bg-secondary/40 flex justify-center items-center">
                         Banner
                     </div>
                     <h1 className="text-2xl font-bold">
