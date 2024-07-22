@@ -74,6 +74,10 @@ function CreateProblem() {
                             <Input placeholder="Nhập tên bài tập" className="placeholder:italic " />
                         </div>
                         <div className="flex gap-2 flex-col">
+                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tuỳ chỉnh đường dẫn (URL)</h4>
+                            <Input placeholder="Nhập đường dẫn tuỳ chỉnh" className="placeholder:italic " />
+                        </div>
+                        <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tag</h4>
                             <div className="flex gap-3">
                                 <Input placeholder={tags.length >= 5 ? "Đã đạt giới hạn" : "Nhập tag mới, tối đa 5 tags"} disabled={tags.length >= 5} className="placeholder:italic w-[350px]" value={tag} onChange={e => setTag(e.target.value)} />
@@ -86,7 +90,7 @@ function CreateProblem() {
                                         tags.map((tag, index) => (
                                             <Badge key={index} variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5">
                                                 {tag}
-                                                <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" onClick={() => setTags(tags.filter(t => t !== tag))} />
+                                                <X className="w-4 h-4 ml-2 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" onClick={() => setTags(tags.filter(t => t !== tag))} />
                                             </Badge>
                                         ))
                                     }
@@ -109,29 +113,29 @@ function CreateProblem() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-5">
-                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">Thông tin chi tiết bài tập</h3>
+                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">Thông tin chi tiết</h3>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mô tả đề bài</h4>
-                            <TextAndMathEditor />
+                            <TextAndMathEditor placeholder="Nhập mô tả bài toán" />
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Input</h4>
-                            <TextAndMathEditor />
+                            <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu vào (input)" />
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Output</h4>
-                            <AutosizeTextarea placeholder="Nhập mô tả cho dữ liệu đầu ra (Output)" className="placeholder:italic " />
+                            <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu ra (output)" />
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium">Giới hạn</h4>
-                            <AutosizeTextarea placeholder="Nhập giới hạn của bài tập (nếu có)" className="placeholder:italic " />
+                            <TextAndMathEditor placeholder="Nhập các giới hạn về tài nguyên, thời gian (nếu có)" />
                         </div>
                     </div>
                 </div>
@@ -160,6 +164,7 @@ function CreateProblem() {
                         <Plus className="w-[17px] mr-1.5 h-[17px]" />Thêm Test-case
                     </Button>
                 </div>
+                <Button className="w-fit">Tạo bài tập</Button>
             </div>
         </div>
     );

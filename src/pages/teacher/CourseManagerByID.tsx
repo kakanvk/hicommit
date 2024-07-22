@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import { Badge } from "@/components/ui/badge"
-import RingProgress from "@/components/ui/ringProcess";
-import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus } from 'lucide-react';
+
+import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus, Activity } from 'lucide-react';
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -50,7 +50,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
     DropdownMenu,
@@ -73,15 +73,34 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 
 const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 700 },
+    {
+        date: "2024-01-01",
+        completed: 85,
+    },
+    {
+        date: "2024-01-02",
+        completed: 72,
+    },
+    {
+        date: "2024-01-03",
+        completed: 81,
+    },
+    {
+        date: "2024-01-04",
+        completed: 62,
+    },
+    {
+        date: "2024-01-05",
+        completed: 52,
+    },
+    {
+        date: "2024-01-06",
+        completed: 81,
+    },
+    {
+        date: "2024-01-07",
+        completed: 70,
+    },
 ]
 
 const chartConfig = {
@@ -261,24 +280,35 @@ function CourseManagerByID() {
                                         <DialogHeader>
                                             <DialogTitle>Cài đặt</DialogTitle>
                                         </DialogHeader>
-                                        <div className="mt-1">
-                                            <Tabs defaultValue="general" className="w-full flex gap-8" orientation="vertical">
+                                        <div className="mt-1 -ml-2">
+                                            <Tabs defaultValue="general" className="w-full flex gap-10" orientation="vertical">
                                                 <TabsList className="flex flex-col h-fit bg-tranparent gap-2 p-0">
                                                     <TabsTrigger value="general" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
                                                         <Settings className="w-4 h-4 mr-2" />Chung
                                                     </TabsTrigger>
-                                                    <TabsTrigger value="access" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
-                                                        <ScanEye className="w-4 h-4 mr-2" />Quyền truy cập
-                                                    </TabsTrigger>
                                                     <TabsTrigger value="advance" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
                                                         <Gem className="w-4 h-4 mr-2" />Nâng cao
+                                                    </TabsTrigger>
+                                                    <TabsTrigger value="access" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
+                                                        <ScanEye className="w-4 h-4 mr-2" />Quyền truy cập
                                                     </TabsTrigger>
                                                     <TabsTrigger value="member" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
                                                         <Users className="w-4 h-4 mr-2" />Thành viên
                                                     </TabsTrigger>
                                                 </TabsList>
                                                 <div className="py-1 flex-1">
-                                                    <TabsContent value="general" className="mt-0  min-h-[400px]">Make changes to your account here.</TabsContent>
+                                                    <TabsContent value="general" className="mt-0  min-h-[400px]">
+                                                        <div className="flex justify-between gap-5 items-center">
+                                                            <Label className="flex-1 flex flex-col gap-1 cursor-pointer" htmlFor="only-submit-by-git">
+                                                                <h3>Chỉ cho phép nộp bài qua Git</h3>
+                                                                <p className="text-sm opacity-50 font-medium">Sinh viên chỉ có thể nộp thông qua Git, không thể nộp qua giao diện người dùng.</p>
+                                                            </Label>
+                                                            <Switch defaultChecked={isPublicCourse} id="only-submit-by-git"/>
+                                                        </div>
+                                                        <div>
+
+                                                        </div>
+                                                    </TabsContent>
                                                     <TabsContent value="access" className="mt-0 min-h-[400px]">
                                                         <div className="flex flex-col gap-4">
                                                             <div className="flex justify-between gap-5 items-center">
@@ -414,16 +444,19 @@ function CourseManagerByID() {
                         </Link>
                     </div>
                 </div>
-                <div className="w-1/4 min-w-[300px] max-w-[600px] sticky top-6 bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-3.5 px-1 2xl:p-5  2xl:px-3">
-                    <h3>Thống kê khoá học</h3>
-                    <ChartContainer config={chartConfig} className="w-full">
+                <div className="w-1/4 min-w-[300px] ralative max-w-[600px] sticky top-6 bg-zinc-100/30 dark:bg-zinc-900/30 border rounded-lg flex flex-col items-center">
+                    <div className="flex flex-col w-full pl-6 2xl:pl-7 pt-4 2xl:pt-5">
+                        <h3 className="font-bold text-xl 2xl:text-2xl align-left">Thống kê</h3>
+                        <p className="text-sm 2xl:text-base opacity-60">Trong toàn khoá học</p>
+                    </div>
+                    {/* <ChartContainer config={chartConfig} className="w-full">
                         <AreaChart
                             accessibilityLayer
                             data={chartData}
-                            margin={{
-                                left: 12,
-                                right: 12,
-                            }}
+                            // margin={{
+                            //     left: 12,
+                            //     right: 12,
+                            // }}
                         >
                             <CartesianGrid vertical={false} />
                             <ChartTooltip
@@ -438,8 +471,67 @@ function CourseManagerByID() {
                                 stroke="var(--color-desktop)"
                             />
                         </AreaChart>
+                    </ChartContainer> */}
+                    <ChartContainer
+                        config={{
+                            time: {
+                                label: "Time",
+                                color: "hsl(var(--chart-2))",
+                            },
+                        }}
+                        className="w-full mt-4"
+                    >
+                        <AreaChart
+                            accessibilityLayer
+                            data={chartData}
+                            margin={{
+                                left: 0,
+                                right: 0,
+                                top: 0,
+                                bottom: 0,
+                            }}
+                        >
+                            <XAxis dataKey="date" hide />
+                            <YAxis domain={["dataMin - 25", "dataMax + 2"]} hide />
+                            <defs>
+                                <linearGradient id="fillTime" x1="0" y1="0" x2="0" y2="1">
+                                    <stop
+                                        offset="5%"
+                                        stopColor="var(--color-time)"
+                                        stopOpacity={0.8}
+                                    />
+                                    <stop
+                                        offset="95%"
+                                        stopColor="var(--color-time)"
+                                        stopOpacity={0.1}
+                                    />
+                                </linearGradient>
+                            </defs>
+                            <Area
+                                dataKey="completed"
+                                type="natural"
+                                fill="url(#fillTime)"
+                                fillOpacity={0.4}
+                                stroke="var(--color-time)"
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                                formatter={(value) => (
+                                    <div className="flex gap-1 items-center text-xs text-muted-foreground">
+                                        Tỷ lệ hoàn thành bài tập
+                                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                                            {value}
+                                            <span className="font-normal text-muted-foreground">
+                                                %
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            />
+                        </AreaChart>
                     </ChartContainer>
-                    <span className="mt-2.5 text-xs 2xl:text-sm dark:font-light opacity-60"><Info className="w-3 h-3 mr-2 2xl:w-3.5 2xl:h-3.5 inline -translate-y-[1px]" />Mức độ hoàn thành bài tập theo thời gian</span>
+                    <span className="absolute bottom-3 mt-2.5 text-xs 2xl:text-sm dark:font-light opacity-60"><Activity className="w-3 h-3 mr-2 2xl:w-4 2xl:h-4 inline -translate-y-[1px]" />Mức độ hoàn thành bài tập theo thời gian</span>
                 </div>
             </div>
         </div>

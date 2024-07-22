@@ -19,8 +19,11 @@ import JoinCourse from "@/pages/client/JoinCourse";
 import SubmissionHistory from "@/pages/client/SubmissionHistory";
 import CourseManager from "@/pages/teacher/CourseManager";
 import CourseManagerByID from "@/pages/teacher/CourseManagerByID";
-import { Analysis } from "@/pages/teacher/Analysis";
+import Analysis from "@/pages/teacher/Analysis";
 import CreateProblem from "@/pages/teacher/CreateProblem";
+import Forum from "@/pages/client/Forum";
+import ContestByID from "@/pages/client/ContestByID";
+import Problems from "@/pages/client/Problems";
 
 function ClientLayout() {
 
@@ -68,14 +71,22 @@ function ClientLayout() {
                                         <Routes>
                                             <Route path="" element={<HomePage />} />
                                             <Route path="message/*" element={<Chat />} />
-                                            <Route path="contest" element={<Contest />} />
+                                            <Route path="contest" >
+                                                <Route path="" element={<Contest />} />
+                                                <Route path=":contest_id" element={<ContestByID />} />
+                                            </Route>
                                             <Route path="course/:course_id">
                                                 <Route path="" element={<Course />} />
                                                 <Route path="join" element={<JoinCourse />} />
                                             </Route>
+                                            <Route path="problems" element={<Problems />} />
                                             <Route path="problem/:problem_id">
                                                 <Route path="" element={<Problem />} />
                                                 <Route path="submit" element={<SubmitProblem />} />
+                                            </Route>
+                                            <Route path="forum">
+                                                <Route path="" element={<Forum />} />
+                                                {/* <Route path=":forum_id" element={<SubmitProblem />} /> */}
                                             </Route>
                                             <Route path="course-manager/">
                                                 <Route path="" element={<CourseManager />} />

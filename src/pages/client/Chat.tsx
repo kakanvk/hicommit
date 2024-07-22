@@ -393,8 +393,8 @@ function Chat() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
-                        <Input placeholder="Nhập tin nhắn..." autoFocus className="w-full rounded-full pl-4" value={message} onChange={handleTypeMessage} />
-                        <Button className="rounded-full aspect-square" disabled={message === ""} size="icon"><i className="fa-solid fa-paper-plane text-lg"></i></Button>
+                        <Input placeholder="Nhập tin nhắn..." autoFocus className="rounded-full pl-4 flex-1" value={message} onChange={handleTypeMessage} />
+                        <Button className="rounded-full" disabled={message === ""} size="icon"><i className="fa-solid fa-paper-plane text-lg"></i></Button>
                     </div>
                 </div>
             </div>

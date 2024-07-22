@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 
-import { Medal, Home, MessageCircle, Package, Album, PieChart, Github, Star, ChevronLeft, ChevronRight, Atom } from 'lucide-react';
+import { Medal, Home, MessageCircle, Package, Album, PieChart, Github, Star, ChevronLeft, ChevronRight, Atom, Milestone, Flame, Podcast, MessageCircleCode, Pyramid } from 'lucide-react';
 
 import {
     Accordion,
@@ -161,8 +161,8 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/favourite') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="favourite">
-                                            <Star className={`${expanded && 'mr-3'} w-4 aspect-square`} />
+                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/problems') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="problems">
+                                            <Pyramid className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
                                                 animate={{
@@ -175,43 +175,14 @@ function Navbar() {
                                                 }}
                                                 style={{ whiteSpace: "nowrap" }}
                                             >
-                                                {expanded && "Được đánh dấu"}
+                                                {expanded && "Các bài tập"}
                                             </motion.span>
                                         </Link>
                                     </TooltipTrigger>
                                     {
                                         !expanded &&
                                         <TooltipContent side="right">
-                                            <p>Danh sách yêu thích</p>
-                                        </TooltipContent>
-                                    }
-                                </Tooltip>
-                            </TooltipProvider>
-                            <TooltipProvider delayDuration={100}>
-                                <Tooltip>
-                                    <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/message') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="message">
-                                            <MessageCircle className={`${expanded && 'mr-3'} w-4 aspect-square`} />
-                                            <motion.span
-                                                initial={{ opacity: 1 }}
-                                                animate={{
-                                                    opacity: !expanded ? 0 : 1,
-                                                }}
-                                                transition={{
-                                                    duration: !expanded ? 0 : 0.4,
-                                                    delay: !expanded ? 0 : 0.4,
-                                                    ease: "easeInOut",
-                                                }}
-                                                style={{ whiteSpace: "nowrap" }}
-                                            >
-                                                {expanded && "Cuộc trò chuyện"}
-                                            </motion.span>
-                                        </Link>
-                                    </TooltipTrigger>
-                                    {
-                                        !expanded &&
-                                        <TooltipContent side="right">
-                                            <p>Cuộc trò chuyện</p>
+                                            <p>Các bài tập</p>
                                         </TooltipContent>
                                     }
                                 </Tooltip>
@@ -248,8 +219,8 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/mygithub') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="mygithub">
-                                            <Github className={`${expanded && 'mr-3'} w-4 aspect-square`} />
+                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/message') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="message">
+                                            <MessageCircleCode className={`${expanded && 'mr-3'} w-[17px]`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
                                                 animate={{
@@ -262,14 +233,43 @@ function Navbar() {
                                                 }}
                                                 style={{ whiteSpace: "nowrap" }}
                                             >
-                                                {expanded && "GitHub của tôi"}
+                                                {expanded && "Cuộc trò chuyện"}
                                             </motion.span>
                                         </Link>
                                     </TooltipTrigger>
                                     {
                                         !expanded &&
                                         <TooltipContent side="right">
-                                            <p>Github của tôi</p>
+                                            <p>Cuộc trò chuyện</p>
+                                        </TooltipContent>
+                                    }
+                                </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider delayDuration={100}>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/forum') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="forum">
+                                            <Podcast className={`${expanded && 'mr-3'} w-4 aspect-square`} />
+                                            <motion.span
+                                                initial={{ opacity: 1 }}
+                                                animate={{
+                                                    opacity: !expanded ? 0 : 1,
+                                                }}
+                                                transition={{
+                                                    duration: !expanded ? 0 : 0.4,
+                                                    delay: !expanded ? 0 : 0.4,
+                                                    ease: "easeInOut",
+                                                }}
+                                                style={{ whiteSpace: "nowrap" }}
+                                            >
+                                                {expanded && "Diễn đàn"}
+                                            </motion.span>
+                                        </Link>
+                                    </TooltipTrigger>
+                                    {
+                                        !expanded &&
+                                        <TooltipContent side="right">
+                                            <p>Diễn đàn</p>
                                         </TooltipContent>
                                     }
                                 </Tooltip>

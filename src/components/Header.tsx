@@ -1,5 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle";
-import { Search, Bell, Settings, UserRound, LogOut, ShieldCheck, SquareArrowOutUpRight } from 'lucide-react';
+import { Search, Bell, Settings, UserRound, LogOut, ShieldCheck, SquareArrowOutUpRight, Star } from 'lucide-react';
 
 import {
     DropdownMenu,
@@ -114,6 +114,7 @@ function Header() {
                                 </DropdownMenuItem>
                             </Link>
                             <DropdownMenuItem ><UserRound className="mr-2 w-4 aspect-square" />Tài khoản của tôi</DropdownMenuItem>
+                            <DropdownMenuItem ><Star className="mr-2 w-4 aspect-square" />Được đánh dấu</DropdownMenuItem>
                             <DropdownMenuItem ><Bell className="mr-2 w-4 aspect-square" />Thông báo</DropdownMenuItem>
                             <DropdownMenuItem ><Settings className="mr-2 w-4 aspect-square" />Cài đặt</DropdownMenuItem>
                             <DropdownMenuSeparator />

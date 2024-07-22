@@ -1,7 +1,7 @@
 
 function JoinCourse () {
     return (
-        <div className="JoinCourse p-2 px-4">
+        <div className="JoinCourse p-6 px-8">
             JoinCourse
         </div>
     );
