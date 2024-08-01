@@ -33,8 +33,13 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui
 import { lastDayOfDecade } from "date-fns";
 import { date } from "zod";
 import { create } from "domain";
+import { useEffect, useState } from "react";
+import { getCreatedCourses } from "@/service/API/Course";
+import { formatTimeAgo } from "@/service/DateTimeService";
 
 function CourseManager() {
+
+    const [createdCourses, setCreatedCourses] = useState<any[]>([]);
 
     // Fake data
     const courses = [
@@ -120,33 +125,31 @@ function CourseManager() {
         },
     ];
 
+    const handleGetCreatedCourse = async () => {
+        try {
+            const response = await getCreatedCourses();
+            setCreatedCourses(response);
+            console.log(response);
+        } catch (error) {
+            console.error('Error getting post:', error);
+        }
+    };
+
+    useEffect(() => {
+        handleGetCreatedCourse();
+    }, []);
+
     return (
         <div className="CourseManager p-7">
             <div className="flex flex-col gap-5 items-start">
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button className="w-fit pr-4" size="sm"><Plus className="w-4 mr-1.5 aspect-square" />Tạo khoá học mới</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete your account
-                                and remove your data from our servers.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Continue</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-
+                <Link to="create">
+                    <Button className="w-fit pr-4" size="sm"><Plus className="w-4 mr-1.5 aspect-square" />Tạo khoá học mới</Button>
+                </Link>
                 <div className="flex flex-col gap-5 w-full relative">
                     <div className="-mx-7 px-7 sticky top-0 z-10 bg-white/60 dark:bg-zinc-950/50 backdrop-blur-xl">
                         <div className="py-2.5 flex items-center justify-between gap-4 border-b">
                             <div className="flex gap-2 items-center">
-                                <h2>Tất cả khoá học</h2>
+                                <h2 className="font-semibold text-lg">Tất cả khoá học</h2>
                                 <div className="flex gap-2">
                                     <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5">
                                         DA20TTB
@@ -177,7 +180,7 @@ function CourseManager() {
                                                 <DialogDescription className="flex flex-col gap-4">
                                                     <div className="flex flex-col gap-1.5">
                                                         <span>Ngôn ngữ lập trình</span>
-                                                        <Select defaultValue="all"> 
+                                                        <Select defaultValue="all">
                                                             <SelectTrigger className="bg-secondary" >
                                                                 <SelectValue />
                                                             </SelectTrigger>
@@ -245,29 +248,34 @@ function CourseManager() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-1 2xl:grid-cols-2 gap-4 w-full">
                         {
-                            courses.map(course => (
-                                <Link key={course.id} className="flex flex-col gap-5 rounded-lg dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course.id}`}>
-                                    <div className="flex flex-col gap-2">
-                                        <h2 className="font-semibold">{course.name}<Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] ml-2 -translate-y-[2px] font-bold">{course.code}</Badge></h2>
-                                        <p className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs truncate">{course.description}</p>
-                                        <div className="flex items-center justify-between mt-5">
+                            createdCourses.map(course => (
+                                <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
+                                    <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
+                                        <img src={course?.thumbnail}/>
+                                    </div>
+                                    <div className="flex flex-col gap-2 flex-1 h-full justify-between pb-1">
+                                        <div className="flex flex-col gap-2 flex-1">
+                                            <h2 className="font-semibold line-clamp-2"><Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2px] font-bold">{course?.class_name}</Badge>{course?.name}</h2>
+                                            <p className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-3">{course?.description}</p>
+                                        </div>
+                                        <div className="w-full flex items-end justify-between">
                                             <div className="flex gap-2 items-center">
                                                 <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                    {course.labs} LAB
+                                                    {course?.labs || 12} LAB
                                                 </Badge>
                                                 <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                    <UsersRound className="h-3 w-3 mr-2" />{course.students}
+                                                    <UsersRound className="h-3 w-3 mr-2" />{course.students || 123}
                                                 </Badge>
                                                 {
-                                                    course.completed &&
+                                                    course?.completed &&
                                                     <Badge variant="secondary" className="text-[11px] p-1 px-3 bg-red-500/20 dark:bg-red-500/45 text-red-600 dark:text-white hover:bg-red-500/20">
                                                         Đã kết thúc
                                                     </Badge>
                                                 }
                                             </div>
-                                            <span className="text-[11px] opacity-60 font-light">Được tạo {course.createdAt}</span>
+                                            <span className="text-[11px] opacity-60 font-light">Được tạo { formatTimeAgo(course?.createdAt, "vi") }</span>
                                         </div>
                                     </div>
                                 </Link>

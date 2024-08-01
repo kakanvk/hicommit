@@ -67,7 +67,7 @@ function CreateProblem() {
             </Breadcrumb>
             <div className="flex flex-col gap-14">
                 <div className="flex flex-col gap-5">
-                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">Thông tin cơ bản</h3>
+                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">1. Thông tin cơ bản</h3>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tên bài tập</h4>
@@ -113,7 +113,7 @@ function CreateProblem() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-5">
-                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">Thông tin chi tiết</h3>
+                    <h3 className="text-xl font-bold w-fit after:content-['*'] after:ml-1 after:text-green-500">2. Thông tin chi tiết</h3>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mô tả đề bài</h4>
@@ -141,7 +141,7 @@ function CreateProblem() {
                 </div>
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold">Các ví dụ</h3>
+                        <h3 className="text-xl font-bold">3. Các ví dụ</h3>
                         <Badge className="px-1.5">2</Badge>
                     </div>
                     <div className="flex flex-col gap-4">
@@ -153,7 +153,7 @@ function CreateProblem() {
                 </div>
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-xl font-bold">Các Test-case</h3>
+                        <h3 className="text-xl font-bold">4. Các Test-case</h3>
                         <Badge className="px-1.5">3</Badge>
                     </div>
                     <div className="flex flex-col gap-4">

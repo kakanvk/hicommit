@@ -278,7 +278,7 @@ function CourseManagerByID() {
                                     </DialogTrigger>
                                     <DialogContent className="max-w-[50%] ">
                                         <DialogHeader>
-                                            <DialogTitle>Cài đặt</DialogTitle>
+                                            <DialogTitle>Cài đặt khoá học</DialogTitle>
                                         </DialogHeader>
                                         <div className="mt-1 -ml-2">
                                             <Tabs defaultValue="general" className="w-full flex gap-10" orientation="vertical">

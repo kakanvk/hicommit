@@ -99,7 +99,7 @@ function Contest() {
                         <Button>Tìm hiểu thêm<ArrowRight className="w-4 h-4 ml-2" /></Button>
                     </div>
                 </div>
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-5 relative">
                     <div className="flex items-end justify-between">
                         <div className="flex gap-2 items-center">
                             <h2 className="text-lg">Các cuộc thi trên hệ thống</h2>
@@ -239,7 +239,7 @@ function Contest() {
                             })
                         }
                     </div>
-                    {/* <Pagination>
+                    <Pagination className="mt-6">
                         <PaginationContent>
                             <PaginationItem>
                                 <PaginationPrevious href="#" />
@@ -254,7 +254,7 @@ function Contest() {
                                 <PaginationNext href="#" />
                             </PaginationItem>
                         </PaginationContent>
-                    </Pagination> */}
+                    </Pagination>
                 </div>
             </div>
         </div>

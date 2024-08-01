@@ -46,8 +46,8 @@ const calculateTimeLeft = (endTime: number, totalTime: number): { timeLeft: stri
 
 function ContestByID() {
     const totalTime = 8 * 60 * 60; // Total contest duration in seconds (5 hours)
-    const startTime = 1721642400 - totalTime; // Example start timestamp
-    const endTime = 1721642400; // Example end timestamp
+    const startTime = 1721730628 - totalTime; // Example start timestamp
+    const endTime = 1721730628; // Example end timestamp
 
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endTime, totalTime));
 
@@ -78,9 +78,9 @@ function ContestByID() {
             </Breadcrumb>
             <div className="flex w-full gap-8 2xl:gap-10 relative items-start">
                 <div className="flex-1 flex flex-col gap-3">
-                    <div className="aspect-[6/1] mb-2 rounded-md border bg-secondary/40 flex justify-center items-center">
-                        Banner
-                    </div>
+                    {/* <div className="aspect-[6/1] mb-2 rounded-md border bg-secondary/40 flex justify-center items-center overflow-hidden">
+                        <img src="https://picsum.photos/1920/1080" alt="avatar" className="w-full h-full object-cover" />
+                    </div> */}
                     <h1 className="text-2xl font-bold">
                         <span className="mr-2">Code Tour 2024 - Semi-final Round</span>
                         <Badge variant="outline" className="text-[12px] p-0 px-2 pr-3 font-normal leading-6 -translate-y-0.5">

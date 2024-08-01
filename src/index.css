@@ -33,6 +33,18 @@
         --chart-3: 197 37% 24%;
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
+        /* CKEditor */
+        --ckeditor-background: #ffffff;
+        --ckeditor-background-secondary: #fafafa;
+        --ckeditor-background-figureCaption: #f0f0f0;
+        --ckeditor-color: #18181b;
+        --ckeditor-background-hover: #eaeaea;
+        --ckeditor-border: #dddddd;
+        --ckeditor-separator: #d0d0d0;
+        --ckeditor-button-on: #eaeaea;
+        --ckeditor-link: #16a34a;
+        /* HiCommit Content */
+        --hicommit-content: #292929;
     }
 
     .dark {
@@ -62,6 +74,18 @@
         --chart-3: 30 80% 55%;
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
+        /* CKEditor */
+        --ckeditor-background: #09090b;
+        --ckeditor-background-secondary: #111112;
+        --ckeditor-background-figureCaption: #111112;
+        --ckeditor-color: #d8d8d8;
+        --ckeditor-background-hover: #2f2f33;
+        --ckeditor-border: #3f3f46;
+        --ckeditor-separator: #5d5d5d;
+        --ckeditor-button-on: #2f2f33;
+        --ckeditor-link: #22c55e;
+        /* HiCommit Content */
+        --hicommit-content: #d4d4d4;
     }
 }
 

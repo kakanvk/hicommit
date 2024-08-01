@@ -54,31 +54,31 @@ function Problems() {
             title: 'Tìm số lớn thứ 2',
             tags: ['Cơ bản', 'Mảng 1 chiều'],
             status: 'completed',
-            completed_percentage: 100,
+            completed_percentage: 56.8,
         },
         {
             title: 'Số nguyên tố đầu tiên',
             tags: ['Cơ bản', 'Số nguyên tố', 'Mảng 1 chiều'],
             status: 'completed',
-            completed_percentage: 100,
+            completed_percentage: 77,
         },
         {
             title: 'Số nguyên tố cuối cùng',
             tags: ['Cơ bản', 'Số nguyên tố', 'Mảng 1 chiều'],
             status: 'null',
-            completed_percentage: 100,
+            completed_percentage: 83.4,
         },
         {
             title: 'Số nguyên tố lớn nhất',
             tags: ['Cơ bản', 'Số nguyên tố', 'Mảng 1 chiều'],
             status: 'null',
-            completed_percentage: 100,
+            completed_percentage: 26.9,
         },
         {
             title: 'Số nguyên tố nhỏ nhất',
             tags: ['Cơ bản', 'Số nguyên tố', 'Mảng 1 chiều'],
             status: 'null',
-            completed_percentage: 100,
+            completed_percentage: 3.5,
         }
     ]
 
@@ -119,7 +119,7 @@ function Problems() {
     const [searchTagValue, setSearchTagValue] = useState("");
 
     useEffect(() => {
-        setFilteredTags(tags.filter(tag => tag.toLowerCase().includes(searchTagValue.toLowerCase())))
+        setFilteredTags(tags.filter(tag => tag.toLowerCase().includes(searchTagValue.trim().toLowerCase())))
     }, [searchTagValue])
 
     return (
@@ -127,7 +127,7 @@ function Problems() {
             <div>
                 <div className="w-full relative flex items-start gap-6">
                     <div className="flex-1 flex flex-col gap-4">
-                        <div className="flex items-center justify-between gap-8">
+                        <div className="flex items-end justify-between gap-8">
                             <h1 className="text-lg font-bold">
                                 Danh sách bài tập
                                 <Badge variant="secondary" className="px-2 min-w-[22px] flex justify-center inline ml-2">{sampleData.length}</Badge>
@@ -142,7 +142,7 @@ function Problems() {
                                     />
                                 </div>
                                 <Select defaultValue="all">
-                                    <SelectTrigger className="w-[180px]">
+                                    <SelectTrigger className="w-[180px] bg-transparent">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -159,7 +159,7 @@ function Problems() {
                                     <TableRow className="bg-secondary/60 hover:bg-secondary/60">
                                         <TableHead className="w-[30px]">#</TableHead>
                                         <TableHead className="w-[35%]">Tên bài tập</TableHead>
-                                        <TableHead>Tags</TableHead>
+                                        <TableHead>Dạng bài tập</TableHead>
                                         <TableHead>Tỉ lệ</TableHead>
                                         <TableHead className="text-right">Điểm</TableHead>
                                     </TableRow>
@@ -187,8 +187,8 @@ function Problems() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-1.5">
-                                                        <div className="w-[60px] 2xl:w-[100px] h-1.5 bg-secondary/90 rounded-md">
-                                                            <div className="h-1.5 bg-primary rounded-md" style={{ width: `${data.completed_percentage}%` }}></div>
+                                                        <div className="w-[60px] 2xl:w-[100px] h-1.5 bg-secondary/90 rounded-full overflow-hidden">
+                                                            <div className="h-1.5 bg-primary rounded-full" style={{ width: `${data.completed_percentage}%` }}></div>
                                                         </div>
                                                         <span className="text-[12px] font-semibold">{data.completed_percentage}%</span>
                                                     </div>

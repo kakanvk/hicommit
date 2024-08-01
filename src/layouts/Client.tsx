@@ -24,6 +24,10 @@ import CreateProblem from "@/pages/teacher/CreateProblem";
 import Forum from "@/pages/client/Forum";
 import ContestByID from "@/pages/client/ContestByID";
 import Problems from "@/pages/client/Problems";
+import CreatePost from "@/pages/client/CreatePost";
+import Courses from "@/pages/client/Courses";
+import ReadPost from "@/pages/client/ReadPost";
+import CreateCourse from "@/pages/teacher/CreateCourse";
 
 function ClientLayout() {
 
@@ -75,6 +79,7 @@ function ClientLayout() {
                                                 <Route path="" element={<Contest />} />
                                                 <Route path=":contest_id" element={<ContestByID />} />
                                             </Route>
+                                            <Route path="courses" element={<Courses />} />
                                             <Route path="course/:course_id">
                                                 <Route path="" element={<Course />} />
                                                 <Route path="join" element={<JoinCourse />} />
@@ -86,10 +91,12 @@ function ClientLayout() {
                                             </Route>
                                             <Route path="forum">
                                                 <Route path="" element={<Forum />} />
-                                                {/* <Route path=":forum_id" element={<SubmitProblem />} /> */}
+                                                <Route path=":slug" element={<ReadPost />} />
+                                                <Route path="create" element={<CreatePost />} />
                                             </Route>
                                             <Route path="course-manager/">
                                                 <Route path="" element={<CourseManager />} />
+                                                <Route path="create" element={<CreateCourse />} />
                                                 <Route path=":course_id">
                                                     <Route path="" element={<CourseManagerByID />} />
                                                     <Route path="problem/create" element={<CreateProblem />} />
@@ -104,7 +111,7 @@ function ClientLayout() {
                             </div>
                             {
                                 showScrollButton &&
-                                <Button variant="secondary" className='scroll-to-top-button fixed bottom-8 right-10' onClick={scrollToTop} style={{ display: showScrollButton ? 'block' : 'none' }}>
+                                <Button variant="secondary" size="icon" className='scroll-to-top-button fixed bottom-8 right-10' onClick={scrollToTop} style={{ display: showScrollButton ? 'block' : 'none' }}>
                                     <i className='fa-solid fa-chevron-up'></i>
                                 </Button>
                             }
