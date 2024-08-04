@@ -10,7 +10,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus, Activity } from 'lucide-react';
+import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus, Activity, Pencil, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -69,8 +69,16 @@ import {
 } from "@/components/ui/chart"
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { getCourseByIDForAdmin } from "@/service/API/Course";
+import { formatTimeAgo } from "@/service/DateTimeService";
+import { set } from "date-fns";
+import { createUnit } from "@/service/API/Unit";
+import toast from "react-hot-toast";
+import { se } from "date-fns/locale";
+import { NodeRendererProps, Tree, useSimpleTree } from "react-arborist";
+import CourseTree from "./CourseTree";
 
 const chartData = [
     {
@@ -110,12 +118,60 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
+const initialData = [
+    {
+        // unit
+        id: Math.random().toString(36).substring(7),
+        name: "Chat Rooms",
+        children: [
+            // work
+            { id: "c1", name: "General" },
+            { id: "c2", name: "Random" },
+            { id: "c3", name: "Open Source Projects" },
+        ],
+    },
+    {
+        // unit
+        id: Math.random().toString(36).substring(7),
+        name: "Direct Messages",
+        children: [
+            // work
+            { id: "d1", name: "Alice" },
+            { id: "d2", name: "Bob" },
+            { id: "d3", name: "Charlie" },
+            { id: "d4", name: "Charlie 2" },
+        ],
+    },
+    {
+        // unit
+        id: Math.random().toString(36).substring(7),
+        name: "Threads",
+        children: [
+            // work
+            { id: "t1", name: "Thread 1" },
+            { id: "t2", name: "Thread 2" },
+            { id: "t3", name: "Thread 3" },
+        ],
+    }
+];
+
 function CourseManagerByID() {
+
+    const [dataFromAPI, setDataFromAPI] = useState<any[]>(initialData);
+    const [key, setKey] = useState(0);
+
+    useEffect(() => {
+        setKey(prevKey => prevKey + 1);
+    }, [dataFromAPI]);
 
     const { course_id } = useParams();
 
+    const [course, setCourse] = useState<any>({});
+
     const [isPublicCourse, setIsPublicCourse] = useState(true);
-    const [enrolKey, setEnrolKey] = useState("DA20TTB");
+    const [enrolKey, setEnrolKey] = useState("");
+
+    const [newLab, setNewLab] = useState('');
 
     const handleChangePublicCourse = () => {
         setIsPublicCourse(!isPublicCourse);
@@ -124,6 +180,48 @@ function CourseManagerByID() {
     const handleOnDrag = (e: any) => {
         e.preventDefault();
     }
+
+    const handleGetCourseData = async () => {
+        try {
+            const response = await getCourseByIDForAdmin(course_id as string);
+            setCourse(response);
+            setIsPublicCourse(response.join_key);
+            setEnrolKey(response.join_key ? response.join_key : "");
+            console.log(response);
+        } catch (error) {
+            console.error('Error getting course:', error);
+        }
+    }
+
+    const handleCreateLab = async () => {
+        try {
+            const response = await toast.promise(
+                createUnit(course_id as string, { name: newLab }),
+                {
+                    loading: 'Đang lưu...',
+                    success: 'Tạo Lab thành công',
+                    error: 'Tạo Lab thất bại'
+                },
+                {
+                    style: {
+                        borderRadius: '8px',
+                        background: '#222',
+                        color: '#fff',
+                        paddingLeft: '15px',
+                        fontFamily: 'Plus Jakarta Sans',
+                    }
+                });
+            setNewLab('');
+            handleGetCourseData();
+            // console.log(response);
+        } catch (error) {
+            console.error('Error creating lab:', error);
+        }
+    }
+
+    useEffect(() => {
+        handleGetCourseData();
+    }, []);
 
     return (
         <div className="Course p-6 px-8 flex flex-col gap-8">
@@ -136,7 +234,7 @@ function CourseManagerByID() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        Kỹ thuật lập trình
+                        {course?.name}
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -145,25 +243,25 @@ function CourseManagerByID() {
                     <div className="flex flex-col gap-5">
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col gap-2">
-                                <h1 className="text-3xl font-bold">Kỹ thuật lập trình<Badge variant="default" className="rounded ml-2 -translate-y-1.5">DA20TTB</Badge></h1>
+                                <h1 className="text-3xl font-bold">{course?.name}<Badge variant="default" className="rounded ml-2 -translate-y-1.5">{course?.class_name}</Badge></h1>
                                 <div className="flex gap-2 items-center text-sm">
                                     <span className="opacity-70 flex items-center gap-2"><CornerDownRight className="w-3" />Được tạo bởi</span>
                                     <HoverCard openDelay={300}>
                                         <HoverCardTrigger>
                                             <Badge className="gap-1.5 p-1 pr-2 hover:bg-secondary cursor-pointer" variant="outline">
                                                 <Avatar>
-                                                    <AvatarImage className="w-5 aspect-square rounded-full border" src="https://avatars.githubusercontent.com/u/17537969?s=80&v=4" />
+                                                    <AvatarImage className="w-5 aspect-square rounded-full border" src={course?.author?.avatar_url} />
                                                 </Avatar>
-                                                <span className="font-semibold text-[13px] -translate-y-[1px]">baoanth</span>
+                                                <span className="font-semibold text-[13px] -translate-y-[1px]">{course?.author?.username}</span>
                                             </Badge>
                                         </HoverCardTrigger>
                                         <HoverCardContent className="w-70" side="bottom" align="start">
                                             <div className="flex gap-4">
                                                 <Avatar>
-                                                    <AvatarImage className="w-14 rounded-full" src="https://avatars.githubusercontent.com/u/17537969?s=80&v=4" />
+                                                    <AvatarImage className="w-14 rounded-full" src={course?.author?.avatar_url} />
                                                 </Avatar>
                                                 <div className="space-y-1">
-                                                    <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@baoanth</h4>
+                                                    <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@{course?.author?.username}</h4>
                                                     <p className="text-sm">
                                                         Khoa Kỹ thuật & Công nghệ
                                                     </p>
@@ -177,7 +275,7 @@ function CourseManagerByID() {
                                             </div>
                                         </HoverCardContent>
                                     </HoverCard>
-                                    <span className="opacity-70 flex items-center gap-2"><i className="fa-solid fa-circle text-[3px]"></i>5 tháng trước</span>
+                                    <span className="opacity-70 flex items-center gap-2"><i className="fa-solid fa-circle text-[3px]"></i>{formatTimeAgo(course?.createdAt, "vi")}</span>
                                     <Dialog>
                                         <TooltipProvider delayDuration={100}>
                                             <Tooltip>
@@ -263,6 +361,20 @@ function CourseManagerByID() {
                                 </div>
                             </div>
                             <div className="flex gap-2">
+                                <TooltipProvider delayDuration={100}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Link to="edit">
+                                                <Button size="icon" variant="outline">
+                                                    <Pencil className="w-[1.2rem] h-[1.2rem]" />
+                                                </Button>
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom">
+                                            Chỉnh sửa thông tin
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                                 <Dialog>
                                     <DialogTrigger>
                                         <TooltipProvider delayDuration={100}>
@@ -303,7 +415,7 @@ function CourseManagerByID() {
                                                                 <h3>Chỉ cho phép nộp bài qua Git</h3>
                                                                 <p className="text-sm opacity-50 font-medium">Sinh viên chỉ có thể nộp thông qua Git, không thể nộp qua giao diện người dùng.</p>
                                                             </Label>
-                                                            <Switch defaultChecked={isPublicCourse} id="only-submit-by-git"/>
+                                                            <Switch defaultChecked={isPublicCourse} id="only-submit-by-git" />
                                                         </div>
                                                         <div>
 
@@ -316,7 +428,7 @@ function CourseManagerByID() {
                                                                     <h3>Hạn chế truy cập</h3>
                                                                     <p className="text-sm opacity-50 font-medium">Yêu cầu người dùng nhập mật khẩu khi đăng ký tham gia khoá học này.</p>
                                                                 </Label>
-                                                                <Switch defaultChecked={isPublicCourse} onCheckedChange={handleChangePublicCourse} id="public-course-switch" />
+                                                                <Switch checked={isPublicCourse} onCheckedChange={handleChangePublicCourse} id="public-course-switch" />
                                                             </div>
                                                             {
                                                                 isPublicCourse &&
@@ -332,7 +444,7 @@ function CourseManagerByID() {
                                                                         />
                                                                     </div>
                                                                     {
-                                                                        enrolKey.length > 0 &&
+                                                                        enrolKey.length > 0 && enrolKey !== course.join_key &&
                                                                         <Button className="w-fit px-4" size="sm">Cập nhật</Button>
                                                                     }
                                                                 </>
@@ -358,120 +470,44 @@ function CourseManagerByID() {
                     <div className="flex flex-col gap-2">
                         <span className="text-sm font-medium text-green-600 dark:text-green-500">Mô tả khoá học:</span>
                         <p className="opacity-90 text-justify">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                            {course?.description}
                         </p>
                     </div>
 
-                    <div className="flex flex-col gap-8">
-                        <div className="flex flex-col gap-3">
-                            <h2 className="font-semibold text-lg">
-                                <GitMerge className="inline-block w-5 mr-2 text-green-600 dark:text-green-500 -translate-y-[1px]" />Lab 1: Nhập môn
-                            </h2>
-                            <div className="flex flex-col gap-1">
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link to="problem/create">
-                                    <Button className="w-fit px-3.5 pr-4 text-base font-medium hover:bg-primary/10 text-primary hover:text-primary" variant="ghost" size="lg"><Plus className="w-5 mr-1.5 h-5" />Thêm bài tập</Button>
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <span className="font-semibold text-lg">
-                                <GitMerge className="inline-block w-5 mr-2 text-green-600 dark:text-green-500 -translate-y-[1px]" />Lab 2: Nhập môn
-                            </span>
-                            <div className="flex flex-col gap-1">
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                    <h3 className="flex items-start gap-3 flex-1">
-                                        <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" onClick={e => handleOnDrag(e)} />
-                                        <span className="flex-1">Bài tập 5: Ước số</span>
-                                    </h3>
-                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                </Link>
-                                <Link to="problem/create">
-                                    <Button className="w-fit px-3.5 pr-4 text-base font-medium hover:bg-primary/10 text-primary hover:text-primary" variant="ghost" size="lg"><Plus className="w-5 mr-1.5 h-5" />Thêm bài tập</Button>
-                                </Link>
-                            </div>
-                        </div>
-                        <Link to="lab/create">
-                            <Button className="w-fit px-3.5 pr-4 text-base font-medium hover:bg-primary/10 text-primary hover:text-primary" variant="ghost" size="lg"><Plus className="w-5 mr-1.5 h-5" />Thêm bài Lab mới</Button>
-                        </Link>
-                    </div>
+                    <CourseTree dataFromAPI={dataFromAPI} setDataFromAPI={setDataFromAPI} key={key} />
+
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="w-fit px-3.5 pr-4" variant="secondary"><Plus className="w-4 mr-1.5 h-5" />Thêm bài Lab mới</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Tạo bài Lab mới</DialogTitle>
+                            </DialogHeader>
+                            <Input
+                                className="w-full mt-2 placeholder:italic"
+                                placeholder="Nhập tên bài Lab"
+                                value={newLab}
+                                onChange={e => setNewLab(e.target.value)}
+                            />
+                            <DialogFooter className="mt-2">
+                                <DialogClose>
+                                    <Button variant="ghost">
+                                        Đóng
+                                    </Button>
+                                </DialogClose>
+                                <DialogClose>
+                                    <Button className="w-fit px-4" onClick={() => handleCreateLab()}>Tạo</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
                 <div className="w-1/4 min-w-[300px] ralative max-w-[600px] sticky top-6 bg-zinc-100/30 dark:bg-zinc-900/30 border rounded-lg flex flex-col items-center">
                     <div className="flex flex-col w-full pl-6 2xl:pl-7 pt-4 2xl:pt-5">
                         <h3 className="font-bold text-xl 2xl:text-2xl align-left">Thống kê</h3>
                         <p className="text-sm 2xl:text-base opacity-60">Trong toàn khoá học</p>
                     </div>
-                    {/* <ChartContainer config={chartConfig} className="w-full">
-                        <AreaChart
-                            accessibilityLayer
-                            data={chartData}
-                            // margin={{
-                            //     left: 12,
-                            //     right: 12,
-                            // }}
-                        >
-                            <CartesianGrid vertical={false} />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent indicator="line" />}
-                            />
-                            <Area
-                                dataKey="desktop"
-                                type="natural"
-                                fill="var(--color-desktop)"
-                                fillOpacity={0.4}
-                                stroke="var(--color-desktop)"
-                            />
-                        </AreaChart>
-                    </ChartContainer> */}
                     <ChartContainer
                         config={{
                             time: {

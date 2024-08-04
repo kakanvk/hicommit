@@ -2,6 +2,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { login } from './API/Auth';
+import { Octokit } from 'octokit';
+import CryptoJS from 'crypto-js';
 
 interface LoginContextProps {
     loading: boolean;
@@ -23,11 +25,18 @@ export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 try {
                     const encryptedToken = localStorage.getItem('encryptedGithubAccessToken');
 
+                    const token = decryptToken(encryptedToken ?? "", user.uid);
+
+                    const octokit = new Octokit({ auth: token });
+
                     const myProfileData = await login(encryptedToken as string, user.email as string, user.uid as string);
 
-                    console.log(myProfileData);
+                    // console.log(myProfileData);
 
-                    setUser(myProfileData as any);
+                    setUser({
+                        ...myProfileData,
+                        accessToken: token,
+                    });
 
                     setLoading(false);
 
@@ -41,6 +50,13 @@ export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
         });
     }, []);
+
+    const decryptToken = (encryptedToken: string, key: string) => {
+        // Sử dụng AES để giải mã token với key chỉ định
+        const bytes = CryptoJS.AES.decrypt(encryptedToken, key);
+        const originalToken = bytes.toString(CryptoJS.enc.Utf8);
+        return originalToken;
+    }
 
     return (
         <LoginContext.Provider value={{ loading, setLoading, user, setUser }}>

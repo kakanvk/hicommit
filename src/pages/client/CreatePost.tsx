@@ -106,7 +106,7 @@ function CreatePost() {
         }
 
         if (tags.length < 5 && tag.trim() !== '') {
-            setTags([...tags, tag]);
+            setTags([...tags, tag.trim()]);
             setTag('');
         }
     }

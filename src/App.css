@@ -37,16 +37,16 @@
     background-color: transparent;
 }
 
-.ck-content.hicommit-content a{
+.ck-content.hicommit-content a {
     cursor: pointer !important;
 }
 
-.ck-content.hicommit-content img{
+.ck-content.hicommit-content img {
     border-radius: 8px;
     border: 1px solid rgb(32, 46, 80);
 }
 
-.ck-content.hicommit-content p{
+.ck-content.hicommit-content p {
     color: var(--hicommit-content);
 }
 

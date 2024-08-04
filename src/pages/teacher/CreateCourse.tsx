@@ -40,6 +40,7 @@ import { createPost } from "@/service/API/Post";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { createCourse } from "@/service/API/Course";
+import toast from 'react-hot-toast';
 
 function CreateCourse() {
 
@@ -120,12 +121,31 @@ function CreateCourse() {
             join_key: isPublicCourse ? enrolKey : null
         }
 
-        console.log(data);
+        // console.log(data);
 
         try {
             // Call createPost API
-            const response = await createCourse(data);
+            const response = await toast.promise(
+                createCourse(data),
+                {
+                    loading: 'Đang lưu...',
+                    success: 'Tạo khoá học thành công',
+                    error: 'Tạo khoá học thất bại'
+                }, 
+                {
+                    style: {
+                        borderRadius: '8px',
+                        background: '#222',
+                        color: '#fff',
+                        paddingLeft: '15px',
+                        fontFamily: 'Plus Jakarta Sans',
+                    }
+                });
             console.log(response);
+            // Chờ 1s rồi chuyển hướng
+            setTimeout(() => {
+                window.location.href = `/course-manager`;
+            }, 1000);
         } catch (error) {
             console.error('Error creating post:', error);
         }

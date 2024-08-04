@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Filter, Plus, RotateCcw, Search, UsersRound, X } from "lucide-react";
+import { ChevronRight, Filter, MoveRight, Plus, RotateCcw, Search, UsersRound, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -30,9 +30,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { lastDayOfDecade } from "date-fns";
-import { date } from "zod";
-import { create } from "domain";
 import { useEffect, useState } from "react";
 import { getCreatedCourses } from "@/service/API/Course";
 import { formatTimeAgo } from "@/service/DateTimeService";
@@ -40,90 +37,6 @@ import { formatTimeAgo } from "@/service/DateTimeService";
 function CourseManager() {
 
     const [createdCourses, setCreatedCourses] = useState<any[]>([]);
-
-    // Fake data
-    const courses = [
-        {
-            id: 1,
-            name: "Kỹ thuật lập trình",
-            code: "DA21TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "20 ngày trước",
-            completed: false,
-        },
-        {
-            id: 2,
-            name: "Lập trình hướng đối tượng",
-            code: "DA22TTB",
-            description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-            labs: 4,
-            students: 34,
-            createdAt: "25 ngày trước",
-            completed: false,
-        },
-        {
-            id: 3,
-            name: "Công nghệ phần mềm",
-            code: "DA23TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "30 ngày trước",
-            completed: true,
-        },
-        {
-            id: 4,
-            name: "Hệ điều hành",
-            code: "DA24TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "35 ngày trước",
-            completed: false,
-        },
-        {
-            id: 5,
-            name: "Cấu trúc dữ liệu và giải thuật",
-            code: "DA25TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "40 ngày trước",
-            completed: true
-        },
-        {
-            id: 6,
-            name: "Lập trình web",
-            code: "DA26TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "20 ngày trước",
-            completed: false,
-        },
-        {
-            id: 7,
-            name: "Lập trình di động",
-            code: "DA27TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "20 ngày trước",
-            completed: true
-        },
-        {
-            id: 8,
-            name: "Lập trình game",
-            code: "DA28TTB",
-            description: "Sau khi học khoá học này, sẽ có được các kỹ năng cần thiết để lập trình.",
-            labs: 4,
-            students: 34,
-            createdAt: "20 ngày trước",
-            completed: true
-        },
-    ];
 
     const handleGetCreatedCourse = async () => {
         try {
@@ -160,7 +73,7 @@ function CourseManager() {
                                         <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
                                     </Badge>
                                 </div>
-                                <Badge className="px-1.5 min-w-[22px] flex justify-center">{courses.length}</Badge>
+                                <Badge className="px-1.5 min-w-[22px] flex justify-center">{createdCourses.length}</Badge>
                                 <TooltipProvider delayDuration={200}>
                                     <Tooltip>
                                         <Dialog>
@@ -248,40 +161,57 @@ function CourseManager() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-1 2xl:grid-cols-2 gap-4 w-full">
-                        {
-                            createdCourses.map(course => (
-                                <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
-                                    <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
-                                        <img src={course?.thumbnail}/>
-                                    </div>
-                                    <div className="flex flex-col gap-2 flex-1 h-full justify-between pb-1">
-                                        <div className="flex flex-col gap-2 flex-1">
-                                            <h2 className="font-semibold line-clamp-2"><Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2px] font-bold">{course?.class_name}</Badge>{course?.name}</h2>
-                                            <p className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-3">{course?.description}</p>
-                                        </div>
-                                        <div className="w-full flex items-end justify-between">
-                                            <div className="flex gap-2 items-center">
-                                                <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                    {course?.labs || 12} LAB
-                                                </Badge>
-                                                <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                    <UsersRound className="h-3 w-3 mr-2" />{course.students || 123}
-                                                </Badge>
-                                                {
-                                                    course?.completed &&
-                                                    <Badge variant="secondary" className="text-[11px] p-1 px-3 bg-red-500/20 dark:bg-red-500/45 text-red-600 dark:text-white hover:bg-red-500/20">
-                                                        Đã kết thúc
-                                                    </Badge>
-                                                }
+                    {
+                        createdCourses.length > 0 ?
+                            <div className="grid grid-cols-1 lg:grid-cols-1 2xl:grid-cols-2 gap-4 w-full">
+                                {
+                                    createdCourses.map(course => (
+                                        <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
+                                            <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
+                                                <img src={course?.thumbnail} />
                                             </div>
-                                            <span className="text-[11px] opacity-60 font-light">Được tạo { formatTimeAgo(course?.createdAt, "vi") }</span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))
-                        }
-                    </div>
+                                            <div className="flex flex-col gap-2 flex-1 h-full justify-between pb-1">
+                                                <div className="flex flex-col gap-2 flex-1">
+                                                    <h2 className="font-semibold line-clamp-2">
+                                                        {
+                                                            course.class_name &&
+                                                            <Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2px] font-bold">{course?.class_name}</Badge>
+                                                        }
+                                                        {course?.name}
+                                                    </h2>
+                                                    <p className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-2">{course?.description}</p>
+                                                </div>
+                                                <div className="w-full flex items-end justify-between">
+                                                    <div className="flex gap-2 items-center">
+                                                        <Badge variant="secondary" className="text-[11px] p-1 px-3">
+                                                            {course?.labs || 12} LAB
+                                                        </Badge>
+                                                        <Badge variant="secondary" className="text-[11px] p-1 px-3">
+                                                            <UsersRound className="h-3 w-3 mr-2" />{course.students || 123}
+                                                        </Badge>
+                                                        {
+                                                            course?.completed &&
+                                                            <Badge variant="secondary" className="text-[11px] p-1 px-3 bg-red-500/20 dark:bg-red-500/45 text-red-600 dark:text-white hover:bg-red-500/20">
+                                                                Đã kết thúc
+                                                            </Badge>
+                                                        }
+                                                    </div>
+                                                    <span className="text-[11px] opacity-60 font-light">Được tạo {formatTimeAgo(course?.createdAt, "vi")}</span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))
+                                }
+                            </div>
+                            :
+                            <div className="flex flex-col items-center justify-center w-full mt-4">
+                                <span className="">
+                                    Bạn chưa tạo khoá học nào. <Link to="create" className="text-green-500 font-bold">
+                                        Tạo ngay<MoveRight className="w-5 h-5 inline ml-2" />
+                                    </Link>
+                                </span>
+                            </div>
+                    }
                 </div>
             </div>
         </div>

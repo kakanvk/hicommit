@@ -21,12 +21,16 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import TextAndMathEditor from "@/components/ui/text-math-editor";
+import { getCourseByIDForAdmin } from "@/service/API/Course";
 
 function CreateProblem() {
+    
+    const course_id = useParams<{ course_id: string }>().course_id;
 
+    const [course, setCourse] = useState<any>({});
     const [tags, setTags] = useState<string[]>([]);
     const [tag, setTag] = useState<string>('');
 
@@ -42,6 +46,19 @@ function CreateProblem() {
         }
     }
 
+    const handleGetCourseData = async () => {
+        try {
+            const response = await getCourseByIDForAdmin(course_id as string);
+            setCourse(response);
+        } catch (error) {
+            console.error('Error getting course:', error);
+        }
+    }
+
+    useEffect(() => {
+        handleGetCourseData();
+    }, []);
+
     return (
         <div className="CreateProblem p-6 px-8 flex flex-col gap-8">
             <Breadcrumb>
@@ -54,7 +71,7 @@ function CreateProblem() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/course-manager/1">Kỹ thuật lập trình</Link>
+                            <Link to={`/course-manager/${course?.id}`}>{course?.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
