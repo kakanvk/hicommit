@@ -71,6 +71,16 @@ const joinToCourse = async (courseId: string, join_key: string) => {
     }
 }
 
+const updateUnits = async (courseId: string, units: any) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}/units`, units);
+        return response.data;
+    } catch (error) {
+        // console.error('Error updating units:', error);
+        throw error;
+    }
+}
+
 export {
     getCourses,
     createCourse,
@@ -78,5 +88,6 @@ export {
     getCourseById,
     joinToCourse,
     getJoinedCourses,
-    getCourseByIDForAdmin
+    getCourseByIDForAdmin,
+    updateUnits
 };

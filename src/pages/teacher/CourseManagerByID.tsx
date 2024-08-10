@@ -71,10 +71,10 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
-import { getCourseByIDForAdmin } from "@/service/API/Course";
+import { getCourseByIDForAdmin, updateUnits } from "@/service/API/Course";
 import { formatTimeAgo } from "@/service/DateTimeService";
 import { set } from "date-fns";
-import { createUnit } from "@/service/API/Unit";
+import { createUnit, updateUnitById } from "@/service/API/Unit";
 import toast from "react-hot-toast";
 import { se } from "date-fns/locale";
 import { NodeRendererProps, Tree, useSimpleTree } from "react-arborist";
@@ -116,55 +116,19 @@ const chartConfig = {
         label: "Desktop",
         color: "hsl(var(--chart-1))",
     },
-} satisfies ChartConfig
-
-const initialData = [
-    {
-        // unit
-        id: Math.random().toString(36).substring(7),
-        name: "Chat Rooms",
-        children: [
-            // work
-            { id: "c1", name: "General" },
-            { id: "c2", name: "Random" },
-            { id: "c3", name: "Open Source Projects" },
-        ],
-    },
-    {
-        // unit
-        id: Math.random().toString(36).substring(7),
-        name: "Direct Messages",
-        children: [
-            // work
-            { id: "d1", name: "Alice" },
-            { id: "d2", name: "Bob" },
-            { id: "d3", name: "Charlie" },
-            { id: "d4", name: "Charlie 2" },
-        ],
-    },
-    {
-        // unit
-        id: Math.random().toString(36).substring(7),
-        name: "Threads",
-        children: [
-            // work
-            { id: "t1", name: "Thread 1" },
-            { id: "t2", name: "Thread 2" },
-            { id: "t3", name: "Thread 3" },
-        ],
-    }
-];
+} satisfies ChartConfig;
 
 function CourseManagerByID() {
 
-    const [dataFromAPI, setDataFromAPI] = useState<any[]>(initialData);
+    const { course_id } = useParams();
+
+    const [dataFromAPI, setDataFromAPI] = useState<any[]>([]);
     const [key, setKey] = useState(0);
 
     useEffect(() => {
         setKey(prevKey => prevKey + 1);
+        handleUpdateUnit(course_id as string, dataFromAPI);
     }, [dataFromAPI]);
-
-    const { course_id } = useParams();
 
     const [course, setCourse] = useState<any>({});
 
@@ -177,19 +141,32 @@ function CourseManagerByID() {
         setIsPublicCourse(!isPublicCourse);
     }
 
-    const handleOnDrag = (e: any) => {
-        e.preventDefault();
-    }
-
     const handleGetCourseData = async () => {
         try {
             const response = await getCourseByIDForAdmin(course_id as string);
             setCourse(response);
             setIsPublicCourse(response.join_key);
             setEnrolKey(response.join_key ? response.join_key : "");
-            console.log(response);
+            setDataFromAPI(response.units);
+            // console.log(response);
         } catch (error) {
             console.error('Error getting course:', error);
+        }
+    }
+
+    const handleRefreshCourseData = async () => {
+        try {
+            handleGetCourseData();
+        } catch (error) {
+            console.error('Error refreshing course:', error);
+        }
+    }
+
+    const handleUpdateUnit = async (unit_id: string, units: any) => {
+        try {
+            const response = await updateUnits(course_id as string, { units: units });
+        } catch (error) {
+            // console.error('Error updating lab:', error);
         }
     }
 
@@ -243,8 +220,13 @@ function CourseManagerByID() {
                     <div className="flex flex-col gap-5">
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col gap-2">
-                                <h1 className="text-3xl font-bold">{course?.name}<Badge variant="default" className="rounded ml-2 -translate-y-1.5">{course?.class_name}</Badge></h1>
-                                <div className="flex gap-2 items-center text-sm">
+                                <h1 className="text-3xl font-bold">
+                                    <span className="mr-2">
+                                        {course?.name}
+                                    </span>
+                                    <Badge variant="default" className="rounded -translate-y-1.5">{course?.class_name}</Badge>
+                                </h1>
+                                <div className="flex gap-2 items-center text-sm flex-wrap">
                                     <span className="opacity-70 flex items-center gap-2"><CornerDownRight className="w-3" />Được tạo bởi</span>
                                     <HoverCard openDelay={300}>
                                         <HoverCardTrigger>
@@ -474,7 +456,10 @@ function CourseManagerByID() {
                         </p>
                     </div>
 
-                    <CourseTree dataFromAPI={dataFromAPI} setDataFromAPI={setDataFromAPI} key={key} />
+                    {
+                        dataFromAPI.length > 0 &&
+                        <CourseTree dataFromAPI={dataFromAPI} setDataFromAPI={setDataFromAPI} refresh={handleRefreshCourseData} courseId={course_id} key={key} />
+                    }
 
                     <Dialog>
                         <DialogTrigger asChild>

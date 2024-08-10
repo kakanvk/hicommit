@@ -34,7 +34,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft } from 'lucide-react';
+import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem } from 'lucide-react';
 import RingProgress from "@/components/ui/ringProcess";
 import { Button } from "@/components/ui/button";
 import CodeArea from "@/components/ui/code-area";
@@ -45,10 +45,70 @@ import SubmissionHistory from "./SubmissionHistory";
 
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import { useEffect, useState } from "react";
+import { getProblemByIDorSlug } from "@/service/API/Problem";
+
+import { Pie, PieChart } from "recharts"
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart"
+import { Separator } from "@radix-ui/react-dropdown-menu";
+
+const chartData = [
+    { status: "chrome", visitors: 275, fill: "#22c55e" },
+    { status: "safari", visitors: 200, fill: "#fbbf24" },
+    { status: "firefox", visitors: 187, fill: "#ef4444" }
+]
+
+const chartConfig = {
+    visitors: {
+        label: "Visitors",
+    },
+    chrome: {
+        label: "Hoàn thành",
+    },
+    safari: {
+        label: "Chưa hoàn thành",
+    },
+    firefox: {
+        label: "Gặp vấn đề",
+    }
+} satisfies ChartConfig
 
 function Problem() {
 
     const { problem_id } = useParams();
+
+    const [problem, setProblem] = useState<any>();
+
+    const handleGetProblem = async () => {
+        try {
+            const response = await getProblemByIDorSlug(problem_id as any);
+            setProblem(response);
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        handleGetProblem();
+    }, []);
 
     return (
         <div className="Problem p-6 px-8 pb-[90px] flex flex-col gap-8">
@@ -62,14 +122,12 @@ function Problem() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink>
-                            <Link to={`/course/123`}>Olympic Sinh Viên 2023 Khối Chuyên tin</Link>
+                            <Link to={`/course/${problem?.parent.id}`}>{problem?.parent.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbLink>
-                            Ước số
-                        </BreadcrumbLink>
+                        {problem?.name}
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -78,14 +136,16 @@ function Problem() {
                     <div className="flex gap-4 justify-between">
                         <div className="flex-1 flex flex-col gap-3">
                             <h1 className="text-2xl font-bold">
-                                Olympic Sinh Viên 2023 - Chuyên tin - Ước số
-                                <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[20px]"></i>
+                                {problem?.name}
+                                <i className="fa-solid fa-circle-minus text-zinc-400 ml-2 text-[18px]"></i>
+                                {/* <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[18px]"></i> */}
+                                {/* <i className="fa-solid fa-circle-xmark text-red-500"></i> */}
                             </h1>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/123`}>
-                                    <CornerDownRight className="w-3" />Olympic Tin học Sinh viên 2023
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent.id}`}>
+                                    <CornerDownRight className="w-3" />{problem?.parent.name}
                                 </Link>
-                                <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">Khối chuyên tin</Badge>
+                                <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">{problem?.unit.name}</Badge>
                             </div>
                         </div>
                         <div className="flex items-start gap-2">
@@ -127,86 +187,87 @@ function Problem() {
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-green-600 dark:text-green-500">Mô tả đề bài:</span>
                                     <div className=" text-justify dark:font-normal font-medium">
-                                        <p>Số <InlineMath math="fib(n)" /> với <InlineMath math="n\ge0" /> được tính theo công thức sau:</p>
-                                        <BlockMath math={`
-                                            fib(n) = 
-                                            \\begin{cases} 
-                                            n & \\text{nếu } n \\leq 1 \\\\
-                                            fib(n-1) + fib(n-2) & \\text{nếu } n \\geq 2 
-                                            \\end{cases}
-                                        `} />
-                                        <p>
-                                            Cho ba số nguyên dương <InlineMath math="a, b, M" />, gọi <InlineMath math="u" /> là ước số chung lớn nhất của <InlineMath math="fib(a)" /> và <InlineMath math="fib(b)" />,
-                                            hãy tính phần dư của phép chia <InlineMath math="u" /> cho <InlineMath math="M" />.
-                                        </p>
+                                        <p
+                                            dangerouslySetInnerHTML={{
+                                                __html: problem?.description,
+                                            }}
+                                        />
                                     </div>
                                 </div>
-
-
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-green-600 dark:text-green-500">Input:</span>
                                     <div className=" text-justify dark:font-normal font-medium">
-                                        <p>
-                                            Vào từ thiết bị vào chuẩn gồm ba số nguyên dương <InlineMath math="a, b, M \, (a, b, M \leq 10^{12})" />.
-                                        </p>
+                                        <p
+                                            dangerouslySetInnerHTML={{
+                                                __html: problem?.input,
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-green-600 dark:text-green-500">Output:</span>
                                     <div className=" text-justify dark:font-normal font-medium">
-                                        <p>
-                                            Ghi ra thiết bị ra chuẩn một số là phần dư của phép chia <InlineMath math="u" /> cho <InlineMath math="M" />.
-                                        </p>
+                                        <p
+                                            dangerouslySetInnerHTML={{
+                                                __html: problem?.output,
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-sm font-bold text-green-600 dark:text-green-500">Giới hạn:</span>
-                                    <div className="text-justify dark:font-normal font-medium text-base">
-                                        <p>
-                                            Subtask 1 (70% số điểm): <InlineMath math="a, b, M \leq 50" />;
-                                        </p>
-                                        <p>
-                                            Subtask 2 (20% số điểm): <InlineMath math="a, b, M \leq 10^9" />;
-                                        </p>
-                                        <p>
-                                            Subtask 3 (10% số điểm): Không có ràng buộc nào thêm.
-                                        </p>
+                                {
+                                    problem?.limit &&
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-sm font-bold text-green-600 dark:text-green-500">Giới hạn:</span>
+                                        <div className="text-justify dark:font-normal font-medium text-base">
+                                            <p
+                                                dangerouslySetInnerHTML={{
+                                                    __html: problem?.limit,
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                }
 
                                 <div className="">
                                     <Accordion type="multiple">
-                                        <AccordionItem value="item-1" className="border-0">
-                                            <AccordionTrigger className="hover:no-underline">
-                                                <span className="flex items-center gap-2 text-lg font-semibold">
-                                                    <MessageSquareCode className="w-5 translate-y-[2px] text-green-600 dark:text-green-500" />Ví dụ 1
-                                                </span>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="flex flex-col gap-7 pt-3 pb-8">
-                                                <div className="flex flex-col gap-3">
-                                                    <span className="text-sm font-semibold opacity-60">Input:</span>
-                                                    <CodeArea>
-                                                        {`6 9 10`}
-                                                    </CodeArea>
-                                                </div>
-                                                <div className="flex flex-col gap-3">
-                                                    <span className="text-sm font-semibold opacity-60">Output:</span>
-                                                    <CodeArea>
-                                                        {`2`}
-                                                    </CodeArea>
-                                                </div>
-                                                <div className="flex flex-col gap-3">
-                                                    <span className="text-sm font-semibold opacity-70">Ghi chú:</span>
-                                                    <div className="text-justify dark:font-normal font-medium text-base">
-                                                        <p>
-                                                            Ta có <InlineMath math="fib(6) = 8" /> và <InlineMath math="fib(9) = 34" />. Ước số chung lớn nhất của chúng là <InlineMath math="2" />.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
+                                        {
+                                            problem?.examples.length > 0 && problem?.examples.map((example: any, index: number) => (
+                                                <AccordionItem key={example.id} value={example.id} className="border-0">
+                                                    <AccordionTrigger className="hover:no-underline">
+                                                        <span className="flex items-center gap-2 text-lg font-semibold">
+                                                            <MessageSquareCode className="w-5 translate-y-[2px] text-green-600 dark:text-green-500" />Ví dụ {index + 1}
+                                                        </span>
+                                                    </AccordionTrigger>
+                                                    <AccordionContent className="flex flex-col gap-7 pt-3 pb-8">
+                                                        <div className="flex flex-col gap-3">
+                                                            <span className="text-sm font-semibold opacity-60">Input:</span>
+                                                            <CodeArea>
+                                                                {example.input}
+                                                            </CodeArea>
+                                                        </div>
+                                                        <div className="flex flex-col gap-3">
+                                                            <span className="text-sm font-semibold opacity-60">Output:</span>
+                                                            <CodeArea>
+                                                                {example.output}
+                                                            </CodeArea>
+                                                        </div>
+                                                        {
+                                                            example.note && example.note.length > 0 &&
+                                                            <div className="flex flex-col gap-3">
+                                                                <span className="text-sm font-semibold opacity-70">Ghi chú:</span>
+                                                                <div className="text-justify dark:font-normal font-medium text-base">
+                                                                    <p>
+                                                                        {example.note}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </AccordionContent>
+                                                </AccordionItem>
+                                            ))
+                                        }
                                     </Accordion>
                                 </div>
 
@@ -314,38 +375,53 @@ function Problem() {
 
                 </div>
 
-                <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
-                    <span className="font-semibold">Tiến độ khoá học</span>
-                    <RingProgress radius={90} stroke={12} progress={30} label="" textSize={28} />
-                    <div className="w-full font-medium flex flex-col gap-4 mt-5">
-                        <div className="flex gap-3 justify-start items-center">
-                            <div className="flex items-center gap-2.5">
-                                <i className="fa-solid fa-circle-check text-green-600"></i>
-                                <span className="text-sm">Hoàn thành:</span>
+                <div className="sticky top-6 w-[270px] 2xl:w-[300px] flex flex-col items-center gap-6">
+                    <Card className="flex flex-col w-full bg-zinc-100/70 dark:bg-zinc-900/50">
+                        <CardHeader className="items-center pb-0 pt-4">
+                            <CardTitle className="text-xl">Thống kê</CardTitle>
+                            <CardDescription>Tỉ lệ hoàn thành bài tập</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-1 px-2 pb-0">
+                            <ChartContainer
+                                config={chartConfig}
+                                className="mx-auto aspect-square w-full"
+                            >
+                                <PieChart>
+                                    <ChartTooltip
+                                        cursor={false}
+                                        content={<ChartTooltipContent hideLabel />}
+                                        className="w-[165px]"
+                                    />
+                                    <Pie data={chartData} dataKey="visitors" nameKey="status" />
+                                    <ChartLegend
+                                        content={<ChartLegendContent nameKey="status" />}
+                                        className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"
+                                    />
+                                </PieChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                    <div className="w-full flex flex-col gap-2">
+                        <h3 className="font-medium"><Tag className="w-[16px] inline mr-1 text-primary" />Tags:</h3>
+                        {
+                            <div className="flex gap-1 gap-y-1.5 flex-wrap">
+                                {problem?.tags.map((tag: any, index: any) => (
+                                    <Badge key={index} variant="outline" className="capitalize text-[12px] p-0.5 px-2.5 font-normal dark:font-light leading-5">{tag}</Badge>
+                                ))}
                             </div>
-                            <Badge variant="secondary" className="rounded">3/10</Badge>
-                        </div>
-                        <div className="flex gap-3 justify-start items-center">
-                            <div className="flex items-center gap-2.5">
-                                <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                <span className="text-sm">Chưa hoàn thành:</span>
-                            </div>
-                            <Badge variant="secondary" className="rounded">1/10</Badge>
-                        </div>
-                        <div className="flex gap-3 justify-start items-center">
-                            <div className="flex items-center gap-2.5">
-                                <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                <span className="text-sm">Gặp vấn đề:</span>
-                            </div>
-                            <Badge variant="secondary" className="rounded">2/10</Badge>
-                        </div>
-                        <div className="flex gap-3 justify-start items-center">
-                            <div className="flex items-center gap-2.5">
-                                <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                <span className="text-sm">Chưa nộp bài:</span>
-                            </div>
-                            <Badge variant="secondary" className="rounded">4/10</Badge>
-                        </div>
+                        }
+                    </div>
+                    <div className="w-full flex gap-2">
+                        <h3 className="font-medium text-base"><CodeXml className="w-[20px] inline mr-1.5 text-primary" />Ngôn ngữ lập trình:</h3>
+                        <Badge className="w-fit px-1.5 rounded" variant="secondary">
+                            {problem?.language === "c" && "C"}
+                            {problem?.language === "cpp" && "C++"}
+                            {problem?.language === "java" && "Java"}
+                        </Badge>
+                    </div>
+                    <div className="w-full flex gap-2">
+                        <h3 className="font-medium text-base"><Gem className="w-4 h-4 inline mr-1.5 text-primary -translate-y-[2.5px]" />Điểm:</h3>
+                        <Badge className="w-fit px-1.5 rounded" variant="secondary">100</Badge>
                     </div>
                 </div>
             </div>

@@ -16,10 +16,12 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
 import { Separator } from '@radix-ui/react-dropdown-menu';
+import { updateUnitById, deleteUnitById } from '@/service/API/Unit';
+import toast from 'react-hot-toast';
 
 const CourseTree = (props: any) => {
 
-    const { dataFromAPI, setDataFromAPI } = props;
+    const { dataFromAPI, setDataFromAPI, refresh, courseId } = props;
 
     const treeRef = useRef(null);
 
@@ -37,12 +39,88 @@ const CourseTree = (props: any) => {
         return count;
     }
 
-    const handleExportData = () => {
-        console.log(dataFromAPI);
-    };
+    useEffect(() => {
+        setDataFromAPI(data);
+    }, [data]);
 
     function Node({ node, dragHandle }: NodeRendererProps<any>) {
+
         const [newLabName, setNewLabName] = useState(node.data.name);
+
+        const handleUpdateUnit = async (unit: any) => {
+
+            const new_unit = {
+                name: newLabName
+            };
+
+            try {
+                // Call createPost API
+                const response = await toast.promise(
+                    updateUnitById(unit.course_id, unit.id, new_unit),
+                    {
+                        loading: 'Đang lưu...',
+                        success: 'Cập nhật thành công',
+                        error: 'Cập nhật thất bại'
+                    },
+                    {
+                        style: {
+                            borderRadius: '8px',
+                            background: '#222',
+                            color: '#fff',
+                            paddingLeft: '15px',
+                            fontFamily: 'Plus Jakarta Sans',
+                        }
+                    });
+
+                refresh();
+
+            } catch (error) {
+                console.error('Error creating post:', error);
+            }
+        }
+
+        const handleDeleteUnit = async (unit: any) => {
+
+            // Nếu là Lab cuối cùng và children > 0 thì không cho xoá
+            if (dataFromAPI.length === 1 && dataFromAPI[0].children.length > 0) {
+                toast.error('Cần xoá các bài tập trước khi xoá Lab này', {
+                    style: {
+                        borderRadius: '8px',
+                        background: '#222',
+                        color: '#fff',
+                        paddingLeft: '15px',
+                        fontFamily: 'Plus Jakarta Sans',
+                        maxWidth: '600px'
+                    }
+                });
+                return;
+            }
+
+            try {
+                // Call createPost API
+                const response = await toast.promise(
+                    deleteUnitById(unit.course_id, unit.id),
+                    {
+                        loading: 'Đang xoá...',
+                        success: 'Xoá thành công',
+                        error: 'Xoá thất bại'
+                    },
+                    {
+                        style: {
+                            borderRadius: '8px',
+                            background: '#222',
+                            color: '#fff',
+                            paddingLeft: '15px',
+                            fontFamily: 'Plus Jakarta Sans',
+                        }
+                    });
+
+                refresh();
+
+            } catch (error) {
+                console.error('Error creating post:', error);
+            }
+        }
 
         const handleMoveUp = (id: string) => {
             const index = dataFromAPI.findIndex((item: any) => item.id === id);
@@ -67,12 +145,16 @@ const CourseTree = (props: any) => {
         // Hàm để ngăn chặn sự kiện phím tắt khi chỉnh sửa tên
         const handleKeyDown = (event: React.KeyboardEvent) => {
             event.stopPropagation();
+
+            if (event.key === 'Enter') {
+                handleUpdateUnit(node.data);
+            }
         };
 
         return (
             node.isLeaf ?
                 <div ref={dragHandle as any} className="h-[50px] w-full flex items-center">
-                    <Link className="w-full hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work" to="/problem/1">
+                    <Link className="w-full hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work" to={`/problem/${node.data.slug ? node.data.slug : node.data.id}`}>
                         <h3 className="flex items-start gap-3 flex-1">
                             <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" />
                             <span className="flex-1 line-clamp-1">{node.data.name}</span>
@@ -87,7 +169,7 @@ const CourseTree = (props: any) => {
                     </h2>
                     <Separator className='flex-1 h-[1px] bg-secondary opacity-0 group-hover/unit:opacity-100' />
                     <div className="opacity-0 group-hover/unit:opacity-100 border rounded-xl h-fit flex gap-1 p-1">
-                        <Link to="/" className='flex'>
+                        <Link to={`problem/create?unit=${node.data.id}`} className='flex'>
                             <Button className="h-6 w-6" size="icon">
                                 <Plus className="w-[17px]" />
                             </Button>
@@ -124,14 +206,40 @@ const CourseTree = (props: any) => {
                                         </Button>
                                     </DialogClose>
                                     <DialogClose>
-                                        <Button className="w-fit px-4">Cập nhật</Button>
+                                        <Button className="w-fit px-4" onClick={() => handleUpdateUnit(node.data)}>
+                                            Cập nhật
+                                        </Button>
                                     </DialogClose>
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-                        <Button size="icon" variant="ghost" className="w-6 h-6 hover:bg-red-500/20 dark:hover:bg-red-500/40">
-                            <Trash2 className="w-[14px]" />
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="w-6 h-6 hover:bg-red-500/20 dark:hover:bg-red-500/40">
+                                    <Trash2 className="w-[14px]" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Xác nhận xoá bài Lab này</DialogTitle>
+                                </DialogHeader>
+                                <DialogDescription>
+                                    Sau khi xoá, tất cả các bài tập trong Lab này sẽ được di chuyển sang Lab gần nhất.
+                                </DialogDescription>
+                                <DialogFooter className="mt-2">
+                                    <DialogClose>
+                                        <Button variant="ghost">
+                                            Đóng
+                                        </Button>
+                                    </DialogClose>
+                                    <DialogClose>
+                                        <Button className="w-fit px-4" variant="destructive" onClick={() => handleDeleteUnit(node.data)}>
+                                            Xoá
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
         );
@@ -154,7 +262,6 @@ const CourseTree = (props: any) => {
             >
                 {Node as any}
             </Tree>
-            {/* <Button onClick={() => handleExportData()}>Export Data</Button> */}
         </div>
     );
 };

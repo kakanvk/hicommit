@@ -102,7 +102,7 @@ function Course() {
             setTimeout(() => {
                 window.location.reload();
             }, 500);
-            
+
         } catch (error) {
             console.error('Error joining course:', error);
         }
@@ -336,108 +336,37 @@ function Course() {
 
                     <div className="">
                         <Accordion type="multiple">
-                            <AccordionItem value="item-1">
-                                <AccordionTrigger className="hover:no-underline">
-                                    <span className="flex items-center font-semibold text-lg">
-                                        <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />Lab 1: Nhập môn
-                                    </span>
-                                </AccordionTrigger>
-                                <AccordionContent className="text-base flex flex-col gap-1.5">
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/1">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-check text-green-600"></i>
-                                            <span>Bài tập 1: Ước số</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/2">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-check text-green-600"></i>
-                                            <span>Bài tập 2: Cộng 2 số nguyên</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="/problem/3">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                            <span>Bài tập 3: Vòng lặp For</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-2">
-                                <AccordionTrigger className="hover:no-underline">
-                                    <span className="flex items-center font-semibold text-lg">
-                                        <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />Lab 2: Giới thiệu ngôn ngữ C++
-                                    </span>
-                                </AccordionTrigger>
-                                <AccordionContent className="text-base flex flex-col gap-1.5">
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                            <span>Bài tập 4: Hello World</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-check text-green-600"></i>
-                                            <span>Bài tập 5: Cộng 2 số nguyên</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                            <span>Bài tập 6: Vòng lặp For</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-3">
-                                <AccordionTrigger className="hover:no-underline">
-                                    <span className="flex items-center font-semibold text-lg">
-                                        <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />Lab 3: Các thuật toán cơ bản
-                                    </span>
-                                </AccordionTrigger>
-                                <AccordionContent className="text-base flex flex-col gap-1.5">
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                            <span>Bài tập 7: Hello World</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                            <span>Bài tập 8: Cộng 2 số nguyên</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                            <span>Bài tập 9: Vòng lặp For</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to="">
-                                        <div className="flex items-center gap-3">
-                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                            <span>Bài tập 10: Vòng lặp While</span>
-                                        </div>
-                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                    </Link>
-                                </AccordionContent>
-                            </AccordionItem>
+                            {
+                                courseData?.units && courseData?.units.map((unit: any, index: number) => (
+                                    <AccordionItem value={unit?.id} key={unit?.id}>
+                                        <AccordionTrigger className="hover:no-underline">
+                                            <span className="flex items-center font-semibold text-lg">
+                                                <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />{unit?.name}
+                                            </span>
+                                        </AccordionTrigger>
+                                        <AccordionContent className="text-base flex flex-col gap-1.5">
+                                            {
+                                                unit?.children && unit?.children.map((problem: any, index: number) => (
+                                                    <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
+                                                        <div className="flex items-center gap-3">
+                                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
+                                                            {/* <i className="fa-solid fa-circle-xmark text-red-500"></i> */}
+                                                            {/* <i className="fa-solid fa-circle-check text-green-600"></i> */}
+                                                            <span>{problem.name}</span>
+                                                        </div>
+                                                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
+                                                    </Link>
+                                                ))
+                                            }
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))
+                            }
                         </Accordion>
                     </div>
                 </div>
                 {
-                    courseData.joined ?
+                    courseData.isJoined ?
                         <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
                             <span className="font-semibold">Tiến độ khoá học</span>
                             <RingProgress radius={90} stroke={12} progress={30} textSize={28} />
@@ -487,7 +416,7 @@ function Course() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="w-full">
-                                        {courseData?.join_key && <i className="fa-solid fa-lock mr-2 text-xs"></i>}
+                                        {!courseData?.isPublic && <i className="fa-solid fa-lock mr-2 text-xs"></i>}
                                         Tham gia ngay
                                     </Button>
                                 </DialogTrigger>
@@ -499,7 +428,7 @@ function Course() {
                                         Bạn có chắc chắn rằng bạn muốn tham gia khoá học này. {courseData?.join_key && 'Vui lòng nhập mã tham gia để tiếp tục.'}
                                     </DialogDescription>
                                     {
-                                        courseData.join_key &&
+                                        !courseData?.isPublic &&
                                         <Input
                                             placeholder="Mã tham gia"
                                             className="placeholder:italic"

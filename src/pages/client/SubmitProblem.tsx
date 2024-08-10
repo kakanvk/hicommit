@@ -12,7 +12,8 @@ import {
     Select,
     SelectContent,
     SelectItem,
-    SelectTrigger
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select"
 
 import { Button } from "@/components/ui/button"
@@ -47,6 +48,8 @@ import { useEffect, useState } from "react";
 import createGitHubAPI from "@/service/githubService";
 import { useLogin } from "@/service/LoginContext";
 import Loader from "@/components/ui/loader";
+import { getProblemByIDorSlug } from "@/service/API/Problem";
+import toast from "react-hot-toast";
 
 function SubmitProblem() {
 
@@ -60,36 +63,90 @@ function SubmitProblem() {
 
     const navigate = useNavigate();
 
-    const [selectedLanguage, setSelectedLanguage] = useState("C");
+    const [selectedLanguage, setSelectedLanguage] = useState("c");
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
-    const [commitMessage, setCommitMessage] = useState("Submit code at " + new Date().toLocaleString());
+    const [commitMessage, setCommitMessage] = useState("Submit code at " + new Date().toLocaleString() + " by HiCommit");
 
-    const defaultLanguage = [
-        "C", "C++", "Java"
-    ]
+    const [problem, setProblem] = useState<any>();
+
+    const handleGetProblem = async () => {
+        try {
+            const response = await getProblemByIDorSlug(problem_id as any);
+            setProblem(response);
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        handleGetProblem();
+        handleCheckRepo();
+    }, []);
+
+    const targetRepo = "hicommit-problems";
+    const templateLanguage = "template-" + problem?.language.toLowerCase();
+
+    const handleCheckRepo = async () => {
+        try {
+            const response = await githubAPI.getRepoInfo(loginContext?.user.username, targetRepo);
+        } catch (error) {
+            await githubAPI.createRepoFromTemplate();
+            console.log("Created repo from template");
+        }
+    }
+
+    const handleCheckBranch = async () => {
+        try {
+            const response = await githubAPI.getRepoBranchInfo(loginContext?.user.username, targetRepo, problem_id);
+            console.log(response);
+        } catch (error) {
+            await githubAPI.createBranchFromBranch(loginContext?.user.username, targetRepo, problem_id, templateLanguage);
+            console.log("Created branch from template");
+        }
+    }
 
     const handleSubmit = async () => {
-        // console.log("Submit work: ", code);
         setLoading(true);
 
         try {
-            // const result = await githubAPI.commitFile(loginContext?.user.login, "hicommit-submissions", "test-cpp", "main.cpp", code, commitMessage);
-            
-            try{
-                const result = await githubAPI.getRepoInfo(loginContext?.user.login, "hicommit-problem", "main");
-            } catch (e){
-                await githubAPI.createRepo("hicommit-problem", "HiCommit Here");
-            }
-            
+            // Kiểm tra xem branch của bài tập đã được tạo chưa
+            await handleCheckBranch();
+
+            const response = await toast.promise(
+                githubAPI.commitFile(
+                    loginContext?.user.login,
+                    targetRepo,
+                    problem_id,
+                    "main.cpp",
+                    code,
+                    commitMessage
+                ),
+                {
+                    loading: 'Đang nộp bài...',
+                    success: 'Nộp bài thành công',
+                    error: 'Nộp bài không thành công, hãy thử lại'
+                },
+                {
+                    style: {
+                        borderRadius: '8px',
+                        background: '#222',
+                        color: '#fff',
+                        paddingLeft: '15px',
+                        fontFamily: 'Plus Jakarta Sans',
+                    }
+                });
+
+            console.log(response);
+
             setLoading(false);
-            // navigate("/problem/1");
         } catch (error) {
             setLoading(false);
-            console.error(error);
+            console.error("Error during handleSubmit:", error);
+            // Thêm thông báo lỗi cho người dùng nếu cần
         }
-
-    }
+    };
 
     const handleChangeLanguage = (language: any) => {
         setSelectedLanguage(language);
@@ -105,7 +162,7 @@ function SubmitProblem() {
 int main() {
     return 0;
 }`,
-        "c++":
+        "cpp":
             `#include <bits/stdc++.h>
 
 using namespace std;
@@ -148,13 +205,13 @@ public class Main {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/course/${problem_id}`}>Olympic Sinh Viên 2023 Khối Chuyên tin</Link>
+                            <Link to={`/course/${problem?.parent.id}`}>{problem?.parent.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/problem/${problem_id}`}>Ước số</Link>
+                            <Link to={`/problem/${problem?.slug || problem_id}`}>{problem?.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -171,15 +228,15 @@ public class Main {
                     <p className="text-xl font-bold">
                         Nộp bài:
                         <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${problem_id}`}>
-                            Olympic Sinh Viên 2023 - Chuyên tin - Ước số
-                            <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[20px]"></i>
+                            {problem?.name}
+                            <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[18px]"></i>
                         </Link>
                     </p>
-                    <div className="flex items-center gap-1.5">
-                        <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem_id}`}>
-                            <CornerDownRight className="w-3" />Olympic Tin học Sinh Viên 2023
+                    <div className="flex items-center gap-2">
+                        <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent.slug || problem?.parent.id}`}>
+                            <CornerDownRight className="w-3" />{problem?.parent.name}
                         </Link>
-                        <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">Khối Chuyên tin</Badge>
+                        <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">{problem?.unit.name}</Badge>
                     </div>
                 </div>
                 <TooltipProvider delayDuration={100}>
@@ -220,23 +277,20 @@ public class Main {
                     />
                 </div>
                 <div className="flex items-center justify-between">
-                    <Link to={`/problem/${problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
+                    <Link to={`/course/${problem?.slug || problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
                         <ChevronLeft className="w-4" />Quay lại
                     </Link>
                     <div className="flex items-center gap-4">
                         <Select value={selectedLanguage} onValueChange={handleChangeLanguage}>
                             <SelectTrigger className="w-[180px] bg-secondary">
-                                {selectedLanguage}
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {
-                                    defaultLanguage.map((item, index) => (
-                                        <SelectItem key={index} value={item}>{item}</SelectItem>
-                                    ))
-                                }
+                                <SelectItem value="c">C</SelectItem>
+                                <SelectItem value="cpp">C++</SelectItem>
+                                <SelectItem value="java">Java</SelectItem>
                             </SelectContent>
                         </Select>
-
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button>
@@ -247,9 +301,9 @@ public class Main {
                                 <DialogHeader>
                                     <DialogTitle><i className="fa-solid fa-code-commit text-primary mr-2 translate-y-[-1px]"></i>Commit thay đổi</DialogTitle>
                                 </DialogHeader>
-                                <DialogDescription>
-                                    <p>
-                                        Đoạn mã này sẽ được gửi lên GitHub, hãy tạo một thông điệp để gợi nhớ về sự thay đổi này:
+                                <div>
+                                    <p className="text-sm opacity-60 font-light">
+                                        Hãy để lại một thông điệp cho lần nộp bài này:
                                     </p>
                                     <div className="flex items-center space-x-2 mt-3">
                                         <div className="grid flex-1 gap-2">
@@ -260,7 +314,7 @@ public class Main {
                                             />
                                         </div>
                                     </div>
-                                </DialogDescription>
+                                </div>
                                 <DialogFooter className="mt-4 justify-end gap-1">
                                     <div className="flex items-center gap-3">
                                         <DialogClose asChild>
