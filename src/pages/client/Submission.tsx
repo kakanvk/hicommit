@@ -91,7 +91,7 @@ function Result() {
     }
 
     useEffect(() => {
-        socket.on('new_submission', (submissions) => {
+        socket.on('new_submission', () => {
             getSubmission();
         });
 
@@ -502,7 +502,7 @@ function Result() {
                     </div>
                     <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5">
                         <span className="font-semibold">Kết quả chấm bài</span>
-                        <RingProgress radius={90} stroke={12} progress={(submission?.pass_count / submission?.problem?.testcase_count) * 100} label="" textSize={28} />
+                        <RingProgress radius={90} stroke={12} progress={((submission?.pass_count / submission?.problem?.testcase_count) * 100).toFixed(0) as any} label="" textSize={28} />
                         <div className="w-full flex flex-col mt-3">
                             <div className="flex gap-2 justify-start items-center">
                                 <span className="text-sm">Tổng thời gian chấm:</span>

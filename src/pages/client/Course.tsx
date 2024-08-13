@@ -61,24 +61,43 @@ import { Input } from "@/components/ui/input";
 import { useLogin } from "@/service/LoginContext";
 import { toggleFavouriteCourse } from "@/service/API/User";
 import toast from "react-hot-toast";
+import { getMySubmited } from "@/service/API/Submission";
 
 function Course() {
 
     const { course_id } = useParams();
     const [courseData, setCourseData] = useState<any>({});
+    const [mySubmited, setMySubmited] = useState<any>({});
+    const [mergedProblems, setMergedProblems] = useState<any>([]);
     const [inputKey, setInputKey] = useState<string>("");
 
     const loginContext = useLogin();
 
     const handleGetCourseData = async () => {
-        try {
-            const response = await getCourseById(course_id as string);
-            setCourseData(response);
-            console.log(response);
-        } catch (error) {
-            console.error('Error getting post:', error);
-        }
+        const response = await getCourseById(course_id as string);
+        setCourseData(response);
+        // console.log(response);
     };
+
+    const handleGetMySubmited = async () => {
+        const response = await getMySubmited();
+        setMySubmited(response);
+    }
+
+    const handleMergeProblem = async () => {
+        let mergedProblems: any = [];
+
+        courseData?.units?.map((unit: any) => {
+            unit?.children?.map((problem: any) => {
+                mergedProblems.push({
+                    slug: problem.slug,
+                    status: mySubmited[problem.slug] ? mySubmited[problem.slug] : "NONE"
+                });
+            });
+        });
+
+        setMergedProblems(mergedProblems);
+    }
 
     const handleJoinCourse = async () => {
         try {
@@ -137,7 +156,12 @@ function Course() {
     }
 
     useEffect(() => {
+        handleMergeProblem();
+    }, [courseData, mySubmited]);
+
+    useEffect(() => {
         handleGetCourseData();
+        handleGetMySubmited();
     }, []);
 
     return (
@@ -163,10 +187,10 @@ function Course() {
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col gap-2">
                                 <h1 className="text-3xl font-bold">
-                                    <span className="mr-2">{courseData?.name}</span>
+                                    <span className="mr-2.5">{courseData?.name}</span>
                                     {
                                         courseData.class_name &&
-                                        <Badge variant="default" className="rounded px-1.5 -translate-y-1">{courseData?.class_name}</Badge>
+                                        <Badge variant="default" className="rounded px-1.5 -translate-y-1.5">{courseData?.class_name}</Badge>
                                     }
                                 </h1>
                                 <div className="flex gap-2 items-center text-sm">
@@ -349,10 +373,17 @@ function Course() {
                                                 unit?.children && unit?.children.map((problem: any, index: number) => (
                                                     <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
                                                         <div className="flex items-center gap-3">
-                                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                                            {/* <i className="fa-solid fa-circle-xmark text-red-500"></i> */}
-                                                            {/* <i className="fa-solid fa-circle-check text-green-600"></i> */}
-                                                            <span>{problem.name}</span>
+                                                            {mySubmited[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
+                                                            {mySubmited[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
+                                                            {mySubmited[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
+                                                            {mySubmited[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
+                                                            {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
+                                                            <span className="line-clamp-1">{problem.name}</span>
+                                                            <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                                {problem?.language === "c" && "C"}
+                                                                {problem?.language === "cpp" && "C++"}
+                                                                {problem?.language === "java" && "Java"}
+                                                            </Badge>
                                                         </div>
                                                         <ChevronRight className="w-4 invisible group-hover/work:visible" />
                                                     </Link>
@@ -369,35 +400,52 @@ function Course() {
                     courseData.isJoined ?
                         <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
                             <span className="font-semibold">Tiến độ khoá học</span>
-                            <RingProgress radius={90} stroke={12} progress={30} textSize={28} />
+                            <RingProgress radius={90} stroke={12} progress={((mergedProblems.filter((problem: any) => problem.status === "PASSED").length / mergedProblems.length) * 100).toFixed(0) as any} textSize={28} />
                             <div className="w-full font-medium flex flex-col gap-4 mt-5">
                                 <div className="flex gap-3 justify-start items-center">
                                     <div className="flex items-center gap-2.5">
                                         <i className="fa-solid fa-circle-check text-green-600"></i>
-                                        <span className="text-sm">Hoàn thành:</span>
+                                        <span className="text-sm">Kết quả chính xác:</span>
                                     </div>
-                                    <Badge variant="secondary" className="rounded">3/10</Badge>
-                                </div>
-                                <div className="flex gap-3 justify-start items-center">
-                                    <div className="flex items-center gap-2.5">
-                                        <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                        <span className="text-sm">Chưa hoàn thành:</span>
-                                    </div>
-                                    <Badge variant="secondary" className="rounded">1/10</Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "PASSED").length}/{mergedProblems.length}
+                                    </Badge>
                                 </div>
                                 <div className="flex gap-3 justify-start items-center">
                                     <div className="flex items-center gap-2.5">
                                         <i className="fa-solid fa-circle-xmark text-red-500"></i>
+                                        <span className="text-sm">Sai kết quả:</span>
+                                    </div>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "FAILED").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
                                         <span className="text-sm">Gặp vấn đề:</span>
                                     </div>
-                                    <Badge variant="secondary" className="rounded">2/10</Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "ERROR").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>
+                                        <span className="text-sm">Lỗi biên dịch:</span>
+                                    </div>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "COMPILE_ERROR").length}/{mergedProblems.length}
+                                    </Badge>
                                 </div>
                                 <div className="flex gap-3 justify-start items-center">
                                     <div className="flex items-center gap-2.5">
                                         <i className="fa-solid fa-circle-minus text-zinc-400"></i>
                                         <span className="text-sm">Chưa nộp bài:</span>
                                     </div>
-                                    <Badge variant="secondary" className="rounded">4/10</Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "NONE").length}/{mergedProblems.length}
+                                    </Badge>
                                 </div>
                             </div>
                         </div> :

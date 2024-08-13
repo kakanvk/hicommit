@@ -76,7 +76,7 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { getSubmissionsByProblemSlug } from "@/service/API/Submission";
+import { getMySubmited, getSubmissionsByProblemSlug } from "@/service/API/Submission";
 import { useLogin } from "@/service/LoginContext";
 
 const chartConfig = {
@@ -107,6 +107,7 @@ function Problem() {
     const [submissions, setSubmissions] = useState<any[]>([]);
     const [selectedType, setSelectedType] = useState("all");
     const [chartData, setChartData] = useState<any[]>([]);
+    const [mySubmited, setMySubmited] = useState<any>({});
 
     const handleGetProblem = async () => {
         try {
@@ -121,6 +122,11 @@ function Problem() {
     const handleGetSubmissons = async (slug: any) => {
         const data = await getSubmissionsByProblemSlug(slug);
         setSubmissions(data);
+    }
+
+    const handleGetMySubmited = async () => {
+        const data = await getMySubmited();
+        setMySubmited(data);
     }
 
     const handleBuildChart = () => {
@@ -156,6 +162,7 @@ function Problem() {
 
     useEffect(() => {
         handleGetProblem();
+        handleGetMySubmited();
     }, []);
 
     return (
@@ -185,9 +192,13 @@ function Problem() {
                         <div className="flex-1 flex flex-col gap-3">
                             <h1 className="text-2xl font-bold">
                                 {problem?.name}
-                                <i className="fa-solid fa-circle-minus text-zinc-400 ml-2 text-[18px]"></i>
-                                {/* <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[18px]"></i> */}
-                                {/* <i className="fa-solid fa-circle-xmark text-red-500"></i> */}
+                                {mySubmited?.[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 ml-2.5 text-[18px]"></i>}
+                                {mySubmited?.[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 ml-2.5 text-[18px]"></i>}
+                                {mySubmited?.[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 ml-2.5 text-[18px]"></i>}
+                                {mySubmited?.[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 ml-2.5 text-[18px]"></i>}
+                                {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) &&
+                                    <i className="fa-solid fa-circle-minus text-zinc-400 ml-2.5 text-[18px]"></i>
+                                }
                             </h1>
                             <div className="flex items-center gap-2 flex-wrap">
                                 <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent.id}`}>

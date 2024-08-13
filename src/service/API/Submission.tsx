@@ -40,9 +40,20 @@ const getSubmissionsByID = async (id: string) => {
     }
 }
 
+const getMySubmited = async () => {
+    try {
+        const response = await axiosInstance.get(`submissions/me/submited`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting submissions:', error);
+        throw error;
+    }
+}
+
 export { 
     getMySubmissions, 
     getSubmissionsByProblemSlug, 
     getMySubmissionsByProblemSlug,
-    getSubmissionsByID
+    getSubmissionsByID,
+    getMySubmited
 };

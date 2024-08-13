@@ -47,8 +47,7 @@ function SubmissionHistory(props: any) {
     }
 
     useEffect(() => {
-        socket.on('new_submission', (submissions: any) => {
-            console.log('New submissions received:', submissions);
+        socket.on('new_submission', () => {
             handleGetMySubmissons();
         });
 
