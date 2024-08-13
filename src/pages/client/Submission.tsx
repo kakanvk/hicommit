@@ -41,7 +41,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode } from "lucide-react";
+import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode, Bug, SquareArrowOutUpRight } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
 import RingProgress from "@/components/ui/ringProcess";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -51,25 +51,58 @@ import { githubLightInit, githubDarkInit } from '@uiw/codemirror-theme-github';
 import { javascript } from '@codemirror/lang-javascript';
 
 import { useTheme } from "@/components/theme-provider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getSubmissionsByID } from "@/service/API/Submission";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
+import CodeArea from "@/components/ui/code-area";
+
+import { useSocket } from "@/service/SocketContext";
+
+const timeAgo = (isoDate: any) => {
+    try {
+        const date = parseISO(isoDate);
+        return formatDistanceToNow(date, { addSuffix: true, locale: vi });
+    } catch (error) {
+        console.error('Error parsing date:', error);
+        return 'Invalid date';
+    }
+};
 
 function Result() {
+
+    const { socket } = useSocket() as any;
 
     const { theme } = useTheme();
 
     const { submission_id } = useParams();
 
-    const [code, setCode] = useState(
-        `#include <bits/stdc++.h>
+    const [code, setCode] = useState('');
+    const [submission, setSubmission] = useState<any>({});
 
-using namespace std;
+    const getSubmission = async () => {
+        const submission = await getSubmissionsByID(submission_id as string);
+        setSubmission(submission);
 
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    return 0;
-}`);
+        const codeDecoded = atob(submission?.code);
+        setCode(codeDecoded);
+
+        console.log(submission);
+    }
+
+    useEffect(() => {
+        socket.on('new_submission', (submissions) => {
+            getSubmission();
+        });
+
+        return () => {
+            socket.off('new_submission');
+        };
+    }, []);
+
+    useEffect(() => {
+        getSubmission();
+    }, []);
 
     return (
         <div className="Result p-6 px-8 pb-[90px] flex flex-col gap-8">
@@ -83,13 +116,13 @@ int main() {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/course/${submission_id}`}>Olympic Sinh Viên 2023 Khối Chuyên tin</Link>
+                            <Link to={`/course/${submission?.problem?.parent.id}`}>{submission?.problem?.parent.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to={`/problem/${submission_id}`}>Ước số</Link>
+                            <Link to={`/problem/${submission?.problem?.slug || submission?.problem?.id}`}>{submission?.problem?.name}</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -109,15 +142,24 @@ int main() {
                                 <div className="flex-1 flex flex-col gap-3">
                                     <p className="text-xl font-bold">
                                         Kết quả chấm bài:
-                                        <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${submission_id}`}>
-                                            Ước số
-                                            <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[20px]"></i>
+                                        <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${submission?.problem?.slug || submission?.problem?.id}`}>
+                                            {submission?.problem?.name}
+                                            {submission?.status === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 ml-2.5 text-[20px]"></i>}
+                                            {submission?.status === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 ml-2.5 text-[20px]"></i>}
+                                            {submission?.status === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 ml-2.5 text-[20px]"></i>}
+                                            {submission?.status === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 ml-2.5 text-[20px]"></i>}
+                                            {submission?.status === "PENDING" &&
+                                                <span className="relative inline-flex h-3.5 w-3.5 ml-3">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-primary"></span>
+                                                </span>
+                                            }
                                         </Link>
                                     </p>
                                 </div>
                                 <p className="font-medium text-base">
                                     <i className="fa-solid fa-code-commit text-primary mr-2"></i>
-                                    Submit code at 21:48:25 16/5/2024
+                                    {submission?.commit}
                                 </p>
                                 <div className="text-[14px] flex items-center gap-2 flex-wrap">
                                     <span className="opacity-70">Commit bởi</span>
@@ -125,18 +167,18 @@ int main() {
                                         <HoverCardTrigger>
                                             <Badge className="gap-1.5 p-1 pr-2 hover:bg-secondary cursor-pointer" variant="outline">
                                                 <Avatar className="h-5 w-5">
-                                                    <AvatarImage className="w-full h-full" src='https://avatars.githubusercontent.com/u/93561031?v=4' />
+                                                    <AvatarImage className="w-full h-full" src={submission?.actor?.avatar_url} />
                                                 </Avatar>
-                                                <span className="font-semibold text-[13px] -translate-y-[1px]">kakanvk</span>
+                                                <span className="font-semibold text-[13px] -translate-y-[1px]">{submission?.actor?.username}</span>
                                             </Badge>
                                         </HoverCardTrigger>
                                         <HoverCardContent className="w-70" side="bottom" align="start">
                                             <div className="flex gap-4">
                                                 <Avatar>
-                                                    <AvatarImage className="w-14 rounded-full" src="https://avatars.githubusercontent.com/u/93561031?v=4" />
+                                                    <AvatarImage className="w-14 rounded-full" src={submission?.actor?.avatar_url} />
                                                 </Avatar>
                                                 <div className="space-y-1">
-                                                    <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@kakanvk</h4>
+                                                    <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@{submission?.actor?.username}</h4>
                                                     <p className="text-sm">
                                                         Trường Đại học Trà Vinh
                                                     </p>
@@ -153,7 +195,7 @@ int main() {
 
                                     <span className="text-green-600 dark:text-green-500 text-[13px] font-medium">
                                         <i className="fa-solid fa-circle text-[3px] -translate-y-[3.5px] mr-2"></i>
-                                        2 phút trước
+                                        {timeAgo(submission?.createdAt)}
                                     </span>
 
                                     <Dialog>
@@ -167,13 +209,17 @@ int main() {
                                             <DialogHeader>
                                                 <DialogTitle className="flex items-center gap-2">
                                                     <SquareCode className="w-5 text-primary" />Mã nguồn
-                                                    <Badge variant="secondary" className="px-1.5 rounded-sm">C++</Badge>
+                                                    <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                        {submission?.problem?.language === "c" && "C"}
+                                                        {submission?.problem?.language === "cpp" && "C++"}
+                                                        {submission?.problem?.language === "java" && "Java"}
+                                                    </Badge>
                                                 </DialogTitle>
                                             </DialogHeader>
                                             <p className="text-sm mt-2">
                                                 Commit
                                                 <Badge className="px-1.5 rounded-sm mx-1 font-medium" variant="secondary">
-                                                    <span className="truncate max-w-[400px]">Submit code at 21:48:25 16/5/2024</span>
+                                                    <span className="truncate max-w-[400px]">{submission?.commit}</span>
                                                 </Badge>
                                             </p>
                                             <div className="w-full border rounded-lg overflow-hidden">
@@ -213,7 +259,7 @@ int main() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button size="icon" variant="ghost"><RefreshCcw className="w-5" /></Button>
+                                        <Button size="icon" variant="ghost" onClick={() => getSubmission()}><RefreshCcw className="w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="bottom">
                                         Làm mới
@@ -228,92 +274,190 @@ int main() {
                                     Kiểm tra đơn vị
                                     <span className="opacity-50 font-medium ml-2 text-sm">(Unit Test)</span>
                                     <Badge className="rounded px-1.5 ml-2 -translate-y-[1px]" variant="secondary">
-                                        <span>C++</span>
+                                        <span>
+                                            {submission?.problem?.language === "c" && "C"}
+                                            {submission?.problem?.language === "cpp" && "C++"}
+                                            {submission?.problem?.language === "java" && "Java"}
+                                        </span>
                                     </Badge>
                                 </p>
-                                <Clock className="w-4 flex-none" />
+                                <Bug className="w-4 flex-none" />
                             </div>
                             <div className="flex flex-col gap-5 p-5">
-                                <div className="flex items-center justify-between">
-                                    <p className="flex items-baseline gap-3">
-                                        <i className="fa-solid fa-circle-check text-primary"></i>
-                                        <span className="text-sm font-medium opacity-60">Test case 1</span>
-                                    </p>
-                                    <span className="text-sm font-medium opacity-70">2s</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className="flex items-baseline gap-3">
-                                        <i className="fa-solid fa-circle-check text-primary"></i>
-                                        <span className="text-sm font-medium opacity-60">Test case 2</span>
-                                    </p>
-                                    <span className="text-sm font-medium opacity-70">5s</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className="flex items-baseline gap-3">
-                                        <i className="fa-solid fa-circle-check text-primary"></i>
-                                        <span className="text-sm font-medium opacity-60">Test case 3</span>
-                                    </p>
-                                    <span className="text-sm font-medium opacity-70">10s</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className="flex items-baseline gap-3">
-                                        <i className="fa-solid fa-circle-check text-primary"></i>
-                                        <span className="text-sm font-medium opacity-60">Test case 4</span>
-                                    </p>
-                                    <span className="text-sm font-medium opacity-70">10s</span>
-                                </div>
-                                {/* <div className="flex items-center justify-between">
-                                    <p className="flex items-baseline gap-3">
-                                        <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                        <span className="text-sm font-medium opacity-60">Test case 4</span>
-                                        <Dialog>
-                                            <TooltipProvider delayDuration={100}>
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        <DialogTrigger className="hover:bg-secondary w-6 rounded">
-                                                            <i className="fa-solid fa-seedling text-sm opacity-60"></i>
-                                                        </DialogTrigger>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="bottom">
-                                                        Gợi ý
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>
-                                                        <i className="fa-solid fa-seedling text-primary mr-2 translate-y-[-1px]"></i>Gợi ý hoàn thành<Badge variant="secondary" className="rounded px-1.5 py-1 ml-2 -translate-y-[1px] text-[13px]">Test case 4</Badge>
-                                                    </DialogTitle>
-                                                </DialogHeader>
-                                                <DialogDescription>
-                                                    Bạn cần xử lý các trường hợp đặc biệt như số 0.
-                                                </DialogDescription>
-                                                <DialogFooter>
-                                                    <DialogClose>
-                                                        <Button variant="secondary">Đóng</Button>
-                                                    </DialogClose>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </p>
-                                    <span className="text-sm font-medium opacity-70">0s</span>
-                                </div> */}
+                                {
+                                    submission?.status === "PENDING" ?
+                                        /* From Uiverse.io by Amerss */
+                                        <p>
+                                            <span className="mr-2">Đang chấm</span>
+                                            <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                            <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                            <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                        </p> :
+                                        submission?.testcases?.length > 0 ?
+                                            submission?.testcases?.map((testcase: any, index: number) => (
+                                                <div key={index} className="flex items-center justify-between">
+                                                    <p className="flex items-baseline gap-3">
+                                                        {/* <i className={`fa-solid fa-circle-${testcase.status === "PASSED" ? "check" : "xmark"} text-${testcase.status === "PASSED" ? "green-600" : "red-500"}`}></i> */}
+                                                        {testcase?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 text-[14px]"></i>}
+                                                        {testcase?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 text-[14px]"></i>}
+                                                        {testcase?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 text-[14px]"></i>}
+                                                        {testcase?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 text-[14px]"></i>}
+                                                        <span className="text-sm font-medium opacity-60">Test case {index + 1}</span>
+                                                        {
+                                                            testcase.status?.toUpperCase() !== "PASSED" && testcase?.suggestion &&
+                                                            <Dialog>
+                                                                <TooltipProvider delayDuration={100}>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger>
+                                                                            <DialogTrigger className="hover:bg-secondary w-6 rounded">
+                                                                                <i className="fa-solid fa-seedling text-sm opacity-60"></i>
+                                                                            </DialogTrigger>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent side="bottom">
+                                                                            Gợi ý
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>
+                                                                            <i className="fa-solid fa-seedling text-primary mr-2 translate-y-[-1px]"></i>Gợi ý hoàn thành<Badge variant="secondary" className="rounded px-1.5 py-1 ml-2 -translate-y-[1px] text-[13px]">Test case {index + 1}</Badge>
+                                                                        </DialogTitle>
+                                                                    </DialogHeader>
+                                                                    <DialogDescription>
+                                                                        {testcase.suggestion}
+                                                                    </DialogDescription>
+                                                                    <DialogFooter>
+                                                                        <DialogClose>
+                                                                            <Button variant="secondary">Đóng</Button>
+                                                                        </DialogClose>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        }
+                                                    </p>
+                                                    {testcase.status.toUpperCase() === "PASSED" && <span className="text-sm text-green-600 dark:text-green-500">Chính xác</span>}
+                                                    {testcase.status.toUpperCase() === "FAILED" &&
+                                                        <Dialog>
+                                                            <DialogTrigger>
+                                                                <span className="text-sm text-red-500">Sai kết quả</span>
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    <DialogTitle className="mb-2 flex items-center gap-2 text-red-600 dark:text-red-500">
+                                                                        <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
+                                                                    </DialogTitle>
+                                                                </DialogHeader>
+                                                                <div className="flex flex-col gap-5">
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
+                                                                        <CodeArea>
+                                                                            {testcase?.output}
+                                                                        </CodeArea>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
+                                                                        <CodeArea>
+                                                                            {
+                                                                                testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
+                                                                                    testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
+                                                                            }
+                                                                        </CodeArea>
+                                                                    </div>
+                                                                </div>
+                                                                <DialogFooter className="mt-4">
+                                                                    <DialogClose>
+                                                                        <Button variant="secondary">Đóng</Button>
+                                                                    </DialogClose>
+                                                                </DialogFooter>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    }
+                                                    {testcase.status.toUpperCase() === "ERROR" &&
+                                                        <Dialog>
+                                                            <DialogTrigger>
+                                                                <span className="text-sm text-amber-500">Gặp vấn đề</span>
+
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    <DialogTitle className="mb-2 flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                                                                        <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
+                                                                    </DialogTitle>
+                                                                </DialogHeader>
+                                                                <div className="flex flex-col gap-5">
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
+                                                                        <CodeArea>
+                                                                            {testcase?.output}
+                                                                        </CodeArea>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
+                                                                        <CodeArea className="text-amber-600 dark:text-amber-400 italic">
+                                                                            {
+                                                                                testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
+                                                                                    testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
+                                                                            }
+                                                                        </CodeArea>
+                                                                    </div>
+                                                                </div>
+                                                                <DialogFooter className="mt-4">
+                                                                    <DialogClose>
+                                                                        <Button variant="secondary">Đóng</Button>
+                                                                    </DialogClose>
+                                                                </DialogFooter>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    }
+                                                </div>
+                                            )) :
+                                            <div className="flex items-center justify-between">
+                                                <p className="flex items-baseline gap-3">
+                                                    <span className="text-sm font-medium opacity-60">Không có test case nào được thực hiện</span>
+                                                </p>
+                                            </div>
+                                }
                             </div>
                             <div className="flex justify-between items-center p-3.5 px-5 border-t-[1px]">
                                 <div className="flex flex-col gap-1.5">
                                     <span className="text-xs opacity-50 font-medium">Kết quả</span>
                                     <div className="flex items-center gap-3">
-                                        <i className="fa-solid fa-circle-check text-green-600"></i>
-                                <span className="font-semibold">Kết quả chính xác</span>
-                                        {/* <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                        <span className="font-semibold">Chưa hoàn thành</span> */}
-                                        {/* <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                <span className="font-semibold">Gặp vấn đề</span> */}
+                                        {submission?.status?.toUpperCase() === "PENDING" &&
+                                            <>
+                                                <span className="relative inline-flex h-3 w-3 ml-1">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                                </span>
+                                                <p>
+                                                    <span className="mr-2">Đang chấm</span>
+                                                    <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                                    <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                                    <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                                </p>
+                                            </>
+                                        }
+                                        {submission?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
+                                        {submission?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
+                                        {submission?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
+                                        {submission?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
+                                        {submission?.status?.toUpperCase() === "PASSED" && <span className="font-semibold">Kết quả chính xác</span>}
+                                        {submission?.status?.toUpperCase() === "FAILED" && <span className="font-semibold">Sai kết quả</span>}
+                                        {submission?.status?.toUpperCase() === "ERROR" && <span className="font-semibold text-amber-500">Có lỗi trong quá trình thực hiện</span>}
+                                        {submission?.status?.toUpperCase() === "COMPILE_ERROR" && <span className="font-semibold">Lỗi biên dịch chương trình</span>}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1.5 items-end ">
                                     <span className="text-xs opacity-50 font-medium">Thời gian</span>
-                                    <span className="text-sm font-bold opacity-70">17s</span>
+                                    {
+                                        submission?.status === "PENDING" ? (
+                                            <p>
+                                                <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                                <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                                <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                            </p>
+                                        ) : <span className="text-sm font-bold opacity-70">{submission?.duration}s</span>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -323,7 +467,11 @@ int main() {
                                     Đánh giá chất lượng mã nguồn
                                     <span className="opacity-50 font-medium ml-2 text-sm">(Code Quality)</span>
                                     <Badge className="rounded px-1.5 ml-2 -translate-y-[1px]" variant="secondary">
-                                        <span>C++</span>
+                                        <span>
+                                            {submission?.problem?.language === "c" && "C"}
+                                            {submission?.problem?.language === "cpp" && "C++"}
+                                            {submission?.problem?.language === "java" && "Java"}
+                                        </span>
                                     </Badge>
                                 </p>
                                 <Clock className="w-4 flex-none" />
@@ -343,24 +491,33 @@ int main() {
                             <p className="text-sm">
                                 <i className="fa-solid fa-circle-info mr-2 opacity-50"></i>
                                 <span className="opacity-70">Được thực hiện bởi</span>
-                                <Badge variant="secondary" className="rounded px-1.5 -translate-y-[2px] ml-2">
-                                    <i className="fa-regular fa-circle-play mr-1"></i>GitHub Actions
-                                </Badge>
+                                <Link to={`https://github.com/${submission?.actor?.username}/hicommit-problems/actions/runs/${submission?.id}`} target="blank" className="group/link">
+                                    <Badge variant="secondary" className="rounded px-1.5 -translate-y-[2px] ml-2">
+                                        <i className="fa-regular fa-circle-play mr-1"></i>GitHub Actions
+                                    </Badge>
+                                    <SquareArrowOutUpRight className="w-4 ml-1.5 opacity-50 inline -translate-y-[2px] invisible group-hover/link:visible" />
+                                </Link>
                             </p>
                         </div>
                     </div>
                     <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5">
                         <span className="font-semibold">Kết quả chấm bài</span>
-                        <RingProgress radius={90} stroke={12} progress={100} label="" textSize={28} />
+                        <RingProgress radius={90} stroke={12} progress={(submission?.pass_count / submission?.problem?.testcase_count) * 100} label="" textSize={28} />
                         <div className="w-full flex flex-col mt-3">
                             <div className="flex gap-2 justify-start items-center">
                                 <span className="text-sm">Tổng thời gian chấm:</span>
-                                <Badge variant="secondary" className="rounded px-1 text-xs">19s</Badge>
+                                <Badge variant="secondary" className="rounded px-1 text-xs">{submission?.duration}s</Badge>
                             </div>
                             <Accordion type="multiple" className="flex flex-col gap-1 mb-6">
                                 <AccordionItem value="item-1" className="border-0">
                                     <AccordionTrigger className="text-sm font-semibold border-b-[1px] border-zinc-600 pb-1 hover:no-underline">
-                                        <span>Unit Test<i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i></span>
+                                        <span>
+                                            Unit Test
+                                            {submission?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-amber-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-red-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-zinc-400 -translate-y-1"></i>}
+                                        </span>
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="flex flex-col gap-3 pt-4">
@@ -369,14 +526,25 @@ int main() {
                                                     <i className="fa-solid fa-circle-check text-green-600"></i>
                                                     <span className="text-sm opacity-70">Số Test case đúng:</span>
                                                 </div>
-                                                <Badge variant="secondary" className="rounded px-2">4/4</Badge>
+                                                <Badge variant="secondary" className="rounded px-2">{submission?.pass_count || 0}/{submission?.problem?.testcase_count}</Badge>
                                             </div>
                                             <div className="flex gap-3 justify-start items-center">
                                                 <div className="flex items-center gap-2.5">
                                                     <i className="fa-solid fa-circle-xmark text-red-500"></i>
                                                     <span className="text-sm opacity-70">Số Test case sai:</span>
                                                 </div>
-                                                <Badge variant="secondary" className="rounded px-2">0/4</Badge>
+                                                <Badge variant="secondary" className="rounded px-2">
+                                                    {submission?.testcases?.filter((testcase: any) => testcase.status === "failed").length}/{submission?.problem?.testcase_count}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex gap-3 justify-start items-center">
+                                                <div className="flex items-center gap-2.5">
+                                                    <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
+                                                    <span className="text-sm opacity-70">Gặp vấn đề:</span>
+                                                </div>
+                                                <Badge variant="secondary" className="rounded px-2">
+                                                    {submission?.testcases?.filter((testcase: any) => testcase.status === "error").length}/{submission?.problem?.testcase_count}
+                                                </Badge>
                                             </div>
                                         </div>
                                     </AccordionContent>
@@ -397,19 +565,34 @@ int main() {
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>
-
-                            {/* <Button size="sm" className="border gap-2 bg-amber-500 dark:bg-amber-600 hover:bg-amber-500">
-                                <i className="fa-solid fa-circle-exclamation"></i>
-                                <span className="font-semibold">Chưa hoàn thành</span>
-                            </Button> */}
-                            <Button size="sm" className="border gap-2">
-                            <i className="fa-solid fa-circle-check"></i>
-                            <span className="font-semibold">Đã hoàn thành</span>
-                        </Button>
-                            {/* <Button size="sm" className="border gap-2 bg-red-500 hover:bg-red-500">
-                            <i className="fa-solid fa-circle-xmark"></i>
-                            <span className="font-semibold">Gặp vấn đề</span>
-                        </Button> */}
+                            {
+                                submission?.status?.toUpperCase() === "PASSED" &&
+                                <Button size="sm" className="border gap-2 bg-green-600 dark:bg-green-700 hover:bg-green-600">
+                                    <i className="fa-solid fa-circle-check"></i>
+                                    <span className="font-semibold">Kết quả chính xác</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "FAILED" &&
+                                <Button size="sm" className="border gap-2 bg-red-500 hover:bg-red-500">
+                                    <i className="fa-solid fa-circle-xmark text-[13px]"></i>
+                                    <span className="font-semibold">Sai kết quả</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "ERROR" &&
+                                <Button size="sm" className="border gap-2 bg-amber-500 hover:bg-amber-500 text-zinc-900">
+                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <span className="font-bold">Gặp vấn đề</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "COMPILE_ERROR" &&
+                                <Button size="sm" className="border gap-2 bg-secondary hover:bg-secondary text-black dark:text-white">
+                                    <i className="fa-solid fa-triangle-exclamation"></i>
+                                    <span className="font-semibold">Lỗi biên dịch</span>
+                                </Button>
+                            }
                         </div>
                     </div>
                 </div>

@@ -48,7 +48,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import { useEffect, useState } from "react";
 import { getProblemByIDorSlug } from "@/service/API/Problem";
 
-import { Pie, PieChart } from "recharts"
+import { Label, Pie, PieChart } from "recharts"
 
 import {
     Card,
@@ -84,10 +84,10 @@ const chartConfig = {
         label: "Số lượng",
     },
     PASSED: {
-        label: "Hoàn thành",
+        label: "Kết quả chính xác",
     },
     FAILED: {
-        label: "Chưa hoàn thành",
+        label: "Sai kết quả",
     },
     ERROR: {
         label: "Gặp vấn đề",
@@ -126,8 +126,8 @@ function Problem() {
     const handleBuildChart = () => {
         let data = [
             { status: "PASSED", quanlity: 0, fill: "#22c55e" },
-            { status: "FAILED", quanlity: 0, fill: "#fbbf24" },
-            { status: "ERROR", quanlity: 0, fill: "#ef4444" },
+            { status: "FAILED", quanlity: 0, fill: "#ef4444" },
+            { status: "ERROR", quanlity: 0, fill: "#fbbf24" },
             { status: "COMPILE_ERROR", quanlity: 0, fill: "#d3d3d3" }
         ]
         submissions.forEach((submission: any) => {
@@ -179,7 +179,7 @@ function Problem() {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <div className="flex gap-8 items-start relative flex-col lg:flex-row">
+            <div className="flex gap-8 2xl:gap-10 items-start relative flex-col lg:flex-row">
                 <div className="flex-1 flex flex-col gap-5 w-full">
                     <div className="flex gap-4 justify-between">
                         <div className="flex-1 flex flex-col gap-3">
@@ -432,7 +432,7 @@ function Problem() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tất cả</SelectItem>
+                                    <SelectItem value="all">Toàn hệ thống</SelectItem>
                                     <SelectItem value="me">Chỉ mình tôi</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -459,7 +459,40 @@ function Problem() {
                                                 data={chartData}
                                                 dataKey="quanlity"
                                                 nameKey="status"
-                                            />
+                                                innerRadius={55}
+                                            >
+                                                <Label
+                                                    content={({ viewBox }) => {
+                                                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                                            return (
+                                                                <text
+                                                                    x={viewBox.cx}
+                                                                    y={viewBox.cy}
+                                                                    textAnchor="middle"
+                                                                    dominantBaseline="middle"
+                                                                    className="-translate-y-2"
+                                                                >
+                                                                    <tspan
+                                                                        x={viewBox.cx}
+                                                                        y={viewBox.cy}
+                                                                        className="fill-foreground text-2xl font-bold"
+                                                                    >
+                                                                        {/* Làm tròn 2 chữ số thập phân */}
+                                                                        {((chartData.find((item) => item.status === "PASSED")?.quanlity || 0) / chartData.reduce((acc, cur) => acc + cur.quanlity, 0) * 100).toFixed(0)}%
+                                                                    </tspan>
+                                                                    <tspan
+                                                                        x={viewBox.cx}
+                                                                        y={viewBox.cy as any + 22}
+                                                                        className="fill-foreground text-xs opacity-80"
+                                                                    >
+                                                                        Hoàn thành
+                                                                    </tspan>
+                                                                </text>
+                                                            )
+                                                        }
+                                                    }}
+                                                />
+                                            </Pie>
                                             <ChartLegend
                                                 content={<ChartLegendContent nameKey="status" />}
                                                 className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"

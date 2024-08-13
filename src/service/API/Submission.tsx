@@ -12,7 +12,7 @@ const getMySubmissions = async () => {
 
 const getSubmissionsByProblemSlug = async (slug: string) => {
     try {
-        const response = await axiosInstance.get(`/submissions/${slug}`);
+        const response = await axiosInstance.get(`/submissions/problem/${slug}`);
         return response.data;
     } catch (error) {
         console.error('Error getting submissions:', error);
@@ -30,8 +30,19 @@ const getMySubmissionsByProblemSlug = async (slug: string) => {
     }
 }
 
+const getSubmissionsByID = async (id: string) => {
+    try {
+        const response = await axiosInstance.get(`/submissions/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting submissions:', error);
+        throw error;
+    }
+}
+
 export { 
     getMySubmissions, 
     getSubmissionsByProblemSlug, 
-    getMySubmissionsByProblemSlug 
+    getMySubmissionsByProblemSlug,
+    getSubmissionsByID
 };

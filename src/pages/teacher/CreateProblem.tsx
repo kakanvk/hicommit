@@ -47,7 +47,7 @@ function CreateProblem() {
     const unit = new URLSearchParams(window.location.search).get('unit');
 
     const [course, setCourse] = useState<any>({});
-    const [tags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<string[]>(['Cơ bản', 'Hicommit']);
     const [tag, setTag] = useState<string>('');
 
     const [name, setName] = useState<string>('');
