@@ -74,6 +74,8 @@ function SubmitProblem() {
         try {
             const response = await getProblemByIDorSlug(problem_id as any);
             setProblem(response);
+            setSelectedLanguage(response.language);
+            handleChangeLanguage(response.language);
             console.log(response);
         } catch (error) {
             console.log(error);
@@ -114,12 +116,15 @@ function SubmitProblem() {
             // Kiểm tra xem branch của bài tập đã được tạo chưa
             await handleCheckBranch();
 
+            // Nếu là java thì tạo file Main.java, còn lại tạo file main.c hoặc main.cpp
+            const file_name = selectedLanguage === "java" ? "Main.java" : "main." + selectedLanguage;
+
             const response = await toast.promise(
                 githubAPI.commitFile(
                     loginContext?.user.login,
                     targetRepo,
                     problem_id,
-                    "main.cpp",
+                    file_name,
                     code,
                     commitMessage
                 ),
@@ -272,7 +277,7 @@ public class Main {
                         }
                         onChange={(value) => setCode(value)}
                         extensions={[javascript({ jsx: true })]}
-                        height="350px"
+                        height="400px"
                         autoFocus
                     />
                 </div>
@@ -282,7 +287,7 @@ public class Main {
                     </Link>
                     <div className="flex items-center gap-4">
                         <Select value={selectedLanguage} onValueChange={handleChangeLanguage}>
-                            <SelectTrigger className="w-[180px] bg-secondary">
+                            <SelectTrigger className="w-[180px] bg-secondary pointer-events-none">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

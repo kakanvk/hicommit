@@ -34,7 +34,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem } from 'lucide-react';
+import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem, LayoutList } from 'lucide-react';
 import RingProgress from "@/components/ui/ringProcess";
 import { Button } from "@/components/ui/button";
 import CodeArea from "@/components/ui/code-area";
@@ -60,6 +60,14 @@ import {
 } from "@/components/ui/card"
 
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+import {
     ChartConfig,
     ChartContainer,
     ChartLegend,
@@ -68,43 +76,83 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Separator } from "@radix-ui/react-dropdown-menu";
-
-const chartData = [
-    { status: "chrome", visitors: 275, fill: "#22c55e" },
-    { status: "safari", visitors: 200, fill: "#fbbf24" },
-    { status: "firefox", visitors: 187, fill: "#ef4444" }
-]
+import { getSubmissionsByProblemSlug } from "@/service/API/Submission";
+import { useLogin } from "@/service/LoginContext";
 
 const chartConfig = {
-    visitors: {
-        label: "Visitors",
+    quanlity: {
+        label: "Số lượng",
     },
-    chrome: {
+    PASSED: {
         label: "Hoàn thành",
     },
-    safari: {
+    FAILED: {
         label: "Chưa hoàn thành",
     },
-    firefox: {
+    ERROR: {
         label: "Gặp vấn đề",
-    }
+    },
+    COMPILE_ERROR: {
+        label: "Lỗi biên dịch",
+    },
 } satisfies ChartConfig
 
 function Problem() {
 
     const { problem_id } = useParams();
 
+    const loginContext = useLogin();
+
     const [problem, setProblem] = useState<any>();
+    const [submissions, setSubmissions] = useState<any[]>([]);
+    const [selectedType, setSelectedType] = useState("all");
+    const [chartData, setChartData] = useState<any[]>([]);
 
     const handleGetProblem = async () => {
         try {
             const response = await getProblemByIDorSlug(problem_id as any);
             setProblem(response);
-            console.log(response);
+            handleGetSubmissons(response.slug);
         } catch (error) {
             console.log(error);
         }
     }
+
+    const handleGetSubmissons = async (slug: any) => {
+        const data = await getSubmissionsByProblemSlug(slug);
+        setSubmissions(data);
+    }
+
+    const handleBuildChart = () => {
+        let data = [
+            { status: "PASSED", quanlity: 0, fill: "#22c55e" },
+            { status: "FAILED", quanlity: 0, fill: "#fbbf24" },
+            { status: "ERROR", quanlity: 0, fill: "#ef4444" },
+            { status: "COMPILE_ERROR", quanlity: 0, fill: "#d3d3d3" }
+        ]
+        submissions.forEach((submission: any) => {
+            if (selectedType === "all") {
+                data.forEach((item: any) => {
+                    if (item.status === submission.status) {
+                        item.quanlity += 1;
+                    }
+                })
+            } else {
+                if (submission.username === loginContext.user.username) {
+                    data.forEach((item: any) => {
+                        if (item.status === submission.status) {
+                            item.quanlity += 1;
+                        }
+                    })
+                }
+            }
+        })
+        setChartData(data);
+    }
+
+    useEffect(() => {
+        handleBuildChart();
+    }, [submissions, selectedType]);
 
     useEffect(() => {
         handleGetProblem();
@@ -363,7 +411,7 @@ function Problem() {
                         </TabsContent>
                         <TabsContent value="history">
                             <div className="pl-4 py-7 pt-2">
-                                <SubmissionHistory />
+                                <SubmissionHistory problem={problem} />
                             </div>
                         </TabsContent>
                     </Tabs>
@@ -378,32 +426,53 @@ function Problem() {
                 <div className="sticky top-6 w-[270px] 2xl:w-[300px] flex flex-col items-center gap-6">
                     <Card className="flex flex-col w-full bg-zinc-100/70 dark:bg-zinc-900/50">
                         <CardHeader className="items-center pb-0 pt-4">
-                            <CardTitle className="text-xl">Thống kê</CardTitle>
-                            <CardDescription>Tỉ lệ hoàn thành bài tập</CardDescription>
+                            <p className="text-start w-full text-sm mb-1">Tỉ lệ hoàn thành bài tập</p>
+                            <Select onValueChange={setSelectedType} value={selectedType}>
+                                <SelectTrigger className="dark:bg-transparent">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả</SelectItem>
+                                    <SelectItem value="me">Chỉ mình tôi</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </CardHeader>
                         <CardContent className="flex-1 px-2 pb-0">
                             <ChartContainer
                                 config={chartConfig}
-                                className="mx-auto aspect-square w-full"
+                                className="mx-auto aspect-[5/6] w-full"
                             >
-                                <PieChart>
-                                    <ChartTooltip
-                                        cursor={false}
-                                        content={<ChartTooltipContent hideLabel />}
-                                        className="w-[165px]"
-                                    />
-                                    <Pie data={chartData} dataKey="visitors" nameKey="status" />
-                                    <ChartLegend
-                                        content={<ChartLegendContent nameKey="status" />}
-                                        className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"
-                                    />
-                                </PieChart>
+                                {
+                                    // Nếu tổng quantity = 0 thì hiển thị thông báo
+                                    chartData.reduce((acc, cur) => acc + cur.quanlity, 0) === 0 ?
+                                        <div className="flex flex-col items-center justify-center h-full">
+                                            <LayoutList className="w-10 h-10 opacity-30 mb-3" />
+                                            <p className="text-center text-sm dark:text-zinc-300 opacity-60">Chưa có dữ liệu</p>
+                                        </div> :
+                                        <PieChart>
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={<ChartTooltipContent hideLabel />}
+                                                className="w-[165px]"
+                                            />
+                                            <Pie
+                                                data={chartData}
+                                                dataKey="quanlity"
+                                                nameKey="status"
+                                            />
+                                            <ChartLegend
+                                                content={<ChartLegendContent nameKey="status" />}
+                                                className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"
+                                            />
+                                        </PieChart>
+                                }
                             </ChartContainer>
                         </CardContent>
                     </Card>
                     <div className="w-full flex flex-col gap-2">
                         <h3 className="font-medium"><Tag className="w-[16px] inline mr-1 text-primary" />Tags:</h3>
                         {
+                            problem?.tags.length > 0 &&
                             <div className="flex gap-1 gap-y-1.5 flex-wrap">
                                 {problem?.tags.map((tag: any, index: any) => (
                                     <Badge key={index} variant="outline" className="capitalize text-[12px] p-0.5 px-2.5 font-normal dark:font-light leading-5">{tag}</Badge>
