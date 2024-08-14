@@ -184,10 +184,10 @@ function CourseManager() {
                                                 <div className="w-full flex items-end justify-between">
                                                     <div className="flex gap-2 items-center">
                                                         <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                            {course?.labs || 12} LAB
+                                                            {course?.problem_count} bài tập
                                                         </Badge>
                                                         <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                            <UsersRound className="h-3 w-3 mr-2" />{course.students || 123}
+                                                            <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
                                                         </Badge>
                                                         {
                                                             course?.completed &&

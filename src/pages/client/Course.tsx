@@ -238,7 +238,7 @@ function Course() {
                                                     <DialogTrigger>
                                                         <Badge className="text-green-600 dark:text-green-500 flex gap-1.5 border-primary px-2 py-0 rounded-md hover:bg-secondary cursor-pointer ml-2" variant="outline">
                                                             <UsersRound className="w-3.5" />
-                                                            <span>34</span>
+                                                            <span>{courseData?.members?.length}</span>
                                                         </Badge>
                                                     </DialogTrigger>
                                                 </TooltipTrigger>
@@ -252,7 +252,7 @@ function Course() {
                                                 <DialogTitle className="mb-2 flex items-center">
                                                     Danh sách tham gia
                                                     <Badge className="w-fit text-green-600 dark:text-green-500 flex gap-1.5 border-primary px-1.5 py-0 rounded-sm ml-2 translate-y-[1px]" variant="outline">
-                                                        <span>34</span>
+                                                        <span>{courseData?.members?.length}</span>
                                                     </Badge>
                                                 </DialogTitle>
                                                 <DialogDescription>
@@ -260,48 +260,16 @@ function Course() {
                                                         <CommandInput placeholder="Tìm kiếm..." />
                                                         <CommandList className="mt-2">
                                                             <CommandEmpty>Không có kết quả phù hợp.</CommandEmpty>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/17537969?s=80&v=4" />
-                                                                </Avatar>
-                                                                baoanth
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/93561031?v=4" />
-                                                                </Avatar>
-                                                                kakanvk
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/112191296?v=4" />
-                                                                </Avatar>
-                                                                vhiep
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/93963527?v=4" />
-                                                                </Avatar>
-                                                                nguyenducmanh
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/94955437?v=4" />
-                                                                </Avatar>
-                                                                lntaivn
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/116266818?v=4" />
-                                                                </Avatar>
-                                                                thaihunghung
-                                                            </CommandItem>
-                                                            <CommandItem className="gap-2.5 p-2.5 px-3 mb-1">
-                                                                <Avatar>
-                                                                    <AvatarImage className="w-6 rounded-full" src="https://avatars.githubusercontent.com/u/92458482?v=4" />
-                                                                </Avatar>
-                                                                nnsang1309
-                                                            </CommandItem>
+                                                            {
+                                                                courseData?.members && courseData?.members.map((member: any) => (
+                                                                    <CommandItem className="gap-2.5 p-2.5 px-3 mb-1" key={member?.id}>
+                                                                        <Avatar>
+                                                                            <AvatarImage className="w-6 rounded-full" src={member?.avatar_url} />
+                                                                        </Avatar>
+                                                                        {member?.username}
+                                                                    </CommandItem>
+                                                                ))
+                                                            }
                                                         </CommandList>
                                                     </Command>
                                                 </DialogDescription>
@@ -355,7 +323,10 @@ function Course() {
 
                     <div className="flex flex-col gap-2">
                         <span className="text-sm font-medium text-green-600 dark:text-green-500">Mô tả khoá học:</span>
-                        <p className="opacity-90 text-justify">{courseData?.description}</p>
+                        <div
+                            className="ck-content hicommit-content leading-7 text-justify flex-1"
+                            dangerouslySetInnerHTML={{ __html: courseData?.description }}
+                        />
                     </div>
 
                     <div className="">
@@ -400,7 +371,7 @@ function Course() {
                     courseData.isJoined ?
                         <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
                             <span className="font-semibold">Tiến độ khoá học</span>
-                            <RingProgress radius={90} stroke={12} progress={((mergedProblems.filter((problem: any) => problem.status === "PASSED").length / mergedProblems.length) * 100).toFixed(0) as any} textSize={28} />
+                            <RingProgress radius={90} stroke={12} progress={mergedProblems.length > 0 ? ((mergedProblems.filter((problem: any) => problem.status === "PASSED").length / mergedProblems.length) * 100).toFixed(0) : 0 as any} textSize={28} />
                             <div className="w-full font-medium flex flex-col gap-4 mt-5">
                                 <div className="flex gap-3 justify-start items-center">
                                     <div className="flex items-center gap-2.5">

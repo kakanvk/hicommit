@@ -36,12 +36,12 @@ function SubmissionHistory(props: any) {
 
     const { problem } = props;
 
-    const { problem_id } = useParams();
+    const { problem_id } = useParams<{ problem_id: string }>();
 
     const [mySubmissions, setMySubmissions] = useState<any[]>([]);
 
     const handleGetMySubmissons = async () => {
-        const data = await getMySubmissionsByProblemSlug(problem?.slug);
+        const data = await getMySubmissionsByProblemSlug(problem_id as any);
         console.log(data);
         setMySubmissions(data);
     }
@@ -114,7 +114,7 @@ function SubmissionHistory(props: any) {
                         </GitGraphBody>
                     </GitGraph> :
                     <div className="w-full flex justify-center py-10 bg-secondary/30 dark:bg-secondary/10 border rounded-lg">
-                        <p className="text-center">Bạn chưa từng nộp bài tập này. <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
+                        <p className="text-center">Bạn chưa từng nộp bài tập này (hoặc đang trong hàng đợi). <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
                     </div>
             }
             <div>

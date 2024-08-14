@@ -145,6 +145,10 @@ function SubmitProblem() {
 
             console.log(response);
 
+            setTimeout(() => {
+                navigate(`/problem/${problem_id}?tab=history`);
+            }, 1000);
+
             setLoading(false);
         } catch (error) {
             setLoading(false);

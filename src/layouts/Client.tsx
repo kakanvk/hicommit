@@ -28,6 +28,8 @@ import CreatePost from "@/pages/client/CreatePost";
 import Courses from "@/pages/client/Courses";
 import ReadPost from "@/pages/client/ReadPost";
 import CreateCourse from "@/pages/teacher/CreateCourse";
+import EditCourse from "@/pages/teacher/EditCourse";
+import EditProblem from "@/pages/teacher/EditProblem";
 
 function ClientLayout() {
 
@@ -99,7 +101,9 @@ function ClientLayout() {
                                                 <Route path="create" element={<CreateCourse />} />
                                                 <Route path=":course_id">
                                                     <Route path="" element={<CourseManagerByID />} />
+                                                    <Route path="edit" element={<EditCourse />} />
                                                     <Route path="problem/create" element={<CreateProblem />} />
+                                                    <Route path="problem/:problem_id/edit" element={<EditProblem />} />
                                                 </Route>
                                             </Route>
                                             <Route path="analysis" element={<Analysis />} />

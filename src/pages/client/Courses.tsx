@@ -286,10 +286,10 @@ function Courses() {
                                                     <div className="flex flex-wrap gap-2 mt-3">
                                                         <Badge variant="secondary" className="text-[12px] p-1 px-3">
                                                             <GitMerge className="w-3 h-3 mr-1.5" />
-                                                            {course?.labs || 12} bài tập
+                                                            {course?.problem_count} bài tập
                                                         </Badge>
                                                         <Badge variant="secondary" className="text-[11.5px] p-1 px-3">
-                                                            <UsersRound className="h-3 w-3 mr-2" />{course?.students || 123}
+                                                            <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
                                                         </Badge>
                                                     </div>
                                                 </div>
@@ -415,7 +415,7 @@ function Courses() {
                                                             <div className="flex flex-wrap gap-2 mt-3">
                                                                 <Badge variant="secondary" className="text-[12px] p-1 px-3">
                                                                     <GitMerge className="w-3 h-3 mr-1.5" />
-                                                                    {course?.labs || 12} bài tập
+                                                                    {course?.problem_count} bài tập
                                                                 </Badge>
                                                                 <Badge variant="secondary" className="text-[11.5px] p-1 px-3">
                                                                     <UsersRound className="h-3 w-3 mr-2" />{course?.students || 123}
@@ -423,27 +423,9 @@ function Courses() {
                                                             </div>
                                                         </div>
                                                         <div className="mt-5 flex gap-2">
-                                                            <Button className="flex-1">
-                                                                Tham gia
+                                                            <Button className="flex-1" variant='secondary'>
+                                                                Tiếp tục khoá học
                                                             </Button>
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger>
-                                                                    <Button size="icon" variant="secondary">
-                                                                        <EllipsisVertical className="w-4 h-4" />
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent side="top" align="end" className="w-[160px] dark:bg-zinc-900">
-                                                                    <DropdownMenuLabel>Tuỳ chọn</DropdownMenuLabel>
-                                                                    <DropdownMenuSeparator />
-                                                                    <DropdownMenuItem>
-                                                                        <Braces className="mr-2 w-4 h-4" />Xem chi tiết
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem>
-                                                                        <Star className="mr-2 w-4 h-4" />Đánh dấu
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-
                                                         </div>
                                                     </div>
                                                 </div>

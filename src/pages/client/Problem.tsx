@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 import {
     Breadcrumb,
@@ -99,7 +99,11 @@ const chartConfig = {
 
 function Problem() {
 
-    const { problem_id } = useParams();
+    const { problem_id } = useParams<{ problem_id: string }>();
+
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const tab = queryParams.get('tab');
 
     const loginContext = useLogin();
 
@@ -220,7 +224,7 @@ function Problem() {
                             </TooltipProvider>
                         </div>
                     </div>
-                    <Tabs defaultValue="content" className="w-full">
+                    <Tabs defaultValue={tab || "content" as any} className="w-full">
                         <TabsList className="bg-transparent justify-start rounded-none pb-0 px-0">
                             <TabsTrigger
                                 value="content"
@@ -238,7 +242,7 @@ function Problem() {
                                 value="history"
                                 className="border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
                             >
-                                <History className="w-4 mr-2" />Lịch sử nộp bài
+                                <History className="w-4 mr-2" />Bài nộp của tôi
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="content">
@@ -463,8 +467,7 @@ function Problem() {
                                         <PieChart>
                                             <ChartTooltip
                                                 cursor={false}
-                                                content={<ChartTooltipContent hideLabel />}
-                                                className="w-[165px]"
+                                                content={<ChartTooltipContent hideLabel className="w-[165px]"/>}
                                             />
                                             <Pie
                                                 data={chartData}

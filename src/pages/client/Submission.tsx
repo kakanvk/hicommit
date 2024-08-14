@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import ReactDOMServer from 'react-dom/server';
 
 import {
     Breadcrumb,
@@ -41,7 +42,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode, Bug, SquareArrowOutUpRight } from "lucide-react";
+import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode, Bug, SquareArrowOutUpRight, Copy, Check } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
 import RingProgress from "@/components/ui/ringProcess";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +59,7 @@ import { vi } from "date-fns/locale";
 import CodeArea from "@/components/ui/code-area";
 
 import { useSocket } from "@/service/SocketContext";
+import toast from "react-hot-toast";
 
 const timeAgo = (isoDate: any) => {
     try {
@@ -79,6 +81,55 @@ function Result() {
 
     const [code, setCode] = useState('');
     const [submission, setSubmission] = useState<any>({});
+
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopyText = () => {
+        const textToCopy = ReactDOMServer.renderToStaticMarkup(<>{code}</>);
+
+        // Tạo một phần tử div ẩn để chứa nội dung cần copy
+        const hiddenDiv = document.createElement('div');
+        hiddenDiv.innerHTML = textToCopy;
+
+        hiddenDiv.style.position = 'absolute';
+        hiddenDiv.style.left = '-9999px';
+        hiddenDiv.style.whiteSpace = 'pre-wrap';
+
+        document.body.appendChild(hiddenDiv);
+
+        // Lựa chọn nội dung trong div ẩn
+        const range = document.createRange();
+        range.selectNode(hiddenDiv);
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+
+        // Copy nội dung đã chọn vào clipboard
+        try {
+            document.execCommand('copy');
+            toast.success('Đã copy vào bộ nhớ tạm', {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+
+            setIsCopied(true);
+
+            // Ẩn nút check sau 3 giây
+            setTimeout(() => {
+                setIsCopied(false);
+            }, 2000);
+
+        } catch (err) {
+            console.error('Copy failed: ', err);
+        }
+
+        // Xóa phần tử div ẩn
+        document.body.removeChild(hiddenDiv);
+    };
 
     const getSubmission = async () => {
         const submission = await getSubmissionsByID(submission_id as string);
@@ -216,36 +267,43 @@ function Result() {
                                                     </Badge>
                                                 </DialogTitle>
                                             </DialogHeader>
-                                            <p className="text-sm mt-2">
-                                                Commit
-                                                <Badge className="px-1.5 rounded-sm mx-1 font-medium" variant="secondary">
-                                                    <span className="truncate max-w-[400px]">{submission?.commit}</span>
-                                                </Badge>
-                                            </p>
-                                            <div className="w-full border rounded-lg overflow-hidden">
-                                                <CodeMirror
-                                                    value={code}
-                                                    placeholder="Please enter your code here..."
-                                                    readOnly={true}
-                                                    theme={theme === "dark" ?
-                                                        githubDarkInit({
-                                                            settings: {
-                                                                background: 'rgb(15 15 15)',
-                                                            }
-                                                        }) :
-                                                        githubLightInit({
-                                                            settings: {
-                                                                gutterBackground: "rgb(235 235 235)",
-                                                                background: 'rgb(248 248 248)',
-                                                                lineHighlight: '#8a91991a',
-                                                            }
-                                                        })
+                                            <div className="relative group/code mt-2">
+                                                <div className="w-full border rounded-lg overflow-hidden z-19">
+                                                    <CodeMirror
+                                                        value={code}
+                                                        placeholder="Please enter your code here..."
+                                                        readOnly={true}
+                                                        theme={theme === "dark" ?
+                                                            githubDarkInit({
+                                                                settings: {
+                                                                    background: 'rgb(15 15 15)',
+                                                                }
+                                                            }) :
+                                                            githubLightInit({
+                                                                settings: {
+                                                                    gutterBackground: "rgb(235 235 235)",
+                                                                    background: 'rgb(248 248 248)',
+                                                                    lineHighlight: '#8a91991a',
+                                                                }
+                                                            })
+                                                        }
+                                                        onChange={(value) => setCode(value)}
+                                                        extensions={[javascript({ jsx: true })]}
+                                                        height="350px"
+                                                        autoFocus
+                                                    />
+                                                </div>
+                                                <Badge
+                                                    className='invisible group-hover/code:visible duration-200 absolute top-1 right-1 font-medium rounded-md border bg-background/50 cursor-pointer py-[3px] scale-90'
+                                                    variant="outline"
+                                                    onClick={() => handleCopyText()}
+                                                >
+                                                    {
+                                                        isCopied ?
+                                                            <Check className='w-[15px] translate-x-[0.5px]' /> :
+                                                            <Copy className='w-[15px] translate-x-[0.5px]' />
                                                     }
-                                                    onChange={(value) => setCode(value)}
-                                                    extensions={[javascript({ jsx: true })]}
-                                                    height="350px"
-                                                    autoFocus
-                                                />
+                                                </Badge>
                                             </div>
                                             <DialogFooter>
                                                 <DialogClose>
@@ -567,7 +625,7 @@ function Result() {
                             </Accordion>
                             {
                                 submission?.status?.toUpperCase() === "PASSED" &&
-                                <Button size="sm" className="border gap-2 bg-green-600 dark:bg-green-700 hover:bg-green-600">
+                                <Button size="sm" className="border gap-2 bg-green-600 hover:bg-green-600">
                                     <i className="fa-solid fa-circle-check"></i>
                                     <span className="font-semibold">Kết quả chính xác</span>
                                 </Button>

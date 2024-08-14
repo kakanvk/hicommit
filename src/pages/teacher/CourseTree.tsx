@@ -154,13 +154,17 @@ const CourseTree = (props: any) => {
         return (
             node.isLeaf ?
                 <div ref={dragHandle as any} className="h-[50px] w-full flex items-center">
-                    <Link className="w-full hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work" to={`/problem/${node.data.slug ? node.data.slug : node.data.id}`}>
+                    <div className="w-full hover:bg-zinc-100 cursor-move dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work">
                         <h3 className="flex items-start gap-3 flex-1">
-                            <GripVertical className="w-5 h-5 cursor-move opacity-70 translate-y-[2.5px]" />
+                            <GripVertical className="w-5 h-5 opacity-70 translate-y-[2.5px]" />
                             <span className="flex-1 line-clamp-1">{node.data.name}</span>
                         </h3>
-                        <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                    </Link>
+                        <Link to={`problem/${node.data.id}/edit`} className='cursor-pointer w-6 h-6 invisible group-hover/work:visible'>
+                            <Button size="icon" variant="ghost" className="w-full h-full">
+                                <Pencil className="w-[13px]" />
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
                 :
                 <div className="w-full mt-2 flex items-center justify-between group/unit cursor-pointer pb-1 gap-4">

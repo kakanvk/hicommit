@@ -24,11 +24,19 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { KeyRound, Plus, TriangleAlert, Upload, X } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, KeyRound, MoveLeft, Plus, TriangleAlert, Upload, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import Editor from "@/components/ui/editor";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 import Cropper from 'react-easy-crop';
 import { se } from "date-fns/locale";
@@ -39,10 +47,19 @@ import { set } from "date-fns";
 import { createPost } from "@/service/API/Post";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { createCourse } from "@/service/API/Course";
+import { createCourse, getCourseByIDForAdmin, updateCourse } from "@/service/API/Course";
 import toast from 'react-hot-toast';
+import { DialogClose } from "@radix-ui/react-dialog";
 
-function CreateCourse() {
+import Editor from "@/components/ui/editor";
+
+function EditCourse() {
+
+    const { course_id } = useParams<{ course_id: string }>();
+
+    const [course, setCourse] = useState<any>({});
+
+    const navigate = useNavigate();
 
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -51,12 +68,23 @@ function CreateCourse() {
     const [thumbnail, setThumbnail] = useState<string>('');
     const [showCropModal, setShowCropModal] = useState<boolean>(false);
 
-    const [isPublicCourse, setIsPublicCourse] = useState(false);
-    const [enrolKey, setEnrolKey] = useState("");
-
-    const handleChangePublicCourse = () => {
-        setIsPublicCourse(!isPublicCourse);
+    const getCourseData = async () => {
+        try {
+            const data = await getCourseByIDForAdmin(course_id as any);
+            setCourse(data);
+            setName(data.name);
+            setDescription(data.description);
+            setClassName(data.class_name);
+            setSlug(data.slug);
+            setThumbnail(data.thumbnail);
+        } catch (error) {
+            console.error('Error fetching course:', error);
+        }
     }
+
+    useEffect(() => {
+        getCourseData();
+    }, []);
 
     // For image cropping
     const [uploadedImage, setUploadedImage] = useState<string>('');
@@ -110,28 +138,25 @@ function CreateCourse() {
         setCroppedAreaPixels(croppedAreaPixels)
     }
 
-    const handleCreateCourse = async () => {
+    const handleUpdateCourse = async () => {
 
         const data = {
             name,
             description,
             slug,
             thumbnail,
-            class_name: className,
-            join_key: isPublicCourse ? enrolKey : null
+            class_name: className
         }
-
-        // console.log(data);
 
         try {
             // Call createPost API
             const response = await toast.promise(
-                createCourse(data),
+                updateCourse(course_id as any, data),
                 {
                     loading: 'Đang lưu...',
-                    success: 'Tạo khoá học thành công',
-                    error: 'Tạo khoá học thất bại'
-                }, 
+                    success: 'Cập nhật khoá học thành công',
+                    error: 'Cập nhật khoá học thất bại'
+                },
                 {
                     style: {
                         borderRadius: '8px',
@@ -143,12 +168,25 @@ function CreateCourse() {
                 });
             console.log(response);
             // Chờ 1s rồi chuyển hướng
-            setTimeout(() => {
-                window.location.href = `/course-manager`;
-            }, 1000);
+            navigate(`/course-manager/${course_id}`);
+
         } catch (error) {
             console.error('Error creating post:', error);
         }
+    }
+
+    const handleCancelUpdate = () => {
+        toast.error('Đã huỷ cập nhật khoá học',
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+        navigate(`/course-manager/${course_id}`);
     }
 
     return (
@@ -162,7 +200,13 @@ function CreateCourse() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        Tạo khoá học mới
+                        <BreadcrumbLink asChild>
+                            <Link to={`/course-manager/${course?.id}`}>{course?.name}</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        Chỉnh sửa khoá học
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -176,24 +220,38 @@ function CreateCourse() {
                         <Input
                             placeholder="Nhập tiêu đề khoá học"
                             className="placeholder:italic "
+                            spellCheck={false}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
                     <div className="flex gap-2 flex-col">
                         <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mô tả khoá học</h4>
-                        <AutosizeTextarea
+                        {/* <AutosizeTextarea
                             placeholder="Nhập mô tả khoá học"
                             className="placeholder:italic"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                        />
+                            spellCheck={false}
+                        /> */}
+                        {
+                            course?.description &&
+                            <Editor
+                                value={description}
+                                onChange={(event: any, editor: any) => {
+                                    const data = editor.getData();
+                                    setDescription(data);
+                                }}
+                                placeholder="Nhập nội dung mô tả"
+                            />
+                        }
                     </div>
                     <div className="flex gap-2 flex-col">
                         <h4 className="font-medium">Mã lớp</h4>
                         <Input
                             placeholder="Nhập mã lớp của khoá học này"
                             className="placeholder:italic "
+                            spellCheck={false}
                             value={className}
                             onChange={(e) => {
                                 setClassName(e.target.value)
@@ -207,39 +265,16 @@ function CreateCourse() {
                             2. Thông tin chi tiết
                         </h1>
                         <div className="flex gap-2 flex-col">
-                            <h4 className="font-medium">Tuỳ chỉnh đường dẫn (URL)</h4>
+                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tuỳ chỉnh đường dẫn (URL)</h4>
                             <Input
                                 placeholder="Nhập đường dẫn tùy chỉnh"
                                 className="placeholder:italic"
+                                spellCheck={false}
                                 value={slug}
                                 onChange={(e) => {
                                     setSlug(e.target.value);
                                 }}
                             />
-                        </div>
-                        <div className="flex flex-col gap-4 border p-4 px-5 w-[50%] min-w-[600px] rounded-md bg-secondary/20">
-                            <div className="flex gap-5 justify-between items-center">
-                                <Label className="flex-1 flex flex-col gap-1 cursor-pointer" htmlFor="public-course-switch">
-                                    <h3 className="text-base"><i className="fa-solid fa-triangle-exclamation mr-2 text-sm text-amber-500/80"></i>Hạn chế truy cập</h3>
-                                    <p className="text-sm opacity-50 font-medium">Chỉ những ai có mật khẩu mới được tham gia khoá học này.</p>
-                                </Label>
-                                <Switch defaultChecked={isPublicCourse} onCheckedChange={handleChangePublicCourse} id="public-course-switch" />
-                            </div>
-                            {
-                                isPublicCourse &&
-                                <>
-                                    <div className="relative">
-                                        <KeyRound className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground ml-1" />
-                                        <Input
-                                            type="search"
-                                            placeholder="Đặt mật khẩu tham gia"
-                                            className="w-full pl-11 bg-transparent"
-                                            value={enrolKey}
-                                            onChange={e => setEnrolKey(e.target.value)}
-                                        />
-                                    </div>
-                                </>
-                            }
                         </div>
                     </div>
                 </div>
@@ -250,7 +285,7 @@ function CreateCourse() {
                         {
                             thumbnail ?
                                 <div className="relative w-[250px] aspect-[3/2]">
-                                    <img src={thumbnail} alt="Thumbnail" className="object-cover w-full h-full rounded-md border-secondary/50 border" />
+                                    <img src={thumbnail} alt="Thumbnail" className="object-cover w-full h-full rounded-lg border-secondary/50 border" />
                                     <Button variant="secondary" size="icon" className="absolute top-2 right-2 rounded-full w-6 h-6" onClick={() => setThumbnail('')}>
                                         <X className="w-4 h-4" />
                                     </Button>
@@ -299,10 +334,49 @@ function CreateCourse() {
                         </AlertDialog>
                     </div>
                 </div>
-                <Button className="w-fit px-5 mt-2" onClick={() => handleCreateCourse()}>Tạo khoá học</Button>
+                <div className="mt-2 flex gap-3">
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit px-5" size="lg">Cập nhật khoá học</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Cập nhật khoá học này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Các thông tin đã chỉnh sửa sẽ được lưu lại.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <Button onClick={() => handleUpdateCourse()}>Cập nhật</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit px-5" variant="ghost" size="lg">Huỷ thay đổi</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Huỷ cập nhật khoá học này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Mọi thay đổi chưa được lưu lại, bạn có chắc muốn huỷ cập nhật.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <Button variant="destructive" onClick={() => handleCancelUpdate()}>Huỷ cập nhật</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
         </div >
     );
 };
 
-export default CreateCourse;
+export default EditCourse;

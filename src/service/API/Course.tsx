@@ -81,6 +81,66 @@ const updateUnits = async (courseId: string, units: any) => {
     }
 }
 
+const updateKey = async (courseId: string, key: any) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}/key`, key);
+        return response.data;
+    } catch (error) {
+        // console.error('Error updating units:', error);
+        throw error;
+    }
+}
+
+const togglePublishCourse = async (courseId: string) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}/publish`);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating units:', error);
+        throw error;
+    }
+}
+
+const togglePublicCourse = async (courseId: string) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}/public`);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating units:', error);
+        throw error;
+    }
+}
+
+const toggleAutoJoin = async (courseId: string) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}/auto_join`);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating units:', error);
+        throw error;
+    }
+}
+
+const updateCourse = async (courseId: string, course: any) => {
+    try {
+        const response = await axiosInstance.put(`/courses/${courseId}`, course);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating course:', error);
+        throw error;
+    }
+}
+
+const deleteCourseByID = async (courseId: string) => {
+    try {
+        const response = await axiosInstance.delete(`/courses/${courseId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting course:', error);
+        throw error;
+    }
+}
+
 export {
     getCourses,
     createCourse,
@@ -89,5 +149,11 @@ export {
     joinToCourse,
     getJoinedCourses,
     getCourseByIDForAdmin,
-    updateUnits
+    updateUnits,
+    updateKey,
+    togglePublishCourse,
+    togglePublicCourse,
+    toggleAutoJoin,
+    updateCourse,
+    deleteCourseByID
 };
