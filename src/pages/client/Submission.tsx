@@ -42,7 +42,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode, Bug, SquareArrowOutUpRight, Copy, Check } from "lucide-react";
+import { CalendarDays, Clock, Code, CornerDownRight, ArrowLeft, RefreshCcw, TriangleAlert, SquareCode, Bug, SquareArrowOutUpRight, Copy, Check, ArrowRight } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
 import RingProgress from "@/components/ui/ringProcess";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -308,6 +308,11 @@ function Result() {
                                             <DialogFooter>
                                                 <DialogClose>
                                                     <Button variant="secondary">Đóng</Button>
+                                                </DialogClose>
+                                                <DialogClose asChild>
+                                                    <Link to={`/problem/${submission?.problem?.slug}/submit`}>
+                                                        <Button>Nộp lại</Button>
+                                                    </Link>
                                                 </DialogClose>
                                             </DialogFooter>
                                         </DialogContent>

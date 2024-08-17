@@ -1,6 +1,7 @@
+import ReactHtmlParser from "react-html-parser";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Filter, MoveRight, Plus, RotateCcw, Search, UsersRound, X } from "lucide-react";
+import { Check, ChevronRight, Eye, Filter, MoveRight, Plus, RotateCcw, Search, UsersRound, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -33,6 +34,12 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui
 import { useEffect, useState } from "react";
 import { getCreatedCourses } from "@/service/API/Course";
 import { formatTimeAgo } from "@/service/DateTimeService";
+
+function transform(node: any) {
+    if (node.name === 'figure' || node.name === 'table') {
+        return null;
+    }
+}
 
 function CourseManager() {
 
@@ -175,24 +182,34 @@ function CourseManager() {
                                                     <h2 className="font-semibold line-clamp-2">
                                                         {
                                                             course.class_name &&
-                                                            <Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2px] font-bold">{course?.class_name}</Badge>
+                                                            <Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2.5px] font-bold">{course?.class_name}</Badge>
                                                         }
-                                                        {course?.name}
+                                                        <span className="mr-2 text-[17px]">{course?.name}</span>
+                                                        {
+                                                            course.public &&
+                                                            <Badge variant="outline" className="text-[11.5px] p-0 px-2 pr-3 font-normal leading-5">
+                                                                <Eye className="h-3 w-3 mr-1.5" />Công khai
+                                                            </Badge>
+                                                        }
                                                     </h2>
-                                                    <p className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-2">{course?.description}</p>
+                                                    <p
+                                                        className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-2"
+                                                    >
+                                                        {ReactHtmlParser(course?.description, { transform })}
+                                                    </p>
                                                 </div>
                                                 <div className="w-full flex items-end justify-between">
                                                     <div className="flex gap-2 items-center">
                                                         <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                            {course?.problem_count} bài tập
+                                                            {course?.problem_count > 0 ? course?.problem_count : "Chưa có"} bài tập
                                                         </Badge>
                                                         <Badge variant="secondary" className="text-[11px] p-1 px-3">
                                                             <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
                                                         </Badge>
                                                         {
-                                                            course?.completed &&
-                                                            <Badge variant="secondary" className="text-[11px] p-1 px-3 bg-red-500/20 dark:bg-red-500/45 text-red-600 dark:text-white hover:bg-red-500/20">
-                                                                Đã kết thúc
+                                                            course?.publish &&
+                                                            <Badge className="text-[11px] p-1 px-3">
+                                                                <Check className="w-3.5 h-3.5 mr-1.5"/>Đã công bố
                                                             </Badge>
                                                         }
                                                     </div>

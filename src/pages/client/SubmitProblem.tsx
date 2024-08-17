@@ -146,7 +146,7 @@ function SubmitProblem() {
             console.log(response);
 
             setTimeout(() => {
-                navigate(`/problem/${problem_id}?tab=history`);
+                navigate(`/problem/${problem_id}?tab=history&status=pending`);
             }, 1000);
 
             setLoading(false);

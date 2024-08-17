@@ -44,7 +44,6 @@ const handleLogout = async () => {
     try {
         await signOut(auth);
         await logout();
-        window.location.reload();
     } catch (err) {
         console.error(err);
     }

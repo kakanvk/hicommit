@@ -46,6 +46,11 @@ function Header() {
 
     const [showSettingDialog, setShowSettingDialog] = useState(false);
 
+    const handleLogoutClick = async () => {
+        await handleLogout();
+        window.location.reload();
+    }
+
     return (
         <div className="flex gap-[10%] items-center justify-between p-3 px-6 border-b dark:bg-zinc-950">
             <div className="flex text-2xl font-black gap-[2px]">
@@ -150,7 +155,7 @@ function Header() {
                             <DialogClose asChild>
                                 <Button variant="outline" size="sm">Đóng</Button>
                             </DialogClose>
-                            <Button variant="destructive" size="sm" onClick={() => handleLogout()}>Đăng xuất</Button>
+                            <Button variant="destructive" size="sm" onClick={() => handleLogoutClick()}>Đăng xuất</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

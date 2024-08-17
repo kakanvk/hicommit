@@ -95,7 +95,7 @@ const GitGraphNode: React.FC<GitGraphNodeProps> = ({ children, className, ref, e
     return (
         <div className={`flex flex-col gap-2 relative ${end ? "translate-y-[-2px] py-3.5 pl-[calc(2rem+2px)]" : "border-l-2 py-3 pl-8"}`}>
             <div className={`absolute ${end ? "-left-0" : "-left-0.5"} top-0.5 w-7 h-[50%] border-b-2 border-l-2 rounded-bl-xl`}>
-                <CircleDot className="w-[12px] h-[12px] stroke-[4.5] fa-solid fa-circle text-primary absolute bottom-0 right-0 translate-x-[100%] translate-y-[50%]" />
+                <CircleDot className="z-20 w-[12px] h-[12px] stroke-[4.5] fa-solid fa-circle text-primary absolute bottom-0 right-0 translate-x-[100%] translate-y-[50%]" />
             </div>
             <div
                 className={cn(className)}

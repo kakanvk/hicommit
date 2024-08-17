@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from './firebase';
+import { auth, handleLogout } from './firebase';
 import { login } from './API/Auth';
 import { Octokit } from 'octokit';
 import CryptoJS from 'crypto-js';
@@ -42,6 +42,7 @@ export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
                 } catch (error) {
                     console.error('Error fetching repositories:', error);
+                    await handleLogout();
                     setLoading(false);
                 }
             } else {

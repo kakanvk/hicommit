@@ -21,6 +21,16 @@ const getProblemByIDorSlug = async (slug: string) => {
     }
 }
 
+const getProblemByIDForAdmin = async (id: string) => {
+    try {
+        const response = await axiosInstance.get(`/problems/admin/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting problem:', error);
+        throw error;
+    }
+}
+
 const createProblem = async (data: any) => {
     try {
         const response = await axiosInstance.post(`/problems/create`, data);
@@ -31,9 +41,9 @@ const createProblem = async (data: any) => {
     }
 }
 
-const updateProblem = async (data: any) => {
+const updateProblem = async (id: string, data: any) => {
     try {
-        const response = await axiosInstance.put(`/problems/update`, data);
+        const response = await axiosInstance.put(`/problems/${id}`, data);
         return response.data;
     } catch (error) {
         console.error('Error updating problem:', error);
@@ -51,4 +61,11 @@ const deleteProblemByID = async (id: string) => {
     }
 }
 
-export { getProblems, createProblem, getProblemByIDorSlug, updateProblem, deleteProblemByID };
+export {
+    getProblems,
+    createProblem,
+    getProblemByIDorSlug,
+    updateProblem,
+    deleteProblemByID,
+    getProblemByIDForAdmin
+};

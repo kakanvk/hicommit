@@ -34,6 +34,13 @@ import { Link } from "react-router-dom";
 import { toggleFavouriteCourse } from "@/service/API/User";
 import toast from "react-hot-toast";
 import { useLogin } from "@/service/LoginContext";
+import ReactHtmlParser from "react-html-parser";
+
+function transform(node: any) {
+    if (node.name === 'figure' || node.name === 'table') {
+        return null;
+    }
+}
 
 function Courses() {
 
@@ -282,7 +289,9 @@ function Courses() {
                                                         }
                                                         {course?.name}
                                                     </Link>
-                                                    <p className="text-sm opacity-50 dark:font-light line-clamp-2">{course?.description}</p>
+                                                    <p className="text-sm opacity-50 dark:font-light line-clamp-2">
+                                                        {ReactHtmlParser(course?.description, { transform })}
+                                                    </p>
                                                     <div className="flex flex-wrap gap-2 mt-3">
                                                         <Badge variant="secondary" className="text-[12px] p-1 px-3">
                                                             <GitMerge className="w-3 h-3 mr-1.5" />
@@ -411,7 +420,7 @@ function Courses() {
                                                                 }
                                                                 {course?.name}
                                                             </Link>
-                                                            <p className="text-sm opacity-50 dark:font-light line-clamp-2">{course?.description}</p>
+                                                            <p className="text-sm opacity-50 dark:font-light line-clamp-2">{ReactHtmlParser(course?.description, { transform })}</p>
                                                             <div className="flex flex-wrap gap-2 mt-3">
                                                                 <Badge variant="secondary" className="text-[12px] p-1 px-3">
                                                                     <GitMerge className="w-3 h-3 mr-1.5" />

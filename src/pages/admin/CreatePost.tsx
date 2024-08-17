@@ -34,7 +34,7 @@ import Cropper from 'react-easy-crop';
 import { se } from "date-fns/locale";
 import Loader2 from "@/components/ui/loader2";
 
-import getCroppedImg from "./cropImage";
+import getCroppedImg from "../client/cropImage";
 import { set } from "date-fns";
 import { createPost } from "@/service/API/Post";
 import toast from "react-hot-toast";
@@ -146,7 +146,7 @@ function CreatePost() {
             createPost(data),
             {
                 loading: 'Đang tạo bài viết...',
-                success: 'Tạo bài viết thành công, bài viết sẽ hiển thị sau khi được duyệt',
+                success: 'Tạo bài viết thành công',
                 error: 'Tạo bài viết không thành công, hãy thử lại'
             },
             {
@@ -156,22 +156,26 @@ function CreatePost() {
                     color: '#fff',
                     paddingLeft: '15px',
                     fontFamily: 'Plus Jakarta Sans',
-                    maxWidth: '700px',
+                    maxWidth: '400px',
                 }
             });
-
+            
         setTimeout(() => {
-            navigate('/forum');
+            navigate('/admin/posts');
         }, 500);
     }
 
     return (
-        <div className="CreatePost p-6 px-8 flex flex-col gap-8">
+        <div className="CreatePost p-5 pl-2 flex flex-col gap-8 pb-10">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
+                        Quản trị
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/forum">Diễn đàn</Link>
+                            <Link to="/admin/posts">Quản lý bài viết</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -190,6 +194,7 @@ function CreatePost() {
                         <Input
                             placeholder="Nhập tiêu đề bài viết"
                             className="placeholder:italic "
+                            spellCheck="false"
                             value={title}
                             onChange={(e) => {
                                 setTitle(e.target.value);
@@ -204,6 +209,7 @@ function CreatePost() {
                             placeholder="Nhập đường dẫn tùy chỉnh"
                             className="placeholder:italic"
                             value={slug}
+                            spellCheck="false"
                             onChange={(e) => {
                                 setSlug(e.target.value);
                                 if (e.target.value.trim() === '') {
@@ -240,6 +246,7 @@ function CreatePost() {
                         <AutosizeTextarea
                             placeholder="Nhập mô tả bài viết"
                             className="placeholder:italic"
+                            spellCheck="false"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />

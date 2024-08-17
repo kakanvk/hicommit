@@ -1,9 +1,86 @@
+import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import { useLogin } from "@/service/LoginContext";
+import Loader from "@/components/ui/loader";
+import Footer from "@/components/Footer";
 
-function AdminLayout () {
+import { Route, Routes, useLocation } from "react-router-dom";
+
+import { useEffect, useRef, useState } from "react";
+import Dashboard from "@/pages/admin/Dashboard";
+import AdminNavbar from "@/pages/admin/AdminNavbar";
+import UserManager from "@/pages/admin/UserManager";
+import PostManager from "@/pages/admin/PostManager";
+import CreatePost from "@/pages/admin/CreatePost";
+import EditPost from "@/pages/admin/EditPost";
+
+function AdminLayout() {
+
+    const clientContentRef = useRef<HTMLDivElement>(null);
+    const [showScrollButton, setShowScrollButton] = useState(false);
+
+    const location = useLocation();
+
+    const loginContext = useLogin();
+
+    useEffect(() => {
+        if (clientContentRef.current) {
+            clientContentRef.current.scrollTop = 0;
+        }
+    }, [location]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollY = clientContentRef.current?.scrollTop || 0;
+            setShowScrollButton(scrollY > 250);
+        };
+
+        clientContentRef.current?.addEventListener('scroll', handleScroll);
+
+        return () => {
+            clientContentRef.current?.removeEventListener('scroll', handleScroll);
+        };
+    }, [loginContext.loading]);
+
+    const scrollToTop = () => {
+        clientContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
-        <div className="AdminLayout">
-            Admin Page
-        </div>
+        <div className="AdminLayout flex flex-col h-[100vh] bg-white dark:bg-zinc-950">
+            {
+                loginContext.loading ? <Loader /> :
+                    loginContext.user ?
+                        <>
+                            <Header />
+                            <div className="flex flex-1 overflow-hidden">
+                                <AdminNavbar />
+                                <div className="flex flex-col flex-1 h-full overflow-auto justify-between" ref={clientContentRef}>
+                                    <div className="flex-1">
+                                        <Routes>
+                                            <Route path="" element={<Dashboard />} />
+                                            <Route path="users">
+                                                <Route path="" element={<UserManager />} />
+                                            </Route>
+                                            <Route path="posts">
+                                                <Route path="" element={<PostManager />} />
+                                                <Route path="create" element={<CreatePost />} />
+                                                <Route path=":id/edit" element={<EditPost />} />
+                                            </Route>
+                                        </Routes>
+                                    </div>
+                                </div>
+                            </div>
+                            {
+                                showScrollButton &&
+                                <Button variant="secondary" size="icon" className='scroll-to-top-button fixed bottom-8 right-10' onClick={scrollToTop} style={{ display: showScrollButton ? 'block' : 'none' }}>
+                                    <i className='fa-solid fa-chevron-up'></i>
+                                </Button>
+                            }
+                        </>
+                        : ""
+            }
+        </div >
     );
 };
 

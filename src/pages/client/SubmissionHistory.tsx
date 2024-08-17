@@ -1,5 +1,5 @@
 
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 import {
     HoverCard,
@@ -36,9 +36,14 @@ function SubmissionHistory(props: any) {
 
     const { problem } = props;
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const status = queryParams.get('status');
+
     const { problem_id } = useParams<{ problem_id: string }>();
 
     const [mySubmissions, setMySubmissions] = useState<any[]>([]);
+    const [statusState, setStatusState] = useState<string | null>(status);
 
     const handleGetMySubmissons = async () => {
         const data = await getMySubmissionsByProblemSlug(problem_id as any);
@@ -48,6 +53,7 @@ function SubmissionHistory(props: any) {
 
     useEffect(() => {
         socket.on('new_submission', () => {
+            setStatusState(null);
             handleGetMySubmissons();
         });
 
@@ -67,6 +73,19 @@ function SubmissionHistory(props: any) {
                     <GitGraph>
                         <GitGraphBody className="">
                             <GitGraphFree className="h-2" />
+                            {
+                                statusState?.toLocaleUpperCase() === "PENDING" &&
+                                <GitGraphNode>
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border bg-zinc-100/80 dark:bg-zinc-900 hover:bg-zinc-200/50 hover:dark:bg-zinc-800/70 p-3 px-5 rounded-lg animate-pulse">
+                                        <p className="opacity-70 italic">
+                                            Một số tiến trình đang trong hàng đợi
+                                            <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                            <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                            <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                        </p>
+                                    </div>
+                                </GitGraphNode>
+                            }
                             {
                                 mySubmissions?.map((submission, index) => {
                                     return (

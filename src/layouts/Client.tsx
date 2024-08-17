@@ -16,7 +16,6 @@ import Problem from "@/pages/client/Problem";
 import SubmitProblem from "@/pages/client/SubmitProblem";
 import Result from "@/pages/client/Submission";
 import JoinCourse from "@/pages/client/JoinCourse";
-import SubmissionHistory from "@/pages/client/SubmissionHistory";
 import CourseManager from "@/pages/teacher/CourseManager";
 import CourseManagerByID from "@/pages/teacher/CourseManagerByID";
 import Analysis from "@/pages/teacher/Analysis";

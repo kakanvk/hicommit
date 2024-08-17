@@ -32,7 +32,7 @@ function App() {
     <div className='App'>
       <Routes>
         <Route path="/*" element={<ClientLayout />} />
-        <Route path="/admin" element={<AdminLayout />} />
+        <Route path="/admin/*" element={<AdminLayout />} />
         <Route path="/login" element={<Login />} />
       </Routes>
       <Toaster position="bottom-center" />

@@ -25,8 +25,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Upload, X } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import Editor from "@/components/ui/editor";
 
@@ -34,12 +34,14 @@ import Cropper from 'react-easy-crop';
 import { se } from "date-fns/locale";
 import Loader2 from "@/components/ui/loader2";
 
-import getCroppedImg from "./cropImage";
+import getCroppedImg from "../client/cropImage";
 import { set } from "date-fns";
-import { createPost } from "@/service/API/Post";
+import { createPost, getPostBySlug, updatePost } from "@/service/API/Post";
 import toast from "react-hot-toast";
 
-function CreatePost() {
+function EditPost() {
+
+    const { id } = useParams();
 
     const navigate = useNavigate();
 
@@ -61,6 +63,21 @@ function CreatePost() {
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [loadingImage, setLoadingImage] = useState(false);
+
+    const getPost = async () => {
+        const response = await getPostBySlug(id as any);
+        console.log(response);
+        setTitle(response.title);
+        setDescription(response.description);
+        setSlug(response.slug);
+        setTags(response.tags);
+        setContent(response.content);
+        setThumbnail(response.thumbnail);
+    }
+
+    useEffect(() => {
+        getPost();
+    }, []);
 
     const handleUploadThumbnail = () => {
         const input = document.createElement('input');
@@ -129,7 +146,7 @@ function CreatePost() {
         setSlug(new_slug);
     }
 
-    const handleCreatePost = async () => {
+    const handleUpdatePost = async () => {
 
         const data = {
             title,
@@ -143,11 +160,11 @@ function CreatePost() {
         console.log(data);
 
         const response = await toast.promise(
-            createPost(data),
+            updatePost(id as any, data),
             {
-                loading: 'Đang tạo bài viết...',
-                success: 'Tạo bài viết thành công, bài viết sẽ hiển thị sau khi được duyệt',
-                error: 'Tạo bài viết không thành công, hãy thử lại'
+                loading: 'Đang cập nhật bài viết...',
+                success: 'Cập nhật bài viết thành công',
+                error: 'Cập nhật bài viết không thành công, hãy thử lại'
             },
             {
                 style: {
@@ -156,27 +173,31 @@ function CreatePost() {
                     color: '#fff',
                     paddingLeft: '15px',
                     fontFamily: 'Plus Jakarta Sans',
-                    maxWidth: '700px',
+                    maxWidth: '400px',
                 }
             });
 
         setTimeout(() => {
-            navigate('/forum');
+            navigate('/admin/posts');
         }, 500);
     }
 
     return (
-        <div className="CreatePost p-6 px-8 flex flex-col gap-8">
+        <div className="EditPost p-5 pl-2 flex flex-col gap-8 pb-10">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
+                        Quản trị
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/forum">Diễn đàn</Link>
+                            <Link to="/admin/posts">Quản lý bài viết</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        Tạo bài viết
+                        Chỉnh sửa
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -190,6 +211,7 @@ function CreatePost() {
                         <Input
                             placeholder="Nhập tiêu đề bài viết"
                             className="placeholder:italic "
+                            spellCheck="false"
                             value={title}
                             onChange={(e) => {
                                 setTitle(e.target.value);
@@ -204,6 +226,7 @@ function CreatePost() {
                             placeholder="Nhập đường dẫn tùy chỉnh"
                             className="placeholder:italic"
                             value={slug}
+                            spellCheck="false"
                             onChange={(e) => {
                                 setSlug(e.target.value);
                                 if (e.target.value.trim() === '') {
@@ -240,20 +263,24 @@ function CreatePost() {
                         <AutosizeTextarea
                             placeholder="Nhập mô tả bài viết"
                             className="placeholder:italic"
+                            spellCheck="false"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
                     <div className="flex gap-2 flex-col">
                         <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Nội dung bài viết</h4>
-                        <Editor
-                            value={content}
-                            onChange={(event: any, editor: any) => {
-                                const data = editor.getData();
-                                setContent(data);
-                            }}
-                            placeholder="Nhập nội dung bài viết"
-                        />
+                        {
+                            content &&
+                            <Editor
+                                value={content}
+                                onChange={(event: any, editor: any) => {
+                                    const data = editor.getData();
+                                    setContent(data);
+                                }}
+                                placeholder="Nhập nội dung bài viết"
+                            />
+                        }
                     </div>
                 </div>
                 <div className="flex flex-col gap-6">
@@ -312,10 +339,10 @@ function CreatePost() {
                         </AlertDialog>
                     </div>
                 </div>
-                <Button className="w-fit px-5 mt-2" onClick={() => handleCreatePost()}>Tạo bài viết</Button>
+                <Button className="w-fit px-5 mt-2" onClick={() => handleUpdatePost()}>Cập nhật bài viết</Button>
             </div>
         </div >
     );
 };
 
-export default CreatePost;
+export default EditPost;

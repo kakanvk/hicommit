@@ -33,7 +33,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import TextAndMathEditor from "@/components/ui/text-math-editor";
 import { getCourseByIDForAdmin } from "@/service/API/Course";
 import { toast } from "react-hot-toast";
@@ -43,6 +43,7 @@ import { createProblem } from "@/service/API/Problem";
 function CreateProblem() {
 
     const course_id = useParams<{ course_id: string }>().course_id;
+    const navigate = useNavigate();
 
     const unit = new URLSearchParams(window.location.search).get('unit');
 
@@ -132,10 +133,7 @@ function CreateProblem() {
                     }
                 });
             console.log(response);
-            // Chờ 1s rồi chuyển hướng
-            // setTimeout(() => {
-            //     window.location.href = `/course-manager`;
-            // }, 1000);
+            navigate(`/course-manager/${course_id}`);
         } catch (error) {
             console.error('Error creating post:', error);
         }
@@ -239,7 +237,7 @@ function CreateProblem() {
                             <Input placeholder="Nhập tên bài tập" className="placeholder:italic" value={name} onChange={e => setName(e.target.value)} />
                         </div>
                         <div className="flex gap-2 flex-col">
-                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tuỳ chỉnh đường dẫn (URL)</h4>
+                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mã bài tập</h4>
                             <Input placeholder="Nhập đường dẫn tuỳ chỉnh" className="placeholder:italic" value={slug} onChange={e => setSlug(e.target.value)} />
                         </div>
                         <div className="flex gap-2 flex-col">
@@ -274,6 +272,7 @@ function CreateProblem() {
                                     <SelectItem value="java">Java</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <span className="italic text-xs opacity-50 dark:font-light">* Không thể thay đổi ngôn ngữ nếu đã có người nộp bài</span>
                         </div>
                     </div>
                 </div>

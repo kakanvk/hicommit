@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@radix-ui/react-dropdown-menu';
 import { updateUnitById, deleteUnitById } from '@/service/API/Unit';
 import toast from 'react-hot-toast';
+import { Badge } from '@/components/ui/badge';
+import { deleteProblemByID } from '@/service/API/Problem';
 
 const CourseTree = (props: any) => {
 
@@ -122,6 +124,33 @@ const CourseTree = (props: any) => {
             }
         }
 
+        const handleDeleteProblem = async (problem_id: any) => {
+            try {
+                // Call createPost API
+                const response = await toast.promise(
+                    deleteProblemByID(problem_id),
+                    {
+                        loading: 'Đang xoá...',
+                        success: 'Xoá thành công',
+                        error: 'Xoá thất bại'
+                    },
+                    {
+                        style: {
+                            borderRadius: '8px',
+                            background: '#222',
+                            color: '#fff',
+                            paddingLeft: '15px',
+                            fontFamily: 'Plus Jakarta Sans',
+                        }
+                    });
+
+                refresh();
+
+            } catch (error) {
+                console.error('Error creating post:', error);
+            }
+        }
+
         const handleMoveUp = (id: string) => {
             const index = dataFromAPI.findIndex((item: any) => item.id === id);
             if (index > 0) {
@@ -157,13 +186,51 @@ const CourseTree = (props: any) => {
                     <div className="w-full hover:bg-zinc-100 cursor-move dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work">
                         <h3 className="flex items-start gap-3 flex-1">
                             <GripVertical className="w-5 h-5 opacity-70 translate-y-[2.5px]" />
-                            <span className="flex-1 line-clamp-1">{node.data.name}</span>
+                            <p className="flex-1 line-clamp-1">
+                                <span className='mr-2.5'>
+                                    {node.data.name}
+                                </span>
+                                <Badge variant="secondary" className="px-1.5 rounded-sm -translate-y-[1px]">
+                                    {node?.data?.language === "c" && "C"}
+                                    {node?.data?.language === "cpp" && "C++"}
+                                    {node?.data?.language === "java" && "Java"}
+                                </Badge>
+                            </p>
                         </h3>
-                        <Link to={`problem/${node.data.id}/edit`} className='cursor-pointer w-6 h-6 invisible group-hover/work:visible'>
-                            <Button size="icon" variant="ghost" className="w-full h-full">
-                                <Pencil className="w-[13px]" />
-                            </Button>
-                        </Link>
+                        <div className='flex items-center gap-1 invisible group-hover/work:visible'>
+                            <Link to={`problem/${node.data.id}/edit`} className='cursor-pointer w-6 h-6'>
+                                <Button size="icon" variant="ghost" className="w-full h-full">
+                                    <Pencil className="w-[13px]" />
+                                </Button>
+                            </Link>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button size="icon" variant="ghost" className="w-6 h-6 hover:bg-red-500/20 dark:hover:bg-red-500/40">
+                                        <Trash2 className="w-[13px]" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Xác nhận xoá bài tập này</DialogTitle>
+                                    </DialogHeader>
+                                    <DialogDescription>
+                                        Sau khi xoá, bài tập này sẽ không thể truy cập.
+                                    </DialogDescription>
+                                    <DialogFooter className="mt-2">
+                                        <DialogClose>
+                                            <Button variant="ghost">
+                                                Đóng
+                                            </Button>
+                                        </DialogClose>
+                                        <DialogClose>
+                                            <Button className="w-fit px-4" variant="destructive" onClick={() => handleDeleteProblem(node?.data?.id)}>
+                                                Xoá
+                                            </Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </div>
                 :

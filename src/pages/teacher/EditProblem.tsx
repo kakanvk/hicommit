@@ -33,18 +33,19 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import TextAndMathEditor from "@/components/ui/text-math-editor";
 import { getCourseByIDForAdmin } from "@/service/API/Course";
 import { toast } from "react-hot-toast";
 
-import { createProblem, getProblemByIDorSlug } from "@/service/API/Problem";
+import { updateProblem, getProblemByIDForAdmin } from "@/service/API/Problem";
 
 function EditProblem() {
 
     const { course_id, problem_id } = useParams<{ course_id: string, problem_id: string }>();
 
     const unit = new URLSearchParams(window.location.search).get('unit');
+    const navigate = useNavigate();
 
     const [course, setCourse] = useState<any>({});
     const [problem, setProblem] = useState<any>({});
@@ -98,7 +99,7 @@ function EditProblem() {
 
     const handleGetProblemData = async () => {
         try {
-            const response = await getProblemByIDorSlug(problem_id as any);
+            const response = await getProblemByIDForAdmin(problem_id as any);
             setProblem(response);
             setName(response.name);
             setSlug(response.slug);
@@ -109,14 +110,14 @@ function EditProblem() {
             setOutput(response.output);
             setLimit(response.limit);
             setExamples(response.examples);
-            // setTestCases(response.testcases);
+            setTestCases(response.testcases);
             console.log(response);
         } catch (error) {
             console.error('Error getting problem:', error);
         }
     }
 
-    const handleCreateProblem = async () => {
+    const handleUpdateProblem = async () => {
         const data = {
             name: name,
             slug: slug.trim(),
@@ -128,9 +129,6 @@ function EditProblem() {
             limit: limit,
             examples: examples,
             testcases: testCases,
-            type: "COURSE",
-            unit: unit,
-            parent: course_id
         }
 
         console.log(data);
@@ -138,11 +136,11 @@ function EditProblem() {
         try {
             // Call createPost API
             const response = await toast.promise(
-                createProblem(data),
+                updateProblem(problem_id as any, data),
                 {
                     loading: 'Đang lưu...',
-                    success: 'Tạo bài tập thành công',
-                    error: 'Tạo bài tập thất bại'
+                    success: 'Cập nhật bài tập thành công',
+                    error: 'Cập nhật bài tập thất bại'
                 },
                 {
                     style: {
@@ -154,13 +152,23 @@ function EditProblem() {
                     }
                 });
             console.log(response);
-            // Chờ 1s rồi chuyển hướng
-            // setTimeout(() => {
-            //     window.location.href = `/course-manager`;
-            // }, 1000);
         } catch (error) {
             console.error('Error creating post:', error);
         }
+    }
+
+    const handleCancelUpdate = () => {
+        toast.error('Đã huỷ cập nhật bài tập',
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+        navigate(`/course-manager/${course_id}`);
     }
 
     const handleAddExample = () => {
@@ -208,6 +216,24 @@ function EditProblem() {
     }
 
     const handleDeleteTestCase = (index: number) => {
+
+        // nếu chỉ còn 1 test-case thì không cho xoá
+        if (testCases.length === 1) {
+            toast.error(
+                'Phải có ít nhất 1 Test-case',
+                {
+                    style: {
+                        borderRadius: '8px',
+                        background: '#222',
+                        color: '#fff',
+                        paddingLeft: '15px',
+                        fontFamily: 'Plus Jakarta Sans',
+                    }
+                }
+            );
+            return;
+        }
+
         const newTestCases = testCases.slice();
         newTestCases.splice(index, 1);
         setTestCases(newTestCases);
@@ -231,7 +257,7 @@ function EditProblem() {
     }, []);
 
     return (
-        <div className="CreateProblem p-6 px-8 flex flex-col gap-8">
+        <div className="updateProblem p-6 px-8 flex flex-col gap-8">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -268,8 +294,9 @@ function EditProblem() {
                             <Input placeholder="Nhập tên bài tập" className="placeholder:italic" value={name} onChange={e => setName(e.target.value)} />
                         </div>
                         <div className="flex gap-2 flex-col">
-                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tuỳ chỉnh đường dẫn (URL)</h4>
-                            <Input placeholder="Nhập đường dẫn tuỳ chỉnh" className="placeholder:italic" value={slug} onChange={e => setSlug(e.target.value)} />
+                            <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mã bài tập</h4>
+                            <Input placeholder="Nhập đường dẫn tuỳ chỉnh" className="placeholder:italic" value={slug} onChange={e => setSlug(e.target.value)} disabled/>
+                            <span className="italic text-xs opacity-50 dark:font-light">* Không thể thay đổi ngôn ngữ nếu đã có người nộp bài</span>
                         </div>
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tag</h4>
@@ -293,7 +320,7 @@ function EditProblem() {
                         </div>
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Ngôn ngữ lập trình</h4>
-                            <Select defaultValue="c" onValueChange={(value) => setLanguage(value)}>
+                            <Select value={language} onValueChange={(value) => setLanguage(value)} disabled>
                                 <SelectTrigger className="w-[350px]">
                                     <SelectValue placeholder="Theme" />
                                 </SelectTrigger>
@@ -303,6 +330,7 @@ function EditProblem() {
                                     <SelectItem value="java">Java</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <span className="italic text-xs opacity-50 dark:font-light">* Không thể thay đổi ngôn ngữ nếu đã có người nộp bài</span>
                         </div>
                     </div>
                 </div>
@@ -405,7 +433,48 @@ function EditProblem() {
                         <Plus className="w-[17px] mr-1.5 h-[17px]" />Thêm Test-case
                     </Button>
                 </div>
-                <Button className="w-fit" onClick={() => handleCreateProblem()}>Tạo bài tập</Button>
+                <div className="mt-2 flex gap-3">
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit">Cập nhật bài tập</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Cập nhật khoá học này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Các thông tin đã chỉnh sửa sẽ được lưu lại.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <DialogClose asChild>
+                                    <Button onClick={() => handleUpdateProblem()}>Cập nhật</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit px-5" variant="ghost" size="lg">Huỷ thay đổi</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Huỷ cập nhật khoá học này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Mọi thay đổi chưa được lưu lại, bạn có chắc muốn huỷ cập nhật.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <Button variant="destructive" onClick={() => handleCancelUpdate()}>Huỷ cập nhật</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
         </div>
     );
