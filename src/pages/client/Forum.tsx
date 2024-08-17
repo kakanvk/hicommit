@@ -42,6 +42,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getPosts } from "@/service/API/Post";
 import { formatTimeAgo } from "@/service/DateTimeService";
+import BlurFade from "@/components/magicui/blur-fade";
 
 function Forum() {
 
@@ -130,54 +131,56 @@ function Forum() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-6 relative">
-                    {posts.map((post: any) => (
-                        <div key={post.id} className="flex items-start gap-5">
-                            <Link className="h-[180px] aspect-[3/2] overflow-hidden border rounded-lg" to={post.slug}>
-                                <img src={post.thumbnail} alt="avatar" className="w-full h-full object-cover" />
-                            </Link>
-                            <div className="flex-1 flex justify-between">
-                                <div className="flex-1 max-w-[80%]">
-                                    <Link className="font-bold text-lg line-clamp-2" to={post.slug}>{post.title}</Link>
-                                    <div className="flex gap-2 items-center text-sm mt-1">
-                                        <span className="opacity-70 flex items-center gap-2">Đăng bởi</span>
-                                        <HoverCard openDelay={300}>
-                                            <HoverCardTrigger>
-                                                <span className="font-semibold text-green-600 dark:text-green-500 cursor-pointer hover:underline">{post.author.username}</span>
-                                            </HoverCardTrigger>
-                                            <HoverCardContent className="w-70" side="bottom" align="start">
-                                                <div className="flex gap-4">
-                                                    <Avatar>
-                                                        <AvatarImage className="w-14 rounded-full" src={post.author.avatar_url} />
-                                                    </Avatar>
-                                                    <div className="space-y-1">
-                                                        <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@{post.author.username}</h4>
-                                                        <p className="text-sm">
-                                                            Khoa Kỹ thuật & Công nghệ
-                                                        </p>
-                                                        <div className="flex items-center pt-2">
-                                                            <CalendarDays className="mr-2 h-4 w-4 opacity-70" />{" "}
-                                                            <span className="text-xs text-muted-foreground">
-                                                                Tham gia từ tháng 10, 2023
-                                                            </span>
+                    {posts.map((post: any, index) => (
+                        <BlurFade key={post.id} delay={0.1 * index} inView>
+                            <div className="flex items-start gap-5">
+                                <Link className="h-[180px] aspect-[3/2] overflow-hidden border rounded-lg" to={post.slug}>
+                                    <img src={post.thumbnail} alt="avatar" className="w-full h-full object-cover" />
+                                </Link>
+                                <div className="flex-1 flex justify-between">
+                                    <div className="flex-1 max-w-[80%]">
+                                        <Link className="font-bold text-lg line-clamp-2" to={post.slug}>{post.title}</Link>
+                                        <div className="flex gap-2 items-center text-sm mt-1">
+                                            <span className="opacity-70 flex items-center gap-2">Đăng bởi</span>
+                                            <HoverCard openDelay={300}>
+                                                <HoverCardTrigger>
+                                                    <span className="font-semibold text-green-600 dark:text-green-500 cursor-pointer hover:underline">{post.author.username}</span>
+                                                </HoverCardTrigger>
+                                                <HoverCardContent className="w-70" side="bottom" align="start">
+                                                    <div className="flex gap-4">
+                                                        <Avatar>
+                                                            <AvatarImage className="w-14 rounded-full" src={post.author.avatar_url} />
+                                                        </Avatar>
+                                                        <div className="space-y-1">
+                                                            <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">@{post.author.username}</h4>
+                                                            <p className="text-sm">
+                                                                Khoa Kỹ thuật & Công nghệ
+                                                            </p>
+                                                            <div className="flex items-center pt-2">
+                                                                <CalendarDays className="mr-2 h-4 w-4 opacity-70" />{" "}
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    Tham gia từ tháng 10, 2023
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </HoverCardContent>
-                                        </HoverCard>
-                                        <span className="opacity-70 flex items-center gap-2"><i className="fa-solid fa-circle text-[3px]"></i>{formatTimeAgo(post.createdAt, "vi")}</span>
+                                                </HoverCardContent>
+                                            </HoverCard>
+                                            <span className="opacity-70 flex items-center gap-2"><i className="fa-solid fa-circle text-[3px]"></i>{formatTimeAgo(post.createdAt, "vi")}</span>
+                                        </div>
+                                        <p className="opacity-50 mt-2 text-sm line-clamp-2 2xl:line-clamp-3">{post.description}</p>
+                                        <div className="flex flex-wrap gap-2 mt-4">
+                                            {post.tags.map((tag: any) => (
+                                                <Badge key={tag} variant="secondary" className="bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer">{tag}</Badge>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <p className="opacity-50 mt-2 text-sm line-clamp-2 2xl:line-clamp-3">{post.description}</p>
-                                    <div className="flex flex-wrap gap-2 mt-4">
-                                        {post.tags.map((tag: any) => (
-                                            <Badge key={tag} variant="secondary" className="bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer">{tag}</Badge>
-                                        ))}
-                                    </div>
+                                    <Button size="icon" variant="outline" className="bg-transparent">
+                                        <Star className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                                <Button size="icon" variant="outline" className="bg-transparent">
-                                    <Star className="h-4 w-4" />
-                                </Button>
                             </div>
-                        </div>
+                        </BlurFade>
                     ))}
                     <Pagination className="mt-10">
                         <PaginationContent>

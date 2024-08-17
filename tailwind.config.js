@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -10,16 +9,15 @@ module.exports = {
   ],
   prefix: "",
   theme: {
-    fontFamily: {
-      'sans': ['Plus Jakarta Sans', 'system-ui'],
-      'mono': ['JetBrains Mono', 'monospace'],
-    },
     container: {
       center: true,
       padding: "2rem",
       screens: {
         "2xl": "1400px",
       },
+    },
+    fontFamily: {
+      sans: ["Plus Jakarta Sans", "sans-serif"],
     },
     extend: {
       colors: {
@@ -78,7 +76,5 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-  ],
+  plugins: [require("tailwindcss-animate")],
 }

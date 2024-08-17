@@ -28,6 +28,8 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 
+import NumberTicker from "@/components/magicui/number-ticker";
+
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
 
@@ -124,28 +126,36 @@ function Dashboard() {
                         <div className="flex gap-5 *:bg-secondary/60 *:dark:bg-secondary/40 *:flex-1 *:rounded-lg *:py-4 *:pt-3 *:p-5 *:border">
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
-                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">234</h2>
+                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
+                                        <NumberTicker value={234} />
+                                    </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Người dùng</p>
                                 </div>
                                 <Users className="translate-y-1 opacity-40" />
                             </div>
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
-                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">2343</h2>
+                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
+                                        <NumberTicker value={2354} />
+                                    </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Bài tập được tạo</p>
                                 </div>
                                 <AppWindow className="translate-y-1 opacity-40" />
                             </div>
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
-                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">123123</h2>
+                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
+                                        <NumberTicker value={23534} />
+                                    </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Lượt nộp bài</p>
                                 </div>
                                 <BookUp className="translate-y-1 opacity-40" />
                             </div>
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
-                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">123</h2>
+                                    <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
+                                        <NumberTicker value={78} />
+                                    </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Bài viết</p>
                                 </div>
                                 <ListTodo className="translate-y-1 opacity-40" />

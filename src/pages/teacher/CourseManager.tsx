@@ -34,6 +34,7 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui
 import { useEffect, useState } from "react";
 import { getCreatedCourses } from "@/service/API/Course";
 import { formatTimeAgo } from "@/service/DateTimeService";
+import BlurFade from "@/components/magicui/blur-fade";
 
 function transform(node: any) {
     if (node.name === 'figure' || node.name === 'table') {
@@ -172,51 +173,53 @@ function CourseManager() {
                         createdCourses.length > 0 ?
                             <div className="grid grid-cols-1 lg:grid-cols-1 2xl:grid-cols-2 gap-4 w-full">
                                 {
-                                    createdCourses.map(course => (
-                                        <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
-                                            <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
-                                                <img src={course?.thumbnail} />
-                                            </div>
-                                            <div className="flex flex-col gap-2 flex-1 h-full justify-between pb-1">
-                                                <div className="flex flex-col gap-2 flex-1">
-                                                    <h2 className="font-semibold line-clamp-2">
-                                                        {
-                                                            course.class_name &&
-                                                            <Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2.5px] font-bold">{course?.class_name}</Badge>
-                                                        }
-                                                        <span className="mr-2 text-[17px]">{course?.name}</span>
-                                                        {
-                                                            course.public &&
-                                                            <Badge variant="outline" className="text-[11.5px] p-0 px-2 pr-3 font-normal leading-5">
-                                                                <Eye className="h-3 w-3 mr-1.5" />Công khai
-                                                            </Badge>
-                                                        }
-                                                    </h2>
-                                                    <p
-                                                        className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-2"
-                                                    >
-                                                        {ReactHtmlParser(course?.description, { transform })}
-                                                    </p>
+                                    createdCourses.map((course, index) => (
+                                        <BlurFade key={course?.id} delay={0.15 * index}>
+                                            <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
+                                                <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
+                                                    <img src={course?.thumbnail} />
                                                 </div>
-                                                <div className="w-full flex items-end justify-between">
-                                                    <div className="flex gap-2 items-center">
-                                                        <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                            {course?.problem_count > 0 ? course?.problem_count : "Chưa có"} bài tập
-                                                        </Badge>
-                                                        <Badge variant="secondary" className="text-[11px] p-1 px-3">
-                                                            <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
-                                                        </Badge>
-                                                        {
-                                                            course?.publish &&
-                                                            <Badge className="text-[11px] p-1 px-3">
-                                                                <Check className="w-3.5 h-3.5 mr-1.5"/>Đã công bố
-                                                            </Badge>
-                                                        }
+                                                <div className="flex flex-col gap-2 flex-1 h-full justify-between pb-1">
+                                                    <div className="flex flex-col gap-2 flex-1">
+                                                        <h2 className="font-semibold line-clamp-2">
+                                                            {
+                                                                course.class_name &&
+                                                                <Badge variant="default" className="rounded text-[9px] px-[5px] py-[1px] mr-2 -translate-y-[2.5px] font-bold">{course?.class_name}</Badge>
+                                                            }
+                                                            <span className="mr-2 text-[17px]">{course?.name}</span>
+                                                            {
+                                                                course.public &&
+                                                                <Badge variant="outline" className="text-[11.5px] p-0 px-2 pr-3 font-normal leading-5">
+                                                                    <Eye className="h-3 w-3 mr-1.5" />Công khai
+                                                                </Badge>
+                                                            }
+                                                        </h2>
+                                                        <p
+                                                            className="opacity-70 dark:opacity-50 text-sm dark:font-light text-xs line-clamp-2"
+                                                        >
+                                                            {ReactHtmlParser(course?.description, { transform })}
+                                                        </p>
                                                     </div>
-                                                    <span className="text-[11px] opacity-60 font-light">Được tạo {formatTimeAgo(course?.createdAt, "vi")}</span>
+                                                    <div className="w-full flex items-end justify-between">
+                                                        <div className="flex gap-2 items-center">
+                                                            <Badge variant="secondary" className="text-[11px] p-1 px-3">
+                                                                {course?.problem_count > 0 ? course?.problem_count : "Chưa có"} bài tập
+                                                            </Badge>
+                                                            <Badge variant="secondary" className="text-[11px] p-1 px-3">
+                                                                <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
+                                                            </Badge>
+                                                            {
+                                                                course?.publish &&
+                                                                <Badge className="text-[11px] p-1 px-3">
+                                                                    <Check className="w-3.5 h-3.5 mr-1.5" />Đã công bố
+                                                                </Badge>
+                                                            }
+                                                        </div>
+                                                        <span className="text-[11px] opacity-60 font-light">Được tạo {formatTimeAgo(course?.createdAt, "vi")}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Link>
+                                            </Link>
+                                        </BlurFade>
                                     ))
                                 }
                             </div>

@@ -4,7 +4,6 @@ import RingProgress from "@/components/ui/ringProcess";
 import { ChevronRight } from 'lucide-react';
 import { Link } from "react-router-dom";
 
-
 function HomePage() {
     return (
         <div className="HomePage p-7">

@@ -60,6 +60,7 @@ import CodeArea from "@/components/ui/code-area";
 
 import { useSocket } from "@/service/SocketContext";
 import toast from "react-hot-toast";
+import BlurFade from "@/components/magicui/blur-fade";
 
 const timeAgo = (isoDate: any) => {
     try {
@@ -358,39 +359,78 @@ function Result() {
                                         </p> :
                                         submission?.testcases?.length > 0 ?
                                             submission?.testcases?.map((testcase: any, index: number) => (
-                                                <div key={index} className="flex items-center justify-between">
-                                                    <p className="flex items-baseline gap-3">
-                                                        {/* <i className={`fa-solid fa-circle-${testcase.status === "PASSED" ? "check" : "xmark"} text-${testcase.status === "PASSED" ? "green-600" : "red-500"}`}></i> */}
-                                                        {testcase?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 text-[14px]"></i>}
-                                                        {testcase?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 text-[14px]"></i>}
-                                                        {testcase?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 text-[14px]"></i>}
-                                                        {testcase?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 text-[14px]"></i>}
-                                                        <span className="text-sm font-medium opacity-60">Test case {index + 1}</span>
-                                                        {
-                                                            testcase.status?.toUpperCase() !== "PASSED" && testcase?.suggestion &&
+                                                <BlurFade key={testcase.id} delay={0.15 + index * 0.05} yOffset={0}>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="flex items-baseline gap-3">
+                                                            {/* <i className={`fa-solid fa-circle-${testcase.status === "PASSED" ? "check" : "xmark"} text-${testcase.status === "PASSED" ? "green-600" : "red-500"}`}></i> */}
+                                                            {testcase?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 text-[14px]"></i>}
+                                                            {testcase?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 text-[14px]"></i>}
+                                                            {testcase?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 text-[14px]"></i>}
+                                                            {testcase?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 text-[14px]"></i>}
+                                                            <span className="text-sm font-medium opacity-60">Test case {index + 1}</span>
+                                                            {
+                                                                testcase.status?.toUpperCase() !== "PASSED" && testcase?.suggestion &&
+                                                                <Dialog>
+                                                                    <TooltipProvider delayDuration={100}>
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger>
+                                                                                <DialogTrigger className="hover:bg-secondary w-6 rounded">
+                                                                                    <i className="fa-solid fa-seedling text-sm opacity-60"></i>
+                                                                                </DialogTrigger>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent side="bottom">
+                                                                                Gợi ý
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    </TooltipProvider>
+                                                                    <DialogContent>
+                                                                        <DialogHeader>
+                                                                            <DialogTitle>
+                                                                                <i className="fa-solid fa-seedling text-primary mr-2 translate-y-[-1px]"></i>Gợi ý hoàn thành<Badge variant="secondary" className="rounded px-1.5 py-1 ml-2 -translate-y-[1px] text-[13px]">Test case {index + 1}</Badge>
+                                                                            </DialogTitle>
+                                                                        </DialogHeader>
+                                                                        <DialogDescription>
+                                                                            {testcase.suggestion}
+                                                                        </DialogDescription>
+                                                                        <DialogFooter>
+                                                                            <DialogClose>
+                                                                                <Button variant="secondary">Đóng</Button>
+                                                                            </DialogClose>
+                                                                        </DialogFooter>
+                                                                    </DialogContent>
+                                                                </Dialog>
+                                                            }
+                                                        </p>
+                                                        {testcase.status.toUpperCase() === "PASSED" && <span className="text-sm text-green-600 dark:text-green-500">Chính xác</span>}
+                                                        {testcase.status.toUpperCase() === "FAILED" &&
                                                             <Dialog>
-                                                                <TooltipProvider delayDuration={100}>
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger>
-                                                                            <DialogTrigger className="hover:bg-secondary w-6 rounded">
-                                                                                <i className="fa-solid fa-seedling text-sm opacity-60"></i>
-                                                                            </DialogTrigger>
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent side="bottom">
-                                                                            Gợi ý
-                                                                        </TooltipContent>
-                                                                    </Tooltip>
-                                                                </TooltipProvider>
+                                                                <DialogTrigger>
+                                                                    <span className="text-sm text-red-500">Sai kết quả</span>
+                                                                </DialogTrigger>
                                                                 <DialogContent>
                                                                     <DialogHeader>
-                                                                        <DialogTitle>
-                                                                            <i className="fa-solid fa-seedling text-primary mr-2 translate-y-[-1px]"></i>Gợi ý hoàn thành<Badge variant="secondary" className="rounded px-1.5 py-1 ml-2 -translate-y-[1px] text-[13px]">Test case {index + 1}</Badge>
+                                                                        <DialogTitle className="mb-2 flex items-center gap-2 text-red-600 dark:text-red-500">
+                                                                            <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
                                                                         </DialogTitle>
                                                                     </DialogHeader>
-                                                                    <DialogDescription>
-                                                                        {testcase.suggestion}
-                                                                    </DialogDescription>
-                                                                    <DialogFooter>
+                                                                    <div className="flex flex-col gap-5">
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
+                                                                            <CodeArea>
+                                                                                {testcase?.output}
+                                                                            </CodeArea>
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
+                                                                            <CodeArea>
+                                                                                {
+                                                                                    testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
+                                                                                        testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
+                                                                                }
+                                                                            </CodeArea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <DialogFooter className="mt-4">
                                                                         <DialogClose>
                                                                             <Button variant="secondary">Đóng</Button>
                                                                         </DialogClose>
@@ -398,82 +438,45 @@ function Result() {
                                                                 </DialogContent>
                                                             </Dialog>
                                                         }
-                                                    </p>
-                                                    {testcase.status.toUpperCase() === "PASSED" && <span className="text-sm text-green-600 dark:text-green-500">Chính xác</span>}
-                                                    {testcase.status.toUpperCase() === "FAILED" &&
-                                                        <Dialog>
-                                                            <DialogTrigger>
-                                                                <span className="text-sm text-red-500">Sai kết quả</span>
-                                                            </DialogTrigger>
-                                                            <DialogContent>
-                                                                <DialogHeader>
-                                                                    <DialogTitle className="mb-2 flex items-center gap-2 text-red-600 dark:text-red-500">
-                                                                        <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
-                                                                    </DialogTitle>
-                                                                </DialogHeader>
-                                                                <div className="flex flex-col gap-5">
-                                                                    <div className="flex flex-col gap-2">
-                                                                        <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
-                                                                        <CodeArea>
-                                                                            {testcase?.output}
-                                                                        </CodeArea>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-2">
-                                                                        <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
-                                                                        <CodeArea>
-                                                                            {
-                                                                                testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
-                                                                                    testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
-                                                                            }
-                                                                        </CodeArea>
-                                                                    </div>
-                                                                </div>
-                                                                <DialogFooter className="mt-4">
-                                                                    <DialogClose>
-                                                                        <Button variant="secondary">Đóng</Button>
-                                                                    </DialogClose>
-                                                                </DialogFooter>
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                    }
-                                                    {testcase.status.toUpperCase() === "ERROR" &&
-                                                        <Dialog>
-                                                            <DialogTrigger>
-                                                                <span className="text-sm text-amber-500">Gặp vấn đề</span>
+                                                        {testcase.status.toUpperCase() === "ERROR" &&
+                                                            <Dialog>
+                                                                <DialogTrigger>
+                                                                    <span className="text-sm text-amber-500">Gặp vấn đề</span>
 
-                                                            </DialogTrigger>
-                                                            <DialogContent>
-                                                                <DialogHeader>
-                                                                    <DialogTitle className="mb-2 flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                                                                        <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
-                                                                    </DialogTitle>
-                                                                </DialogHeader>
-                                                                <div className="flex flex-col gap-5">
-                                                                    <div className="flex flex-col gap-2">
-                                                                        <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
-                                                                        <CodeArea>
-                                                                            {testcase?.output}
-                                                                        </CodeArea>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle className="mb-2 flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                                                                            <i className="fa-solid fa-circle-info text-[14px] translate-y-[1px]"></i>Chi tiết
+                                                                        </DialogTitle>
+                                                                    </DialogHeader>
+                                                                    <div className="flex flex-col gap-5">
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <span className="text-sm font-semibold opacity-60">Kết quả mong muốn (Test case {index + 1}):</span>
+                                                                            <CodeArea>
+                                                                                {testcase?.output}
+                                                                            </CodeArea>
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
+                                                                            <CodeArea className="text-amber-600 dark:text-amber-400 italic">
+                                                                                {
+                                                                                    testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
+                                                                                        testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
+                                                                                }
+                                                                            </CodeArea>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="flex flex-col gap-2">
-                                                                        <span className="text-sm font-semibold opacity-60">Kết quả nhận được:</span>
-                                                                        <CodeArea className="text-amber-600 dark:text-amber-400 italic">
-                                                                            {
-                                                                                testcase?.actual_output === "N/A" ? "N/A (Không xác định)" :
-                                                                                    testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
-                                                                            }
-                                                                        </CodeArea>
-                                                                    </div>
-                                                                </div>
-                                                                <DialogFooter className="mt-4">
-                                                                    <DialogClose>
-                                                                        <Button variant="secondary">Đóng</Button>
-                                                                    </DialogClose>
-                                                                </DialogFooter>
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                    }
-                                                </div>
+                                                                    <DialogFooter className="mt-4">
+                                                                        <DialogClose>
+                                                                            <Button variant="secondary">Đóng</Button>
+                                                                        </DialogClose>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        }
+                                                    </div>
+                                                </BlurFade>
                                             )) :
                                             <div className="flex items-center justify-between">
                                                 <p className="flex items-baseline gap-3">

@@ -61,11 +61,23 @@ const deleteProblemByID = async (id: string) => {
     }
 }
 
+// ADMIN
+const getProblemsForAdmin = async () => {
+    try {
+        const response = await axiosInstance.get(`/admin/problems/list`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting problems:', error);
+        throw error;
+    }
+}
+
 export {
     getProblems,
     createProblem,
     getProblemByIDorSlug,
     updateProblem,
     deleteProblemByID,
-    getProblemByIDForAdmin
+    getProblemByIDForAdmin,
+    getProblemsForAdmin
 };

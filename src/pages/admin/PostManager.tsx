@@ -67,6 +67,21 @@ import { formatTimeAgo } from "@/service/DateTimeService";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import Loader2 from "@/components/ui/loader2";
 
+// Post(id, title, created_by, description, content, slug, created_at, thumbnail, tags, publish, status)
+export type Post = {
+    id: string
+    title: string
+    author: Object
+    description: string
+    content: string
+    slug: string
+    created_at: string
+    thumbnail: string
+    tags: string[]
+    publish: boolean
+    status: "ACTIVE" | "INACTIVE"
+}
+
 function PostManager() {
 
     const loginContext = useLogin();
@@ -113,7 +128,7 @@ function PostManager() {
                     <TabsList className="bg-transparent justify-start rounded-none pb-3 px-0 border-b-[2px] border-secondary/40 w-full">
                         <TabsTrigger
                             value="all"
-                            className="px-1 border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
+                            className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                         >
                             <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
                                 Đã duyệt
@@ -124,7 +139,7 @@ function PostManager() {
                         </TabsTrigger>
                         <TabsTrigger
                             value="pending"
-                            className="px-1 border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
+                            className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                         >
                             <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
                                 Đang chờ duyệt
@@ -147,21 +162,6 @@ function PostManager() {
 };
 
 export default PostManager;
-
-// Post(id, title, created_by, description, content, slug, created_at, thumbnail, tags, publish, status)
-export type Post = {
-    id: string
-    title: string
-    author: Object
-    description: string
-    content: string
-    slug: string
-    created_at: string
-    thumbnail: string
-    tags: string[]
-    publish: boolean
-    status: "ACTIVE" | "INACTIVE"
-}
 
 function ActiveTab(props: any) {
 

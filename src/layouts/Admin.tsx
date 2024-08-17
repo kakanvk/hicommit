@@ -13,6 +13,8 @@ import UserManager from "@/pages/admin/UserManager";
 import PostManager from "@/pages/admin/PostManager";
 import CreatePost from "@/pages/admin/CreatePost";
 import EditPost from "@/pages/admin/EditPost";
+import ProblemManager from "@/pages/admin/ProblemManager";
+import CreateProblem from "@/pages/admin/CreateProblem";
 
 function AdminLayout() {
 
@@ -66,6 +68,11 @@ function AdminLayout() {
                                                 <Route path="" element={<PostManager />} />
                                                 <Route path="create" element={<CreatePost />} />
                                                 <Route path=":id/edit" element={<EditPost />} />
+                                            </Route>
+                                            <Route path="problems">
+                                                <Route path="" element={<ProblemManager />} />
+                                                <Route path="create" element={<CreateProblem />} />
+                                                {/* <Route path=":id/edit" element={<EditPost />} /> */}
                                             </Route>
                                         </Routes>
                                     </div>

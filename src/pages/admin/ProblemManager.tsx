@@ -1,4 +1,6 @@
 
+import ReactDOMServer from 'react-dom/server';
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -39,7 +41,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Pencil, Plus, Trash2, UserRoundPlus } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Ellipsis, ListFilter, MoreHorizontal, Pencil, Plus, Trash2, UserRoundPlus } from "lucide-react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -68,8 +70,43 @@ import toast from "react-hot-toast";
 import { useLogin } from "@/service/LoginContext";
 import { AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { getProblemsForAdmin } from "@/service/API/Problem";
+import { formatTimeAgo } from "@/service/DateTimeService";
 
-function UserManager() {
+
+// Problem(id, name, slug, tags, language, description, input, output, limit, examples, testcases, created_by, type, level, score, parent)
+export type Problem = {
+    id: string
+    name: string
+    slug: string
+    tags: string[]
+    language: string
+    description: string
+    input: string
+    output: string
+    limit: number
+    examples: string[]
+    testcases: string[]
+    created_by: string
+    type: "COURSE" | "CONTEST" | "FREE"
+    level: string
+    score: number
+    parent: Object
+}
+
+const labelArr = {
+    name: "Tên bài tập",
+    slug: "Mã bài tập",
+    creator: "Người tạo",
+    tags: "Dạng bài",
+    language: "Ngôn ngữ",
+    level: "Cấp độ",
+    score: "Điểm",
+    createdAt: "Ngày tạo",
+    actions: "Hành động"
+}
+
+function ProblemManager() {
 
     const loginContext = useLogin();
 
@@ -77,18 +114,14 @@ function UserManager() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
         id: false,
-        avatar_url: false,
     });
     const [rowSelection, setRowSelection] = useState({});
-    const [data, setData] = useState<User[]>([]);
+    const [data, setData] = useState<Problem[]>([]);
 
     const getData = async () => {
-        const users = await getUsers();
-        // console.log(users);
-        const currentUser = users.find((user: any) => user.id === loginContext.user?.id);
-        users.splice(users.indexOf(currentUser), 1);
-        users.unshift(currentUser);
-        setData(users);
+        const problems = await getProblemsForAdmin();
+        console.log(problems);
+        setData(problems);
     }
 
     const handleUpdateRole = async (userId: string, role: string) => {
@@ -111,15 +144,29 @@ function UserManager() {
         getData();
     }
 
-    const handleUpdateStatus = async (userId: string, status: string) => {
-        await toast.promise(
-            updateStatus(userId, status),
-            {
-                loading: 'Đang cập nhật...',
-                success: 'Cập nhật thành công',
-                error: 'Cập nhật không thành công, hãy thử lại'
-            },
-            {
+    const handleCopyText = (text: string) => {
+        const textToCopy = ReactDOMServer.renderToStaticMarkup(<>{text}</>);
+
+        // Tạo một phần tử div ẩn để chứa nội dung cần copy
+        const hiddenDiv = document.createElement('div');
+        hiddenDiv.innerHTML = textToCopy;
+
+        hiddenDiv.style.position = 'absolute';
+        hiddenDiv.style.left = '-9999px';
+        hiddenDiv.style.whiteSpace = 'pre-wrap';
+
+        document.body.appendChild(hiddenDiv);
+
+        // Lựa chọn nội dung trong div ẩn
+        const range = document.createRange();
+        range.selectNode(hiddenDiv);
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+
+        // Copy nội dung đã chọn vào clipboard
+        try {
+            document.execCommand('copy');
+            toast.success('Đã copy vào bộ nhớ tạm', {
                 style: {
                     borderRadius: '8px',
                     background: '#222',
@@ -128,14 +175,24 @@ function UserManager() {
                     fontFamily: 'Plus Jakarta Sans',
                 }
             });
-        getData();
-    }
+
+        } catch (err) {
+            console.error('Copy failed: ', err);
+        }
+
+        // Xóa phần tử div ẩn
+        document.body.removeChild(hiddenDiv);
+    };
 
     useEffect(() => {
         getData();
     }, []);
 
-    const columns: ColumnDef<User>[] = [
+    const columns: ColumnDef<Problem>[] = [
+        {
+            accessorKey: "id",
+            enableHiding: false,
+        },
         {
             id: "select",
             header: ({ table }) => (
@@ -159,11 +216,110 @@ function UserManager() {
             enableHiding: false,
         },
         {
-            accessorKey: "username",
+            accessorKey: "name",
             header: ({ column }) => {
                 return (
                     <div className="flex items-center gap-1">
-                        <span>Username</span>
+                        <span className='text-nowrap'>Tên bài tập</span>
+                    </div>
+                )
+            },
+            cell: ({ row }) => (
+                <p className="line-clamp-1 font-medium">{row.getValue("name")}</p>
+            ),
+        },
+        {
+            accessorKey: "slug",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <span className='text-nowrap'>Mã bài tập</span>
+                    </div>
+                )
+            },
+            cell: ({ row }) => (
+                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap" onClick={() => handleCopyText(row.getValue("slug"))}>
+                    {row.getValue("slug")}
+                </Badge>
+            ),
+        },
+        {
+            accessorKey: "creator",
+            header: () => {
+                return (<div className="text-nowrap">Người tạo</div>)
+            },
+            cell: ({ row }) => (
+                <div className="flex justify-start mr-2">
+                    <div className="flex items-center gap-2">
+                        <img src={(row.getValue("creator") as any).avatar_url} className="w-6 h-6 rounded-full" />
+                        <span className="text-nowrap">
+                            {(row.getValue("creator") as any).username}
+                            {((row.getValue("creator") as any).role === "ADMIN" || (row.getValue("creator") as any).role === "TEACHER") && <i className="fa-solid fa-circle-check text-primary text-[10px] ml-1 -translate-y-[1px]"></i>}
+                        </span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            accessorKey: "tags",
+            header: () => { return (<div>Dạng bài</div>) },
+            cell: ({ row }) => (
+                <div className="flex flex-wrap gap-2 max-w-[250px]">
+                    {(row.getValue("tags") as any)?.map((tag: any) => (
+                        <Badge key={tag} variant="outline" className="text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer text-nowrap">{tag}</Badge>
+                    ))}
+                </div>
+            ),
+        },
+        {
+            accessorKey: "language",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1 text-nowrap">
+                        <span>Ngôn ngữ</span>
+                    </div>
+                )
+            },
+            cell: ({ row }) => (
+                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap">
+                    {row.getValue("language") === "c" && "C"}
+                    {row.getValue("language") === "cpp" && "C++"}
+                    {row.getValue("language") === "java" && "Java"}
+                </Badge>
+            ),
+        },
+        {
+            accessorKey: "level",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <span>Cấp độ</span>
+                    </div>
+                )
+            },
+            cell: ({ row }) => {
+                return (
+                    <div className="font-medium">
+                        <Select value={row.getValue("level")}>
+                            <SelectTrigger className="w-[130px] bg-transparent p-2 h-8 text-xs items-center">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="EASY">Dễ</SelectItem>
+                                <SelectItem value="MEDIUM">Trung bình</SelectItem>
+                                <SelectItem value="HARD">Khó</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: "score",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <span>Điểm</span>
                         <Button
                             variant="ghost"
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -176,139 +332,55 @@ function UserManager() {
                 )
             },
             cell: ({ row }) => (
-                <div className="flex items-center">
-                    <img src={row.getValue("avatar_url")} className="w-6 h-6 rounded-full inline mr-2" />
-                    <span className="lowercase">{row.getValue("username")}</span>
-                    {
-                        loginContext.user?.id === row.getValue("id") &&
-                        <span className="ml-1 text-primary italic">(Bạn)</span>
-                    }
-                </div>
+                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap">
+                    {row.getValue("score")}
+                </Badge>
             ),
         },
         {
-            accessorKey: "id",
-            enableHiding: false,
-        },
-        {
-            accessorKey: "avatar_url",
-            enableHiding: false,
-        },
-        {
-            accessorKey: "email",
-            header: ({ column }) => {
-                return (
-                    <div className="flex items-center gap-1">
-                        <span>Email</span>
-                        <Button
-                            variant="ghost"
-                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                            size="icon"
-                            className="h-7 w-7"
-                        >
-                            <ArrowUpDown className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )
+            accessorKey: "createdAt",
+            header: () => {
+                return (<div className="text-nowrap text-left">Ngày tạo</div>)
             },
-            cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-        },
-        {
-            accessorKey: "role",
-            header: ({ column }) => {
-                return (
-                    <div className="flex items-center gap-1">
-                        <span>Phân quyền</span>
-                        <Button
-                            variant="ghost"
-                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                            size="icon"
-                            className="h-7 w-7"
-                        >
-                            <ArrowUpDown className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )
-            },
-            cell: ({ row }) => {
-                return (
-                    <div className="font-medium">
-                        <Select value={row.getValue("role")} onValueChange={(value) => handleUpdateRole(row.getValue("id"), value)} disabled={loginContext.user?.id === row.getValue("id")}>
-                            <SelectTrigger className="w-[130px] bg-transparent p-2 h-8 text-xs items-center">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ADMIN">ADMIN</SelectItem>
-                                <SelectItem value="TEACHER">TEACHER</SelectItem>
-                                <SelectItem value="STUDENT">STUDENT</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                )
-            },
-        },
-        {
-            accessorKey: "status",
-            header: ({ column }) => {
-                return (
-                    <div className="flex items-center gap-1">
-                        <span>Trạng thái</span>
-                        <Button
-                            variant="ghost"
-                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                            size="icon"
-                            className="h-7 w-7"
-                        >
-                            <ArrowUpDown className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )
-            },
-            cell: ({ row }) => {
-                return (
-                    <div className="font-medium">
-                        <Select value={row.getValue("status")} onValueChange={(value) => handleUpdateStatus(row.getValue("id"), value)} disabled={loginContext.user?.id === row.getValue("id")}>
-                            <SelectTrigger className="w-[130px] bg-transparent p-2 h-8 text-xs items-center">
-                                <div>
-                                    <SelectValue />
-                                    {row.getValue("status") === "ACTIVE" && <i className="fa-solid fa-circle text-[4px] ml-1.5 text-green-600 dark:text-green-500 -translate-y-[3px]"></i>}
-                                    {row.getValue("status") === "INACTIVE" && <i className="fa-solid fa-circle text-[4px] ml-1.5 text-red-600 dark:text-red-500 -translate-y-[3px]"></i>}
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ACTIVE">Hoạt động</SelectItem>
-                                <SelectItem value="INACTIVE">Tạm khoá</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                )
-            },
+            cell: ({ row }) => (
+                <div className="flex justify-center flex-col gap-0.5">
+                    <span className="text-xs opacity-60">Được tạo</span>
+                    <span className="text-nowrap">{formatTimeAgo(row.getValue("createdAt"), "vi")}</span>
+                </div>
+            )
         },
         {
             id: "actions",
             enableHiding: false,
-            header: () => <div className="text-center">Hành động</div>,
+            header: () => <div className="text-center flex justify-center"><ListFilter className="size-[14px]" /></div>,
             cell: ({ row }) => {
                 return (
                     <div className="m-auto">
                         <div className='flex items-center justify-center gap-2'>
-                            <Link to={``} className='cursor-pointer'>
-                                <Button variant="secondary" size="icon" className="w-8 h-8 border border-black/10 dark:border-white/10">
-                                    <Pencil className="w-[14px]" />
-                                </Button>
-                            </Link>
-                            {/* <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="destructive" size="icon" className="w-8 h-8">
-                                        <Trash2 className="w-[14px]" />
-                                    </Button>
-                                </DialogTrigger>
+                            <Dialog>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger>
+                                        <Button variant="outline" size="icon" className="w-8 h-8">
+                                            <Ellipsis className="w-[14px]" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent side="top" align="end">
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            <Pencil className="size-[13px] mr-3" />Chỉnh sửa
+                                        </DropdownMenuItem>
+                                        <DialogTrigger asChild>
+                                            <DropdownMenuItem className="focus:bg-destructive focus:text-white cursor-pointer">
+                                                <Trash2 className="size-[14px] mr-3" />Xoá
+                                            </DropdownMenuItem>
+                                        </DialogTrigger>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Xác nhận xoá người dùng này</DialogTitle>
+                                        <DialogTitle>Xác nhận xoá bài tập này</DialogTitle>
                                     </DialogHeader>
                                     <DialogDescription>
-                                        Sau khi xoá, bài viết này sẽ không thể khôi phục.
+                                        Sau khi xoá, bài tập này sẽ không thể khôi phục.
                                     </DialogDescription>
                                     <AlertDialogFooter className="mt-2">
                                         <DialogClose>
@@ -323,7 +395,7 @@ function UserManager() {
                                         </DialogClose>
                                     </AlertDialogFooter>
                                 </DialogContent>
-                            </Dialog> */}
+                            </Dialog>
                         </div>
                     </div>
                 )
@@ -351,7 +423,7 @@ function UserManager() {
     })
 
     return (
-        <div className="UserManager p-5 pl-2 flex flex-col gap-1">
+        <div className="ProblemManager p-5 pl-2 flex flex-col gap-1">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -361,7 +433,7 @@ function UserManager() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        Quản lý người dùng
+                        Quản lý bài tập
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -370,17 +442,19 @@ function UserManager() {
                     <div className="w-full">
                         <div className="flex items-center py-4 gap-3 justify-end">
                             <p className="flex-1 text-lg pt-2">
-                                <span className="font-semibold">Danh sách người dùng</span>
+                                <span className="font-semibold">Danh sách bài tập</span>
                                 <Badge variant="secondary" className="px-1.5 rounded-sm ml-2 inline">
                                     {data.length}
                                 </Badge>
                             </p>
-                            <Button size="icon"><UserRoundPlus className="w-[18px] h-[18px]" /></Button>
+                            <Link to="create">
+                                <Button size="icon"><Plus className="w-[18px] h-[18px]" /></Button>
+                            </Link>
                             <Input
-                                placeholder="Tìm kiếm người dùng ..."
-                                value={(table.getColumn("username")?.getFilterValue() as string) ?? ""}
+                                placeholder="Tìm kiếm bài tập ..."
+                                value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                                 onChange={(event) =>
-                                    table.getColumn("username")?.setFilterValue(event.target.value)
+                                    table.getColumn("name")?.setFilterValue(event.target.value)
                                 }
                                 className="max-w-sm bg-transparent"
                             />
@@ -398,16 +472,14 @@ function UserManager() {
                                             return (
                                                 <DropdownMenuCheckboxItem
                                                     key={column.id}
-                                                    className="capitalize w-full"
+                                                    className="w-full"
                                                     checked={column.getIsVisible()}
                                                     onCheckedChange={(value) =>
                                                         column.toggleVisibility(!!value)
                                                     }
                                                 >
                                                     {
-                                                        column.id === "role" ? "Phân quyền" :
-                                                            column.id === "status" ? "Trạng thái" :
-                                                                column.id
+                                                        labelArr[column.id as keyof typeof labelArr] ?? column.id
                                                     }
                                                 </DropdownMenuCheckboxItem>
                                             )
@@ -499,15 +571,4 @@ function UserManager() {
     );
 };
 
-export default UserManager;
-
-// User(id, username, email, role, status, avatar_url, createdAt)
-export type User = {
-    id: string
-    username: string
-    email: string
-    role: "ADMIN" | "TEACHER" | "STUDENT"
-    status: "ACTIVE" | "INACTIVE"
-    avatar_url: string
-    createdAt: string
-}
+export default ProblemManager;
