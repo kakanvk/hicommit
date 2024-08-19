@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useState } from "react";
 import Ranking from "./Ranking";
+import { Button } from "@/components/ui/button";
 
 // Function to calculate the remaining time and the progress percentage
 const calculateTimeLeft = (endTime: number, totalTime: number): { timeLeft: string; percent: number } => {
@@ -89,24 +90,30 @@ function ContestByID() {
                     </h1>
                     <div className="flex flex-col gap-2">
                         <Tabs defaultValue="content" className="w-full">
-                            <TabsList className="bg-transparent justify-start rounded-none pb-0 px-0 border-b-[2px] border-secondary/40 w-full">
+                            <TabsList className="mt-3 bg-transparent justify-start rounded-none pb-3 px-0 border-b-[2px] border-secondary/40 w-full">
                                 <TabsTrigger
                                     value="content"
-                                    className="px-4 border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
+                                    className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                                 >
-                                    <AlignLeft className="w-4 mr-2" />Thông tin
+                                    <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
+                                        <AlignLeft className="w-4 mr-2" />Chi tiết
+                                    </Button>
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="ranking"
-                                    className="px-4 border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
+                                    className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                                 >
-                                    <BarChartBig className="w-4 mr-2" />Bảng xếp hạng
+                                    <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
+                                        <BarChartBig className="w-4 mr-2" />Bảng xếp hạng
+                                    </Button>
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="history"
-                                    className="px-4 border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
+                                    className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                                 >
-                                    <History className="w-4 mr-2" />Lịch sử nộp bài
+                                    <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
+                                        <History className="w-4 mr-2" />Lịch sử nộp bài
+                                    </Button>
                                 </TabsTrigger>
                             </TabsList>
                             <TabsContent value="content" className="w-full">

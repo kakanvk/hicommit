@@ -82,7 +82,7 @@ const GitGraphFree: React.FC<GitGraphFreeProps> = ({ className, ref }) => {
     return (
         <div
             className={cn(
-                `pl-10 border-l-2 h-4`,
+                `pl-10 border-l-2 h-4 after:absolute after:top-0 after:left-0 after:w-[2px] after:h-full after:bg-gradient-to-b after:from-background`,
                 className
             )}
             ref={ref}

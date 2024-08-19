@@ -18,6 +18,7 @@ module.exports = {
     },
     fontFamily: {
       sans: ["Plus Jakarta Sans", "sans-serif"],
+      mono: ["JetBrains Mono", "monospace"],
     },
     extend: {
       colors: {
@@ -68,6 +69,17 @@ module.exports = {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
+        },
+        "shine-pulse": {
+          "0%": {
+            "background-position": "0% 0%",
+          },
+          "50%": {
+            "background-position": "100% 100%",
+          },
+          to: {
+            "background-position": "0% 0%",
+          },
         },
       },
       animation: {

@@ -73,6 +73,7 @@
     "react-html-parser": "^2.0.2",
     "react-katex": "^3.0.1",
     "react-resizable-panels": "^2.0.19",
+    "react-responsive": "^10.0.0",
     "react-router-dom": "^6.23.0",
     "recharts": "^2.12.7",
     "socket.io-client": "^4.7.5",

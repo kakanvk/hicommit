@@ -440,7 +440,7 @@ function EditProblem() {
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Cập nhật khoá học này?</DialogTitle>
+                                <DialogTitle>Cập nhật bài tập này?</DialogTitle>
                             </DialogHeader>
                             <DialogDescription>
                                 Các thông tin đã chỉnh sửa sẽ được lưu lại.
@@ -461,7 +461,7 @@ function EditProblem() {
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Huỷ cập nhật khoá học này?</DialogTitle>
+                                <DialogTitle>Huỷ cập nhật bài tập này?</DialogTitle>
                             </DialogHeader>
                             <DialogDescription>
                                 Mọi thay đổi chưa được lưu lại, bạn có chắc muốn huỷ cập nhật.

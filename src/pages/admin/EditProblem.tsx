@@ -2,7 +2,7 @@ import { AutosizeTextarea } from "@/components/ui/auto-resize-text-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronRight, ChevronsLeft, ChevronsRight, CornerDownRight, MessageSquareCode, Pencil, Plus, Trash, Trash2, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, ChevronsLeft, ChevronsRight, CornerDownRight, MessageSquareCode, MoveLeft, Pencil, Plus, Trash, Trash2, X } from "lucide-react";
 
 import {
     Select,
@@ -38,7 +38,7 @@ import TextAndMathEditor from "@/components/ui/text-math-editor";
 import { getCourseByIDForAdmin } from "@/service/API/Course";
 import { toast } from "react-hot-toast";
 
-import { createProblem } from "@/service/API/Problem";
+import { checkAvailableLanguageChangeByProblemID, createProblem, getProblemByIDForAdmin, updateProblemForAdmin } from "@/service/API/Problem";
 import { set } from "date-fns";
 import { ta } from "date-fns/locale";
 
@@ -48,14 +48,15 @@ const DEFAULT_SCORE = {
     HARD: 100
 }
 
-function CreateProblem() {
+function EditProblem() {
 
     const navigate = useNavigate();
+    const { id } = useParams();
 
     const scoreRef = useRef<any>(null);
     const tagRef = useRef<any>(null);
 
-    const unit = new URLSearchParams(window.location.search).get('unit');
+    const [problem, setProblem] = useState<any>(null);
 
     const [tags, setTags] = useState<string[]>(['Hicommit']);
     const [tag, setTag] = useState<string>('');
@@ -63,6 +64,7 @@ function CreateProblem() {
     const [name, setName] = useState<string>('');
     const [slug, setSlug] = useState<string>('');
     const [language, setLanguage] = useState<string>('c');
+    const [checkLanguage, setCheckLanguage] = useState<boolean>(false);
     const [level, setLevel] = useState<string>('EASY');
     const [score, setScore] = useState<any>(20);
     const [editedScore, setEditedScore] = useState<boolean>(false);
@@ -73,6 +75,37 @@ function CreateProblem() {
 
     const [examples, setExamples] = useState<any[]>([]);
     const [testCases, setTestCases] = useState<any[]>([]);
+
+    const getProblem = async () => {
+        try {
+            const response = await getProblemByIDForAdmin(id as any);
+            setProblem(response);
+            setName(response.name);
+            setSlug(response.slug);
+            setLanguage(response.language);
+            setTags(response.tags);
+            setLevel(response.level);
+            setScore(response.score);
+            setExamples(response.examples);
+            setTestCases(response.testcases);
+            setInput(response.input);
+            setOutput(response.output);
+            setDescription(response.description);
+            setLimit(response.limit);
+        } catch (error) {
+            console.error('Error getting problem:', error);
+        }
+    }
+
+    const handleCheckLanguage = async () => {
+        const response = await checkAvailableLanguageChangeByProblemID(id as any);
+        setCheckLanguage(response.available as any);
+    }
+
+    useEffect(() => {
+        getProblem();
+        handleCheckLanguage();
+    }, []);
 
     const handleAddTag = () => {
         if (tags.includes(tag)) {
@@ -124,7 +157,7 @@ function CreateProblem() {
         }, 100);
     }
 
-    const handleCreateProblem = async () => {
+    const handleUpdateProblem = async () => {
         const data = {
             name: name,
             slug: slug.trim(),
@@ -136,23 +169,20 @@ function CreateProblem() {
             limit: limit,
             examples: examples,
             testcases: testCases,
-            type: "FREE",
-            unit: unit,
-            parent: null,
             level: level,
             score: score
         }
 
-        console.log(data);
+        // console.log(data);
 
         try {
             // Call createPost API
             const response = await toast.promise(
-                createProblem(data),
+                updateProblemForAdmin(id as any, data),
                 {
-                    loading: 'Đang lưu...',
-                    success: 'Tạo bài tập thành công',
-                    error: 'Tạo bài tập thất bại'
+                    loading: 'Đang cập nhật...',
+                    success: 'Cập nhật bài tập thành công',
+                    error: 'Cập nhật bài tập thất bại'
                 },
                 {
                     style: {
@@ -161,6 +191,7 @@ function CreateProblem() {
                         color: '#fff',
                         paddingLeft: '15px',
                         fontFamily: 'Plus Jakarta Sans',
+                        maxWidth: '500px'
                     }
                 });
             // console.log(response);
@@ -168,6 +199,20 @@ function CreateProblem() {
         } catch (error) {
             console.error('Error creating post:', error);
         }
+    }
+
+    const handleCancelUpdate = () => {
+        toast.error('Đã huỷ cập nhật bài tập',
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+        navigate(`/admin/problems`);
     }
 
     const handleAddExample = () => {
@@ -233,7 +278,7 @@ function CreateProblem() {
     }
 
     return (
-        <div className="CreateProblem p-5 pl-2 flex flex-col gap-8">
+        <div className="EditProblem p-5 pl-2 flex flex-col gap-8">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -249,7 +294,7 @@ function CreateProblem() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        Tạo bài tập
+                        Chỉnh sửa bài tập
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -259,16 +304,16 @@ function CreateProblem() {
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Tên bài tập</h4>
-                            <Input placeholder="Nhập tên bài tập" className="placeholder:italic" value={name} onChange={e => setName(e.target.value)} />
+                            <Input placeholder="Nhập tên bài tập" className="placeholder:italic" value={name} onChange={e => setName(e.target.value)} spellCheck="false" />
                         </div>
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mã bài tập</h4>
-                            <Input placeholder="Nhập đường dẫn tuỳ chỉnh" className="placeholder:italic" value={slug} onChange={e => setSlug(e.target.value)} />
+                            <Input placeholder="Nhập mã bài tập" className="placeholder:italic" value={slug} onChange={e => setSlug(e.target.value)} disabled={!checkLanguage} spellCheck="false" />
                         </div>
                         <div className="flex gap-2">
                             <div className="flex gap-2 flex-col">
                                 <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Ngôn ngữ lập trình</h4>
-                                <Select defaultValue="c" onValueChange={(value) => setLanguage(value)}>
+                                <Select value={language} onValueChange={(value) => setLanguage(value)} disabled={!checkLanguage}>
                                     <SelectTrigger className="w-[350px]">
                                         <SelectValue placeholder="Theme" />
                                     </SelectTrigger>
@@ -278,7 +323,7 @@ function CreateProblem() {
                                         <SelectItem value="java">Java</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <span className="italic text-xs opacity-50 dark:font-light">* Không thể thay đổi ngôn ngữ nếu đã có người nộp bài</span>
+                                <span className="italic text-xs opacity-50 dark:font-light">* Chỉ có thể thay đổi ngôn ngữ nếu chưa có người nộp bài</span>
                             </div>
                             <ChevronRight className="size-4 mt-11 opacity-50" />
                             <div className="flex gap-2 flex-col">
@@ -339,25 +384,41 @@ function CreateProblem() {
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Mô tả đề bài</h4>
-                            <TextAndMathEditor placeholder="Nhập mô tả bài toán" onChange={setDescription} />
+                            {
+                                problem?.description &&
+                                <TextAndMathEditor placeholder="Nhập mô tả bài toán" onChange={setDescription} defaultValue={problem?.description} />
+                            }
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Input</h4>
-                            <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu vào (input)" onChange={setInput} />
+                            {
+                                problem?.input &&
+                                <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu vào (input)" onChange={setInput} defaultValue={problem?.input} />
+                            }
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Output</h4>
-                            <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu ra (output)" onChange={setOutput} />
+                            {
+                                problem?.output &&
+                                <TextAndMathEditor placeholder="Nhập mô tả cho dữ liệu đầu ra (output)" onChange={setOutput} defaultValue={problem?.output} />
+                            }
                         </div>
                     </div>
                     <div className="flex flex-col gap-6">
                         <div className="flex gap-2 flex-col">
                             <h4 className="font-medium">Giới hạn</h4>
-                            <TextAndMathEditor placeholder="Nhập các giới hạn về tài nguyên, thời gian (nếu có)" onChange={setLimit} />
+                            {
+                                problem?.limit &&
+                                <TextAndMathEditor placeholder="Nhập các giới hạn về tài nguyên, thời gian (nếu có)" onChange={setLimit} defaultValue={problem?.limit} />
+                            }
+                            {
+                                !problem?.limit &&
+                                <TextAndMathEditor placeholder="Nhập các giới hạn về tài nguyên, thời gian (nếu có)" onChange={setLimit} />
+                            }
                         </div>
                     </div>
                 </div>
@@ -417,13 +478,57 @@ function CreateProblem() {
                         <Plus className="w-[17px] mr-1.5 h-[17px]" />Thêm Test-case
                     </Button>
                 </div>
-                <Button className="w-fit" onClick={() => handleCreateProblem()}>Tạo bài tập</Button>
+                <div className="mt-2 flex gap-3">
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit px-5" variant="secondary" size="lg">
+                                <ArrowLeft className="size-4 mr-2" />
+                                Huỷ thay đổi
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Huỷ cập nhật bài tập này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Mọi thay đổi chưa được lưu lại, bạn có chắc muốn huỷ cập nhật.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <Button variant="destructive" onClick={() => handleCancelUpdate()}>Huỷ cập nhật</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button className="w-fit" size="lg">Cập nhật bài tập</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Cập nhật bài tập này?</DialogTitle>
+                            </DialogHeader>
+                            <DialogDescription>
+                                Các thông tin đã chỉnh sửa sẽ được lưu lại.
+                            </DialogDescription>
+                            <DialogFooter className="mt-2">
+                                <DialogClose asChild>
+                                    <Button variant="ghost">Tiếp tục chỉnh sửa</Button>
+                                </DialogClose>
+                                <DialogClose asChild>
+                                    <Button onClick={() => handleUpdateProblem()}>Cập nhật</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
         </div>
     );
 };
 
-export default CreateProblem;
+export default EditProblem;
 
 const Example = (props: any) => {
 

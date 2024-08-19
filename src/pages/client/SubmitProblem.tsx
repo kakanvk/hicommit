@@ -50,6 +50,7 @@ import { useLogin } from "@/service/LoginContext";
 import Loader from "@/components/ui/loader";
 import { getProblemByIDorSlug } from "@/service/API/Problem";
 import toast from "react-hot-toast";
+import { getMySubmited } from "@/service/API/Submission";
 
 function SubmitProblem() {
 
@@ -69,17 +70,24 @@ function SubmitProblem() {
     const [commitMessage, setCommitMessage] = useState("Submit code at " + new Date().toLocaleString() + " by HiCommit");
 
     const [problem, setProblem] = useState<any>();
+    const [mySubmited, setMySubmited] = useState<any>();
 
     const handleGetProblem = async () => {
-        try {
+        try{
             const response = await getProblemByIDorSlug(problem_id as any);
             setProblem(response);
+            handleGetMySubmited();
             setSelectedLanguage(response.language);
             handleChangeLanguage(response.language);
             console.log(response);
         } catch (error) {
-            console.log(error);
+            console.error("Error during handleGetProblem:", error);
         }
+    }
+
+    const handleGetMySubmited = async () => {
+        const data = await getMySubmited();
+        setMySubmited(data);
     }
 
     useEffect(() => {
@@ -91,11 +99,14 @@ function SubmitProblem() {
     const templateLanguage = "template-" + problem?.language.toLowerCase();
 
     const handleCheckRepo = async () => {
+        setLoading(true);
         try {
             const response = await githubAPI.getRepoInfo(loginContext?.user.username, targetRepo);
+            setLoading(false);
         } catch (error) {
             await githubAPI.createRepoFromTemplate();
             console.log("Created repo from template");
+            setLoading(false);
         }
     }
 
@@ -199,25 +210,40 @@ public class Main {
 
     return (
         <div className="SubmitProblem p-6 px-8 pb-[90px] flex flex-col gap-8">
-
             {
                 loading &&
                 <Loader />
             }
             <Breadcrumb>
                 <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link to="/">Khoá học của tôi</Link>
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link to={`/course/${problem?.parent.id}`}>{problem?.parent.name}</Link>
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
+                    {
+                        problem?.type === "COURSE" &&
+                        <>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink asChild>
+                                    <Link to="/">Khoá học của tôi</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbLink>
+                                    <Link to={`/course/${problem?.parent?.id}`}>{problem?.parent?.name}</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                        </>
+                    }
+                    {
+                        problem?.type === "FREE" &&
+                        <>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink asChild>
+                                    <Link to="/problems">Các bài tập</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                        </>
+                    }
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
                             <Link to={`/problem/${problem?.slug || problem_id}`}>{problem?.name}</Link>
@@ -238,15 +264,47 @@ public class Main {
                         Nộp bài:
                         <Link className="ml-1 hover:text-green-600 dark:hover:text-green-500 duration-300 w-fit" to={`/problem/${problem_id}`}>
                             {problem?.name}
-                            <i className="fa-solid fa-circle-check text-green-600 ml-2 text-[18px]"></i>
+                            {mySubmited && mySubmited?.[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 ml-2.5 text-[18px]"></i>}
+                            {mySubmited && mySubmited?.[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500 ml-2.5 text-[18px]"></i>}
+                            {mySubmited && mySubmited?.[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500 ml-2.5 text-[18px]"></i>}
+                            {mySubmited && mySubmited?.[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400 ml-2.5 text-[18px]"></i>}
+                            {mySubmited && (mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) &&
+                                <i className="fa-solid fa-circle-minus text-zinc-400 ml-2.5 text-[18px]"></i>
+                            }
                         </Link>
                     </p>
-                    <div className="flex items-center gap-2">
-                        <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent.slug || problem?.parent.id}`}>
-                            <CornerDownRight className="w-3" />{problem?.parent.name}
-                        </Link>
-                        <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">{problem?.unit.name}</Badge>
-                    </div>
+                    {
+                        problem?.type === "COURSE" ?
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent?.id}`}>
+                                    <CornerDownRight className="w-3" />{problem?.parent?.name}
+                                </Link>
+                                <Badge variant="outline" className="rounded-md px-2 text-green-600 dark:text-green-500 border-primary">{problem?.unit?.name}</Badge>
+                            </div> :
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`rounded-md bg-green-500/20 border border-green-500 text-green-600 dark:text-green-400 text-[12px] p-0.5 px-2 font-medium leading-5 text-nowrap`} >
+                                    Bài tập tự do
+                                </span >
+                                {
+                                    problem?.level === "EASY" &&
+                                    <span className={`rounded-md bg-green-500/20 border border-green-500 text-green-600 dark:text-green-400 text-[12px] p-0.5 px-2 font-medium leading-5 text-nowrap`} >
+                                        Mức độ: Dễ
+                                    </span >
+                                }
+                                {
+                                    problem?.level === "MEDIUM" &&
+                                    <span className={`rounded-md bg-sky-500/20 border border-sky-500 text-sky-600 dark:text-sky-400 text-[12px] p-0.5 px-2 font-medium leading-5 text-nowrap`} >
+                                        Mức độ: Trung bình
+                                    </span >
+                                }
+                                {
+                                    problem?.level === "HARD" &&
+                                    <span className={`rounded-md bg-orange-500/20 border border-orange-500 text-orange-600 dark:text-orange-400 text-[12px] p-0.5 px-2 font-medium leading-5 text-nowrap`} >
+                                        Mức độ: Khó
+                                    </span >
+                                }
+                            </div>
+                    }
                 </div>
                 <TooltipProvider delayDuration={100}>
                     <Tooltip>
@@ -261,6 +319,7 @@ public class Main {
             </div>
 
             <div className="flex flex-col gap-5">
+                <p className="text-lg font-bold">Nộp bài tập</p>
                 <div className="border rounded-lg overflow-hidden">
                     <CodeMirror
                         value={code}

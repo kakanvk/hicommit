@@ -109,133 +109,135 @@ function Courses() {
                 <Tabs defaultValue="all-courses" className="w-full">
                     <div className="relative w-full flex flex-col gap-5">
                         <div className="-mx-8 px-0 sticky top-0 z-10 bg-background dark:bg-zinc-950">
-                            <TabsList className="bg-transparent justify-between rounded-none py-0 px-0 pr-2 border-b-[2px] border-secondary/40 w-full h-fit">
-                                <div className="flex items-center">
-                                    <TabsTrigger
-                                        value="all-courses"
-                                        className="translate-y-0.5 p-3 px-5 data-[state=active]:bg-transparent data-[state=active]:bg-gradient-to-t data-[state=active]:from-green-500/30 data-[state=active]:to-primary/0 data-[state=active]:to-120% border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
-                                    >
-                                        <span className="text-base">
-                                            Tất cả khoá học
-                                        </span>
-                                        <Badge className="px-1.5 min-w-[22px] flex justify-center ml-2">{courses.length}</Badge>
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="my-courses"
-                                        className="translate-y-0.5 p-3 px-5 data-[state=active]:bg-transparent data-[state=active]:bg-gradient-to-t data-[state=active]:from-green-500/30 data-[state=active]:to-primary/0 data-[state=active]:to-120% border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
-                                    >
-                                        <span className="text-base">
-                                            Đã tham gia
-                                        </span>
-                                        <Badge className="px-1.5 min-w-[22px] flex justify-center ml-2">{joinedCourses.length}</Badge>
-                                    </TabsTrigger>
-                                    <div className="flex gap-2 ml-3">
-                                        <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
-                                            DA20TTB
-                                            <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
-                                        </Badge>
-                                        <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
-                                            C++
-                                            <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
-                                        </Badge>
+                            <BlurFade delay={0.1} yOffset={0} blur="2px">
+                                <TabsList className="bg-transparent justify-between rounded-none py-0 px-0 pr-2 border-b-[2px] border-secondary/40 w-full h-fit">
+                                    <div className="flex items-center">
+                                        <TabsTrigger
+                                            value="all-courses"
+                                            className="translate-y-0.5 p-3 px-5 data-[state=active]:bg-transparent data-[state=active]:bg-gradient-to-t data-[state=active]:from-green-500/30 data-[state=active]:to-primary/0 data-[state=active]:to-120% border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
+                                        >
+                                            <span className="text-base">
+                                                Tất cả khoá học
+                                            </span>
+                                            <Badge className="px-1.5 min-w-[22px] flex justify-center ml-2">{courses.length}</Badge>
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="my-courses"
+                                            className="translate-y-0.5 p-3 px-5 data-[state=active]:bg-transparent data-[state=active]:bg-gradient-to-t data-[state=active]:from-green-500/30 data-[state=active]:to-primary/0 data-[state=active]:to-120% border-b-2 border-b-transparent data-[state=active]:border-b-primary rounded-none bg-transparent duration-500"
+                                        >
+                                            <span className="text-base">
+                                                Đã tham gia
+                                            </span>
+                                            <Badge className="px-1.5 min-w-[22px] flex justify-center ml-2">{joinedCourses.length}</Badge>
+                                        </TabsTrigger>
+                                        <div className="flex gap-2 ml-3">
+                                            <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
+                                                DA20TTB
+                                                <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
+                                            </Badge>
+                                            <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
+                                                C++
+                                                <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
+                                            </Badge>
+                                        </div>
+                                        <TooltipProvider delayDuration={200}>
+                                            <Tooltip>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="w-8 h-8 ml-3">
+                                                                <Filter className="w-4 aspect-square" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-[350px] flex flex-col gap-6">
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                Tuỳ chỉnh lọc
+                                                            </DialogTitle>
+                                                        </DialogHeader>
+                                                        <DialogDescription className="flex flex-col gap-4">
+                                                            <div className="flex flex-col gap-1.5">
+                                                                <span>Ngôn ngữ lập trình</span>
+                                                                <Select defaultValue="all">
+                                                                    <SelectTrigger className="bg-secondary" >
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="all">Tất cả</SelectItem>
+                                                                        <SelectItem value="DA20TTB">C</SelectItem>
+                                                                        <SelectItem value="DA21TTB">C++</SelectItem>
+                                                                        <SelectItem value="DA21TTB">Java</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                            <div className="flex flex-col gap-1.5">
+                                                                <span>Lớp học</span>
+                                                                <Select defaultValue="all">
+                                                                    <SelectTrigger className="bg-secondary">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="all">Tất cả</SelectItem>
+                                                                        <SelectItem value="DA20TTB">DA20TTB</SelectItem>
+                                                                        <SelectItem value="DA21TTB">DA21TTB</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                            <div className="flex flex-col gap-1.5">
+                                                                <span>Trạng thái khoá học</span>
+                                                                <Select defaultValue="all">
+                                                                    <SelectTrigger className="bg-secondary">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="all">Tất cả</SelectItem>
+                                                                        <SelectItem value="DA20TTB">Chưa kết thúc</SelectItem>
+                                                                        <SelectItem value="DA21TTB">Đã kết thúc</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </DialogDescription>
+                                                        <DialogFooter className="mt-3">
+                                                            <div className="flex gap-2.5">
+                                                                <DialogClose asChild>
+                                                                    <Button type="button" variant="secondary">
+                                                                        Đóng
+                                                                    </Button>
+                                                                </DialogClose>
+                                                                <Button>Lọc</Button>
+                                                            </div>
+                                                        </DialogFooter>
+                                                    </DialogContent>
+                                                </Dialog>
+                                                <TooltipContent>
+                                                    Lọc
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </div>
-                                    <TooltipProvider delayDuration={200}>
-                                        <Tooltip>
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="w-8 h-8 ml-3">
-                                                            <Filter className="w-4 aspect-square" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                </DialogTrigger>
-                                                <DialogContent className="max-w-[350px] flex flex-col gap-6">
-                                                    <DialogHeader>
-                                                        <DialogTitle>
-                                                            Tuỳ chỉnh lọc
-                                                        </DialogTitle>
-                                                    </DialogHeader>
-                                                    <DialogDescription className="flex flex-col gap-4">
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <span>Ngôn ngữ lập trình</span>
-                                                            <Select defaultValue="all">
-                                                                <SelectTrigger className="bg-secondary" >
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="all">Tất cả</SelectItem>
-                                                                    <SelectItem value="DA20TTB">C</SelectItem>
-                                                                    <SelectItem value="DA21TTB">C++</SelectItem>
-                                                                    <SelectItem value="DA21TTB">Java</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <span>Lớp học</span>
-                                                            <Select defaultValue="all">
-                                                                <SelectTrigger className="bg-secondary">
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="all">Tất cả</SelectItem>
-                                                                    <SelectItem value="DA20TTB">DA20TTB</SelectItem>
-                                                                    <SelectItem value="DA21TTB">DA21TTB</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <span>Trạng thái khoá học</span>
-                                                            <Select defaultValue="all">
-                                                                <SelectTrigger className="bg-secondary">
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="all">Tất cả</SelectItem>
-                                                                    <SelectItem value="DA20TTB">Chưa kết thúc</SelectItem>
-                                                                    <SelectItem value="DA21TTB">Đã kết thúc</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                    </DialogDescription>
-                                                    <DialogFooter className="mt-3">
-                                                        <div className="flex gap-2.5">
-                                                            <DialogClose asChild>
-                                                                <Button type="button" variant="secondary">
-                                                                    Đóng
-                                                                </Button>
-                                                            </DialogClose>
-                                                            <Button>Lọc</Button>
-                                                        </div>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                            <TooltipContent>
-                                                Lọc
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                                <div className="flex-1 flex justify-end gap-2">
-                                    <div className="relative max-w-[400px] flex-1">
-                                        <Search className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            type="search"
-                                            placeholder="Tìm kiếm khoá học"
-                                            className="w-full rounded-md pl-9 flex-1 bg-transparent"
-                                        />
+                                    <div className="flex-1 flex justify-end gap-2">
+                                        <div className="relative max-w-[400px] flex-1">
+                                            <Search className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                type="search"
+                                                placeholder="Tìm kiếm khoá học"
+                                                className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                            />
+                                        </div>
+                                        <Button variant="outline" size="icon">
+                                            <EllipsisVertical className="w-4 h-4" />
+                                        </Button>
                                     </div>
-                                    <Button variant="outline" size="icon">
-                                        <EllipsisVertical className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TabsList>
+                                </TabsList>
+                            </BlurFade>
                         </div>
                         <TabsContent value="all-courses">
                             <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
                                 {
                                     courses.map((course, index) => (
                                         <BlurFade key={course?.id} delay={0.15 * index} yOffset={0}>
-                                            <div className="flex flex-col border rounded-md flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
+                                            <div className="h-full flex flex-col border rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                 <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
                                                     <img src={course?.thumbnail} />
                                                     <Button variant={`${loginContext.user.favourite_course.includes(course.id) ? 'default' : 'secondary'}`} size="icon" className="absolute right-3 top-3 active:scale-90" onClick={(e) => handleAddFavouriteCourse(e, course.id)}>
@@ -368,7 +370,7 @@ function Courses() {
                                         {
                                             joinedCourses.map((course, index) => (
                                                 <BlurFade key={course?.id} delay={0.15 * index} yOffset={0}>
-                                                    <div key={course?.id} className="flex flex-col border rounded-md flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
+                                                    <div className="flex flex-col border h-full rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                         <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
                                                             <img src={course?.thumbnail} />
                                                             <Button variant={`${loginContext.user.favourite_course.includes(course.id) ? 'default' : 'secondary'}`} size="icon" className="absolute right-3 top-3 active:scale-90" onClick={(e) => handleAddFavouriteCourse(e, course.id)}>

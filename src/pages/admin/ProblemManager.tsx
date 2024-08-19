@@ -41,7 +41,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Ellipsis, ListFilter, MoreHorizontal, Pencil, Plus, Trash2, UserRoundPlus } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Ellipsis, ListFilter, MoreHorizontal, Pencil, Plus, Trash2, UserRound, UserRoundPlus } from "lucide-react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -65,13 +65,19 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { useEffect, useState } from "react";
-import { getUsers, updateRole, updateStatus } from "@/service/API/User";
 import toast from "react-hot-toast";
 import { useLogin } from "@/service/LoginContext";
 import { AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { getProblemsForAdmin } from "@/service/API/Problem";
+import { deleteProblemByID, getProblemsForAdmin, updateLevel } from "@/service/API/Problem";
 import { formatTimeAgo } from "@/service/DateTimeService";
+
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import Loader2 from '@/components/ui/loader2';
 
 
 // Problem(id, name, slug, tags, language, description, input, output, limit, examples, testcases, created_by, type, level, score, parent)
@@ -91,7 +97,8 @@ export type Problem = {
     type: "COURSE" | "CONTEST" | "FREE"
     level: string
     score: number
-    parent: Object
+    parent: Object,
+    ac_rate: number
 }
 
 const labelArr = {
@@ -101,6 +108,7 @@ const labelArr = {
     tags: "Dạng bài",
     language: "Ngôn ngữ",
     level: "Cấp độ",
+    ac_rate: "Tỷ lệ AC",
     score: "Điểm",
     createdAt: "Ngày tạo",
     actions: "Hành động"
@@ -108,29 +116,52 @@ const labelArr = {
 
 function ProblemManager() {
 
-    const loginContext = useLogin();
-
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
         id: false,
+        submission_count: false,
+        pass_count: false,
+        createdAt: false,
     });
     const [rowSelection, setRowSelection] = useState({});
     const [data, setData] = useState<Problem[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const getData = async () => {
         const problems = await getProblemsForAdmin();
         console.log(problems);
         setData(problems);
+        setLoading(false);
     }
 
-    const handleUpdateRole = async (userId: string, role: string) => {
+    const handleUpdateLevel = async (problem_id: string, level: string) => {
         await toast.promise(
-            updateRole(userId, role),
+            updateLevel(problem_id, level),
             {
                 loading: 'Đang cập nhật...',
                 success: 'Cập nhật thành công',
                 error: 'Cập nhật không thành công, hãy thử lại'
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+        getData();
+    }
+
+    const handleDeleteProblem = async (problem_id: string) => {
+        await toast.promise(
+            deleteProblemByID(problem_id),
+            {
+                loading: 'Đang xoá...',
+                success: 'Xoá thành công',
+                error: 'Xoá không thành công, hãy thử lại'
             },
             {
                 style: {
@@ -194,6 +225,14 @@ function ProblemManager() {
             enableHiding: false,
         },
         {
+            accessorKey: "submission_count",
+            enableHiding: false,
+        },
+        {
+            accessorKey: "pass_count",
+            enableHiding: false,
+        },
+        {
             id: "select",
             header: ({ table }) => (
                 <Checkbox
@@ -216,6 +255,21 @@ function ProblemManager() {
             enableHiding: false,
         },
         {
+            accessorKey: "slug",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <span className='text-nowrap'>Mã bài tập</span>
+                    </div>
+                )
+            },
+            cell: ({ row }) => (
+                <Badge variant="secondary" className="uppercase rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap" onClick={() => handleCopyText(row.getValue("slug"))}>
+                    {row.getValue("slug")}
+                </Badge>
+            ),
+        },
+        {
             accessorKey: "name",
             header: ({ column }) => {
                 return (
@@ -229,34 +283,30 @@ function ProblemManager() {
             ),
         },
         {
-            accessorKey: "slug",
-            header: ({ column }) => {
-                return (
-                    <div className="flex items-center gap-1">
-                        <span className='text-nowrap'>Mã bài tập</span>
-                    </div>
-                )
-            },
-            cell: ({ row }) => (
-                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap" onClick={() => handleCopyText(row.getValue("slug"))}>
-                    {row.getValue("slug")}
-                </Badge>
-            ),
-        },
-        {
             accessorKey: "creator",
             header: () => {
-                return (<div className="text-nowrap">Người tạo</div>)
+                return (<div className="text-nowrap w-8 flex justify-center"><UserRound className='size-4' /></div>)
             },
             cell: ({ row }) => (
-                <div className="flex justify-start mr-2">
-                    <div className="flex items-center gap-2">
-                        <img src={(row.getValue("creator") as any).avatar_url} className="w-6 h-6 rounded-full" />
-                        <span className="text-nowrap">
-                            {(row.getValue("creator") as any).username}
-                            {((row.getValue("creator") as any).role === "ADMIN" || (row.getValue("creator") as any).role === "TEACHER") && <i className="fa-solid fa-circle-check text-primary text-[10px] ml-1 -translate-y-[1px]"></i>}
-                        </span>
-                    </div>
+                <div className="flex justify-center w-8">
+                    <HoverCard openDelay={100}>
+                        <HoverCardTrigger>
+                            <img src={(row.getValue("creator") as any).avatar_url} className="size-6 rounded-full" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className='flex items-center justify-between'>
+                            <div className="flex items-center gap-2">
+                                <img src={(row.getValue("creator") as any).avatar_url} className="size-8 rounded-full" />
+                                <div className='flex flex-col'>
+                                    <span className='text-xs opacity-70'>Tạo bởi</span>
+                                    <span className="text-nowrap">
+                                        {(row.getValue("creator") as any).username}
+                                        {((row.getValue("creator") as any).role === "ADMIN" || (row.getValue("creator") as any).role === "TEACHER") && <i className="fa-solid fa-circle-check text-primary text-[10px] ml-1 -translate-y-[1px]"></i>}
+                                    </span>
+                                </div>
+                            </div>
+                            <Button size="sm" variant="secondary" className='h-7 text-xs'>{(row.getValue("creator") as any).role}</Button>
+                        </HoverCardContent>
+                    </HoverCard>
                 </div>
             )
         },
@@ -264,7 +314,7 @@ function ProblemManager() {
             accessorKey: "tags",
             header: () => { return (<div>Dạng bài</div>) },
             cell: ({ row }) => (
-                <div className="flex flex-wrap gap-2 max-w-[250px]">
+                <div className="flex flex-wrap gap-2 max-w-[120px] xl:max-w-[150px] 2xl:max-w-[250px]">
                     {(row.getValue("tags") as any)?.map((tag: any) => (
                         <Badge key={tag} variant="outline" className="text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer text-nowrap">{tag}</Badge>
                     ))}
@@ -300,8 +350,8 @@ function ProblemManager() {
             cell: ({ row }) => {
                 return (
                     <div className="font-medium">
-                        <Select value={row.getValue("level")}>
-                            <SelectTrigger className="w-[130px] bg-transparent p-2 h-8 text-xs items-center">
+                        <Select value={row.getValue("level")} onValueChange={(value) => handleUpdateLevel(row.getValue("id"), value)}>
+                            <SelectTrigger className={`w-[130px] bg-transparent p-2 h-8 text-xs items-center`}>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -313,6 +363,35 @@ function ProblemManager() {
                     </div>
                 )
             },
+        },
+        {
+            accessorKey: "ac_rate",
+            header: ({ column }) => {
+                return (
+                    <div className="flex items-center gap-1">
+                        <span className='text-nowrap'>Tỷ lệ AC</span>
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                            size="icon"
+                            className="h-7 w-7"
+                        >
+                            <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )
+            },
+            cell: ({ row }) => (
+                <div className="flex items-center gap-1.5">
+                    <div className="w-[60px] 2xl:w-[80px] h-1.5 bg-secondary/90 rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-primary rounded-full" style={{ width: `${(row.getValue("ac_rate") as any).toFixed(0)}%` }}>
+                        </div>
+                    </div>
+                    <span className="text-[12px] font-semibold">
+                        {(row.getValue("ac_rate") as any).toFixed(0) + "%"}
+                    </span>
+                </div>
+            ),
         },
         {
             accessorKey: "score",
@@ -365,9 +444,11 @@ function ProblemManager() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent side="top" align="end">
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <Pencil className="size-[13px] mr-3" />Chỉnh sửa
-                                        </DropdownMenuItem>
+                                        <Link to={`/admin/problems/${row.getValue("id")}/edit`} className="cursor-pointer">
+                                            <DropdownMenuItem className="cursor-pointer">
+                                                <Pencil className="size-[13px] mr-3" />Chỉnh sửa
+                                            </DropdownMenuItem>
+                                        </Link>
                                         <DialogTrigger asChild>
                                             <DropdownMenuItem className="focus:bg-destructive focus:text-white cursor-pointer">
                                                 <Trash2 className="size-[14px] mr-3" />Xoá
@@ -389,7 +470,7 @@ function ProblemManager() {
                                             </Button>
                                         </DialogClose>
                                         <DialogClose>
-                                            <Button className="w-fit px-4" variant="destructive">
+                                            <Button className="w-fit px-4" variant="destructive" onClick={() => handleDeleteProblem(row.getValue("id"))}>
                                                 Xoá
                                             </Button>
                                         </DialogClose>
@@ -508,33 +589,45 @@ function ProblemManager() {
                                     ))}
                                 </TableHeader>
                                 <TableBody>
-                                    {table.getRowModel().rows?.length ? (
-                                        table.getRowModel().rows.map((row) => (
-                                            <TableRow
-                                                key={row.id}
-                                                data-state={row.getIsSelected() && "selected"}
-                                                className="data-[state=selected]:bg-secondary/40 dark:data-[state=selected]:bg-secondary/60 hover:bg-secondary/20"
-                                            >
-                                                {row.getVisibleCells().map((cell) => (
-                                                    <TableCell key={cell.id}>
-                                                        {flexRender(
-                                                            cell.column.columnDef.cell,
-                                                            cell.getContext()
-                                                        )}
-                                                    </TableCell>
-                                                ))}
-                                            </TableRow>
-                                        ))
-                                    ) : (
+                                    {loading ?
                                         <TableRow>
                                             <TableCell
                                                 colSpan={columns.length}
                                                 className="h-24 text-center"
                                             >
-                                                Không có kết quả phù hợp.
+                                                <div className="w-full flex justify-center p-5">
+                                                    <Loader2 />
+                                                </div>
                                             </TableCell>
                                         </TableRow>
-                                    )}
+                                        :
+                                        table.getRowModel().rows?.length ? (
+                                            table.getRowModel().rows.map((row) => (
+                                                <TableRow
+                                                    key={row.id}
+                                                    data-state={row.getIsSelected() && "selected"}
+                                                    className="data-[state=selected]:bg-secondary/40 dark:data-[state=selected]:bg-secondary/60 hover:bg-secondary/20"
+                                                >
+                                                    {row.getVisibleCells().map((cell) => (
+                                                        <TableCell key={cell.id}>
+                                                            {flexRender(
+                                                                cell.column.columnDef.cell,
+                                                                cell.getContext()
+                                                            )}
+                                                        </TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={columns.length}
+                                                    className="h-24 text-center"
+                                                >
+                                                    Không có kết quả phù hợp.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                 </TableBody>
                             </Table>
                         </div>

@@ -63,78 +63,80 @@ function Forum() {
     }, []);
 
     return (
-        <div className="Forum p-7">
+        <div className="Forum p-7 pt-5">
             <div className="flex flex-col gap-7">
-                <div className="flex items-end justify-between">
-                    <div className="flex gap-2 items-center">
-                        <h2 className="text-lg font-semibold">Tất cả bài viết</h2>
-                        <Badge className="px-2 min-w-[22px] flex justify-center" variant="secondary">18</Badge>
-                    </div>
-                    <div className="flex-1 flex items-center gap-3 justify-end">
-                        <div className="relative max-w-[300px] flex-1">
-                            <Search className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Tìm kiếm bài viết"
-                                className="w-full rounded-md pl-9 flex-1 bg-transparent"
-                            />
+                <BlurFade delay={0.1} yOffset={0} blur="2px">
+                    <div className="flex items-end justify-between">
+                        <div className="flex gap-2 items-center">
+                            <h2 className="text-lg font-semibold">Tất cả bài viết</h2>
+                            <Badge className="px-2 min-w-[22px] flex justify-center" variant="secondary">18</Badge>
                         </div>
-                        <Dialog>
+                        <div className="flex-1 flex items-center gap-3 justify-end">
+                            <div className="relative max-w-[300px] flex-1">
+                                <Search className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="search"
+                                    placeholder="Tìm kiếm bài viết"
+                                    className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                />
+                            </div>
+                            <Dialog>
+                                <TooltipProvider delayDuration={100}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <DialogTrigger asChild>
+                                                <Button size="icon" variant="outline" className="bg-transparent">
+                                                    <Filter className="h-4 w-4" />
+                                                </Button>
+                                            </DialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Lọc
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Lọc bài viết</DialogTitle>
+                                    </DialogHeader>
+                                    <DialogDescription>
+                                        This action cannot be undone. This will permanently delete your account
+                                        and remove your data from our servers.
+                                    </DialogDescription>
+                                    <DialogFooter className="mt-4">
+                                        <DialogClose asChild>
+                                            <Button variant="ghost">
+                                                Hủy
+                                            </Button>
+                                        </DialogClose>
+                                        <Button>
+                                            Xác nhận
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button size="icon" variant="outline" className="bg-transparent">
-                                                <Filter className="h-4 w-4" />
+                                        <Link to="create">
+                                            <Button size="icon" className="dark:bg-green-500">
+                                                <Plus className="h-[18px] w-[18px] stroke-[2.5px]" />
                                             </Button>
-                                        </DialogTrigger>
+                                        </Link>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Lọc
+                                        Tạo bài viết
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Lọc bài viết</DialogTitle>
-                                </DialogHeader>
-                                <DialogDescription>
-                                    This action cannot be undone. This will permanently delete your account
-                                    and remove your data from our servers.
-                                </DialogDescription>
-                                <DialogFooter className="mt-4">
-                                    <DialogClose asChild>
-                                        <Button variant="ghost">
-                                            Hủy
-                                        </Button>
-                                    </DialogClose>
-                                    <Button>
-                                        Xác nhận
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                        <TooltipProvider delayDuration={100}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Link to="create">
-                                        <Button size="icon" className="dark:bg-green-500">
-                                            <Plus className="h-[18px] w-[18px] stroke-[2.5px]" />
-                                        </Button>
-                                    </Link>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    Tạo bài viết
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        </div>
                     </div>
-                </div>
+                </BlurFade>
                 <div className="flex flex-col gap-6 relative">
                     {posts.map((post: any, index) => (
                         <BlurFade key={post.id} delay={0.1 * index} inView>
                             <div className="flex items-start gap-5">
-                                <Link className="h-[180px] aspect-[3/2] overflow-hidden border rounded-lg" to={post.slug}>
+                                <Link className="h-[180px] aspect-[3/2] overflow-hidden border rounded-xl" to={post.slug}>
                                     <img src={post.thumbnail} alt="avatar" className="w-full h-full object-cover" />
                                 </Link>
                                 <div className="flex-1 flex justify-between">

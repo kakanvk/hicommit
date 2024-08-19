@@ -175,7 +175,7 @@ function CourseManager() {
                                 {
                                     createdCourses.map((course, index) => (
                                         <BlurFade key={course?.id} delay={0.15 * index}>
-                                            <Link key={course?.id} className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border" to={`${course?.id}`}>
+                                            <Link className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border h-full" to={`${course?.id}`}>
                                                 <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">
                                                     <img src={course?.thumbnail} />
                                                 </div>

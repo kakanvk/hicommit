@@ -11,6 +11,16 @@ const getProblems = async () => {
     }
 }
 
+const getAllTags = async () => {
+    try {
+        const response = await axiosInstance.get(`/problems/tags`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting tags:', error);
+        throw error;
+    }
+}
+
 const getProblemByIDorSlug = async (slug: string) => {
     try {
         const response = await axiosInstance.get(`/problems/${slug}`);
@@ -72,12 +82,46 @@ const getProblemsForAdmin = async () => {
     }
 }
 
+const updateLevel = async (id: string, level: any) => {
+    try {
+        const response = await axiosInstance.put(`/admin/problems/${id}/level`, { level});
+        return response.data;
+    } catch (error) {
+        console.error('Error updating problem:', error);
+        throw error;
+    }
+}
+
+const updateProblemForAdmin = async (id: string, data: any) => {
+    try {
+        const response = await axiosInstance.put(`/admin/problems/${id}/update`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating problem:', error);
+        throw error;
+    }
+}
+
+const checkAvailableLanguageChangeByProblemID = async (id: string) => {
+    try {
+        const response = await axiosInstance.get(`/admin/problems/${id}/check-language`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting available languages:', error);
+        throw error;
+    }
+}
+
 export {
     getProblems,
+    getAllTags,
     createProblem,
     getProblemByIDorSlug,
     updateProblem,
     deleteProblemByID,
     getProblemByIDForAdmin,
-    getProblemsForAdmin
+    getProblemsForAdmin,
+    updateLevel,
+    updateProblemForAdmin,
+    checkAvailableLanguageChangeByProblemID
 };

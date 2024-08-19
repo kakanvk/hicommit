@@ -101,7 +101,7 @@ const createGitHubAPI = (accessToken: any) => {
 
             const response = await githubAPI.put(`/repos/${owner}/${repo}/contents/${path}`, {
                 message,
-                content: btoa(content), // Mã hóa nội dung file thành base64
+                content: btoa(content),
                 sha: fileSha,
                 branch: branch
             });

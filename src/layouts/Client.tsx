@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { useLogin } from "@/service/LoginContext";
 import Loader from "@/components/ui/loader";
-import Footer from "@/components/Footer";
+import { Footer } from "@/components/Footer";
 
 import { Route, Routes, useLocation } from "react-router-dom";
 

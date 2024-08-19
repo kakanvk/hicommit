@@ -49,7 +49,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname === "/" ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname === "/" ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="">
                                             <Home className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -78,7 +78,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/courses') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="courses">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/courses') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="courses">
                                             <Package className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -107,7 +107,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/problems') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="problems">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/problems') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="problems">
                                             <Pyramid className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -136,7 +136,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/contest') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="contest">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/contest') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="contest">
                                             <Medal className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -165,7 +165,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/message') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="message">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/message') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="message">
                                             <MessageCircleCode className={`${expanded && 'mr-3'} w-[17px]`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -194,7 +194,7 @@ function Navbar() {
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
-                                        <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/forum') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="forum">
+                                        <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/forum') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="forum">
                                             <Podcast className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                             <motion.span
                                                 initial={{ opacity: 1 }}
@@ -236,7 +236,7 @@ function Navbar() {
                                 <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/course-manager') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="/course-manager">
+                                            <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/course-manager') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="/course-manager">
                                                 <Atom className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                                 <motion.span
                                                     initial={{ opacity: 1 }}
@@ -265,7 +265,7 @@ function Navbar() {
                                 <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <Link className={`flex rounded p-2 px-4 ${location.pathname.startsWith('/analysis') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="analysis">
+                                            <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/analysis') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="analysis">
                                                 <PieChart className={`${expanded && 'mr-3'} w-4 aspect-square`} />
                                                 <motion.span
                                                     initial={{ opacity: 1 }}

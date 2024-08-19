@@ -72,16 +72,16 @@ function SubmissionHistory(props: any) {
     return (
         <div className="SubmissionHistory flex flex-col gap-8">
             {
-                mySubmissions?.length > 0 ?
+                (mySubmissions?.length > 0 || statusState?.toLocaleUpperCase() === "PENDING") ?
                     <>
                         <GitGraph>
                             <GitGraphBody className="">
                                 <BlurFade delay={0.1} yOffset={0}>
-                                    <GitGraphFree className="h-2" />
+                                    <GitGraphFree className="h-4" />
                                 </BlurFade>
                                 {
                                     statusState?.toLocaleUpperCase() === "PENDING" &&
-                                    <GitGraphNode>
+                                    <GitGraphNode end={mySubmissions?.length === 0}>
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border bg-zinc-100/80 dark:bg-zinc-900 hover:bg-zinc-200/50 hover:dark:bg-zinc-800/70 p-3 px-5 rounded-lg animate-pulse">
                                             <p className="opacity-70 italic">
                                                 Một số tiến trình đang trong hàng đợi
@@ -151,7 +151,7 @@ function SubmissionHistory(props: any) {
                         </div>
                     </> : isInitial &&
                     <div className="w-full flex justify-center py-10 bg-secondary/30 dark:bg-secondary/10 border rounded-lg">
-                        <p className="text-center">Bạn chưa từng nộp bài tập này (hoặc đang trong hàng đợi). <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
+                        <p className="text-center">Bạn chưa từng nộp bài tập này. <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
                     </div>
             }
         </div >

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { useLogin } from "@/service/LoginContext";
 import Loader from "@/components/ui/loader";
-import Footer from "@/components/Footer";
+import { AdminFooter } from "@/components/Footer";
 
 import { Route, Routes, useLocation } from "react-router-dom";
 
@@ -15,6 +15,7 @@ import CreatePost from "@/pages/admin/CreatePost";
 import EditPost from "@/pages/admin/EditPost";
 import ProblemManager from "@/pages/admin/ProblemManager";
 import CreateProblem from "@/pages/admin/CreateProblem";
+import EditProblem from "@/pages/admin/EditProblem";
 
 function AdminLayout() {
 
@@ -72,10 +73,11 @@ function AdminLayout() {
                                             <Route path="problems">
                                                 <Route path="" element={<ProblemManager />} />
                                                 <Route path="create" element={<CreateProblem />} />
-                                                {/* <Route path=":id/edit" element={<EditPost />} /> */}
+                                                <Route path=":id/edit" element={<EditProblem />} />
                                             </Route>
                                         </Routes>
                                     </div>
+                                    <AdminFooter />
                                 </div>
                             </div>
                             {
