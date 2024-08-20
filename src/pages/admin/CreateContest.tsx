@@ -51,10 +51,6 @@ function CreateContest() {
     const [startDate, setStartDate] = useState<Date>(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
     const [startTime, setStartTime] = useState<string>("00:00");
 
-    // Mặc định ngày kết thúc là ngày hiện tại + 2
-    const [endDate, setEndDate] = useState<Date>(new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000));
-    const [endTime, setEndTime] = useState<string>("00:00");
-
     const [duration, setDuration] = useState<{ hours: number, minutes: number }>({
         hours: 2,
         minutes: 0
@@ -84,14 +80,54 @@ function CreateContest() {
         setSlug(new_slug);
     }
 
+    const pushError = (message: string) => {
+        toast.error(message, {
+            style: {
+                borderRadius: '8px',
+                background: '#222',
+                color: '#fff',
+                paddingLeft: '15px',
+                fontFamily: 'Plus Jakarta Sans',
+                maxWidth: '400px',
+            }
+        });
+    }
+
+    // Ngày kết thúc bằng ngày giờ bắt đầu + duration
+    const endDate = combineDateAndTimeToTimestamp(startDate, startTime) + duration.hours * 60 * 60 + duration.minutes * 60;
+
     const handleCreatePost = async () => {
+
+        // kiểm tra nếu tên rỗng thì báo lỗi
+        if (!name || name.trim() === '') {
+            pushError('Tên cuộc thi không được để trống');
+            return;
+        }
+
+        // kiểm tra nếu slug rỗng thì báo lỗi
+        if (!slug || slug.trim() === '') {
+            pushError('Mã cuộc thi không được để trống');
+            return;
+        }
+
+        // kiểm tra nếu mô tả rỗng thì báo lỗi
+        if (!description || description.trim() === '') {
+            pushError('Mô tả cuộc thi không được để trống');
+            return;
+        }
+
+        // kiểm tra nếu !isPublic mà enrolKey rỗng thì báo lỗi
+        if (!isPublic && (!enrolKey || enrolKey.trim() === '')) {
+            pushError('Mật khẩu tham gia cuộc thi không được để trống');
+            return;
+        }
 
         const data = {
             name,
             description,
             slug,
             start_time: combineDateAndTimeToTimestamp(startDate, startTime),
-            end_time: combineDateAndTimeToTimestamp(endDate, endTime),
+            end_time: endDate,
             duration: duration.hours * 60 * 60 + duration.minutes * 60,
             public: isPublic,
             enrol_key: enrolKey
@@ -190,7 +226,7 @@ function CreateContest() {
                 <div className="flex flex-col gap-6">
                     <h1 className="font-bold text-xl after:content-['*'] after:ml-1 after:text-green-500">2. Thông tin chi tiết</h1>
                     <div className="flex gap-2 flex-col">
-                        <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Ngày bắt đầu</h4>
+                        <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Thời gian bắt đầu</h4>
                         <div className="flex gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
@@ -211,8 +247,8 @@ function CreateContest() {
                                         selected={startDate}
                                         // Kiểm tra ngày kết thúc phải sau ngày bắt đầu
                                         onSelect={(date) => {
-                                            if (date as any > (endDate as any)) {
-                                                toast.error("Ngày bắt đầu phải trước ngày kết thúc", {
+                                            if (combineDateAndTimeToTimestamp(date as any, startTime) < moment(new Date()).unix()) {
+                                                toast.error("Không được chọn thời điểm trong quá khứ", {
                                                     style: {
                                                         borderRadius: '8px',
                                                         background: '#222',
@@ -231,78 +267,22 @@ function CreateContest() {
                                 </PopoverContent>
                             </Popover>
                             <Select
-                                defaultValue={startTime!}
+                                value={startTime!}
                                 onValueChange={(e) => {
-                                    setStartTime(e);
-                                }}
-                            >
-                                <SelectTrigger className="font-normal w-[120px] bg-secondary/20 hover:bg-secondary/50">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <ScrollArea className="h-[15rem]">
-                                        {Array.from({ length: 96 }).map((_, i) => {
-                                            const hour = Math.floor(i / 4)
-                                                .toString()
-                                                .padStart(2, "0");
-                                            const minute = ((i % 4) * 15)
-                                                .toString()
-                                                .padStart(2, "0");
-                                            return (
-                                                <SelectItem key={i} value={`${hour}:${minute}`}>
-                                                    {hour}:{minute}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </ScrollArea>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                    <div className="flex gap-2 flex-col">
-                        <h4 className="font-medium after:content-['*'] after:ml-1 after:text-green-500">Ngày kết thúc</h4>
-                        <div className="flex gap-2">
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-[280px] justify-start text-left font-normal bg-secondary/20 hover:bg-secondary/50",
-                                            !endDate && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {endDate ? moment(endDate).format("DD [tháng] MM, YYYY") : <span className="italic">Chọn ngày kết thúc</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={endDate}
-                                        onSelect={(date) => {
-                                            if (date as any < (startDate as any)) {
-                                                toast.error("Ngày kết thúc phải sau ngày bắt đầu", {
-                                                    style: {
-                                                        borderRadius: '8px',
-                                                        background: '#222',
-                                                        color: '#fff',
-                                                        paddingLeft: '15px',
-                                                        fontFamily: 'Plus Jakarta Sans',
-                                                        maxWidth: '400px',
-                                                    }
-                                                });
-                                                return;
+                                    if (combineDateAndTimeToTimestamp(startDate, e) < moment(new Date()).unix()) {
+                                        toast.error("Không được chọn thời điểm trong quá khứ", {
+                                            style: {
+                                                borderRadius: '8px',
+                                                background: '#222',
+                                                color: '#fff',
+                                                paddingLeft: '15px',
+                                                fontFamily: 'Plus Jakarta Sans',
+                                                maxWidth: '400px',
                                             }
-                                            setEndDate(date as any);
-                                        }}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                            <Select
-                                defaultValue={endTime!}
-                                onValueChange={(e) => {
-                                    setEndTime(e);
+                                        });
+                                        return;
+                                    }
+                                    setStartTime(e);
                                 }}
                             >
                                 <SelectTrigger className="font-normal w-[120px] bg-secondary/20 hover:bg-secondary/50">

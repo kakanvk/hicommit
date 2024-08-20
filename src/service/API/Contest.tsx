@@ -31,9 +31,40 @@ const getContestDescriptionByID = async (contestID: string) => {
     }
 }
 
+const joinContest = async (contestID: string, join_key: string) => {
+    try {
+        const response = await axiosInstance.post(`/contests/${contestID}/join`, {join_key});
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
+const getJoinedContest = async () => {
+    try {
+        const response = await axiosInstance.get(`/contests/joined`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
+// ADMIN
 const getContestsForAdmin = async () => {
     try {
         const response = await axiosInstance.get(`/admin/contests/list`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
+const getContestByIDForAdmin = async (contestID: string) => {
+    try {
+        const response = await axiosInstance.get(`/admin/contests/${contestID}`);
         return response.data;
     } catch (error) {
         console.error('Error getting contests:', error);
@@ -61,9 +92,39 @@ const togglePublishContestByID = async (contestID: string) => {
     }
 }
 
+const togglePinnedContestByID = async (contestID: string) => {
+    try {
+        const response = await axiosInstance.put(`/admin/contests/${contestID}/pinned`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
 const updatePublicContestByID = async (contestID: string, status: any) => {
     try {
         const response = await axiosInstance.put(`/admin/contests/${contestID}/public`, {public: status});
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
+const updateContestByID = async (contestID: string, contest: any) => {
+    try {
+        const response = await axiosInstance.put(`/admin/contests/${contestID}/update`, contest);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
+const deleteContestByID = async (contestID: string) => {
+    try {
+        const response = await axiosInstance.delete(`/admin/contests/${contestID}/delete`);
         return response.data;
     } catch (error) {
         console.error('Error getting contests:', error);
@@ -75,8 +136,15 @@ export {
     getContests,
     getContestByID,
     getContestDescriptionByID,
+    joinContest,
+    getJoinedContest,
+    // ADMIN
     createContest,
     getContestsForAdmin,
+    getContestByIDForAdmin,
     togglePublishContestByID,
-    updatePublicContestByID
+    togglePinnedContestByID,
+    updatePublicContestByID,
+    updateContestByID,
+    deleteContestByID
 };

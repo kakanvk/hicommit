@@ -4,6 +4,7 @@ import { auth, handleLogout } from './firebase';
 import { login } from './API/Auth';
 import { Octokit } from 'octokit';
 import CryptoJS from 'crypto-js';
+import { getJoinedContest } from './API/Contest';
 
 interface LoginContextProps {
     loading: boolean;
@@ -17,6 +18,11 @@ const LoginContext = createContext<LoginContextProps | undefined>(undefined);
 export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+
+    const handleGetJoinedContest = async () => {
+        const response = await getJoinedContest();
+        console.log(response);
+    }
 
     useEffect(() => {
         setLoading(true);
@@ -50,6 +56,7 @@ export const LoginProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 setLoading(false);
             }
         });
+        handleGetJoinedContest();
     }, []);
 
     const decryptToken = (encryptedToken: string, key: string) => {

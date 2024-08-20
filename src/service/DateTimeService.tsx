@@ -80,10 +80,15 @@ const timestampToDateTime = (timestamp: any) => {
 };
 
 const combineDateAndTimeToTimestamp = (date: Date, timeString: string) => {
-    // Cộng lên 1 ngày
-    const dateString = date.toISOString().split('T')[0]; 
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    const dateString = `${year}-${month}-${day}`;
     const combined = `${dateString} ${timeString}`;
-    return moment(combined).add(1, 'day').unix();
+
+    console.log("combined", combined);
+    return moment(combined).unix();
 };
 
 const timestampChange = (timestamp: number) => {

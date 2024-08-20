@@ -25,6 +25,7 @@ import Ranking from "./Ranking";
 import { Button } from "@/components/ui/button";
 import { getContestByID, getContestDescriptionByID } from "@/service/API/Contest";
 import BlurFade from "@/components/magicui/blur-fade";
+import { timestampChange } from "@/service/DateTimeService";
 
 // Function to calculate the remaining time and the progress percentage
 const calculateTimeLeft = (endTime: number, totalTime: number): { timeLeft: string; percent: number } => {
@@ -42,7 +43,7 @@ const calculateTimeLeft = (endTime: number, totalTime: number): { timeLeft: stri
     const percent = Math.min(100, (timeLeft / totalTime) * 100);
 
     return {
-        timeLeft: `${hours}:${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`,
+        timeLeft: `${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`,
         percent,
     };
 };
@@ -221,6 +222,11 @@ function Contest() {
                         <div className="flex flex-col items-center absolute">
                             <span className="text-[14px] opacity-80 font-light">Thời gian còn lại</span>
                             <span className="text-3xl font-extrabold">{timeLeft.timeLeft}</span>
+                            <span className="text-nowrap italic opacity-60 text-sm mt-1">
+                                <History className="size-[14px] mr-1 inline -translate-y-[1px]" />
+                                {timestampChange(contest?.duration).hours > 0 && `${timestampChange(contest?.duration).hours.toString().padStart(2, "0")} giờ `}
+                                {`${timestampChange(contest?.duration).minutes.toString().padStart(2, "0")} phút `}
+                            </span>
                         </div>
                     </div>
                 </div>

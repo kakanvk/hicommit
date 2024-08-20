@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RingProgress from "@/components/ui/ringProcess";
-import { ArrowRight, CalendarDays, ChevronRight, CornerDownRight, Eye, Filter, History, Lock, Pin, Search, UsersRound } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronRight, CornerDownRight, Eye, Filter, History, Lock, PencilLine, Pin, Search, UsersRound } from "lucide-react";
 
 import {
     Select,
@@ -43,15 +43,17 @@ import { Link, useNavigate } from "react-router-dom";
 import ShineBorder from "@/components/magicui/shine-border";
 import BlurFade from "@/components/magicui/blur-fade";
 import { useEffect, useState } from "react";
-import { getContests } from "@/service/API/Contest";
+import { getContests, joinContest } from "@/service/API/Contest";
 import { formatTimeAgo, timestampChange, timestampToDateTime } from "@/service/DateTimeService";
 import moment from "moment";
+import toast from "react-hot-toast";
 
 function Contests() {
 
     const navigate = useNavigate();
 
     const [data, setData] = useState<any[]>([]);
+    const [joinKey, setJoinKey] = useState<string>("");
 
     const getData = async () => {
         const response = await getContests();
@@ -63,11 +65,49 @@ function Contests() {
         getData();
     }, []);
 
-    const handleConfirmJoinContest = (_id: string) => {
-        // Xử lý logic khi người dùng xác nhận tham gia cuộc thi
+    const pushError = (message: string) => {
+        toast.error(message, {
+            style: {
+                borderRadius: '8px',
+                background: '#222',
+                color: '#fff',
+                paddingLeft: '15px',
+                fontFamily: 'Plus Jakarta Sans',
+                maxWidth: '700px',
+            }
+        });
+    }
 
-        // Chuyển hướng đến trang cuộc thi
-        navigate(`/contest/${_id}`);
+    const handleConfirmJoinContest = async (_id: any, _public: any) => {
+        if (!_public && joinKey === "") {
+            pushError("Mã tham gia không được để trống");
+            return;
+        }
+
+        setJoinKey("");
+
+        const response = await toast.promise(
+            joinContest(_id as any, joinKey),
+            {
+                loading: 'Đang kiểm tra...',
+                success: 'Tham gia cuộc thi thành công',
+                error: (err) => `${err.response.data.message}`,
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                    maxWidth: '600px',
+                }
+            });
+
+        setTimeout(() => {
+            navigate(`/contest/${_id}`);
+        }, 500);
+
     }
 
     return (
@@ -132,7 +172,7 @@ function Contests() {
                                                     <h2 className="font-semibold text-lg">
                                                         {
                                                             contest?.pinned &&
-                                                            <Badge variant="secondary" className="italic rounded bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 text-nowrap mr-1.5">
+                                                            <Badge variant="secondary" className="border border-white/5 italic rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 text-nowrap mr-1.5">
                                                                 <Pin className="size-[12px] mr-1 inline" /> Đã ghim
                                                             </Badge>
                                                         }
@@ -182,67 +222,78 @@ function Contests() {
                                                     </div>
                                                 </div>
                                                 {
-                                                    contest?.end_time > moment(new Date().getTime()).unix() ?
-                                                        <div className="flex gap-3 items-center mt-3">
-                                                            <Dialog>
-                                                                <DialogTrigger>
-                                                                    <Button className="px-5 pr-4">Tham gia cuộc thi<ChevronRight className="w-4 h-4 ml-2" /></Button>
-                                                                </DialogTrigger>
-                                                                <DialogContent>
-                                                                    <DialogHeader>
-                                                                        <DialogTitle>Xác nhận tham gia cuộc thi</DialogTitle>
-                                                                    </DialogHeader>
-                                                                    <DialogDescription className="-mt-0.5 leading-6">
-                                                                        Bạn có
-                                                                        <Badge variant="secondary" className="text-[11px] p-0 px-1 pr-2 leading-5 mx-1">
-                                                                            <History className="size-[14px] mr-1.5" />
-                                                                            {timestampChange(contest.duration).hours > 0 && `${timestampChange(contest.duration).hours} giờ `}
-                                                                            {`${timestampChange(contest.duration).minutes.toString().padStart(2, "0")} phút `}
-                                                                        </Badge>để hoàn thành bài thi này. Sau khi hết thời gian, bạn sẽ không thể tiếp tục tham gia cuộc thi này. Bạn chỉ có thể tham gia cuộc thi một lần và trong cùng một thời điểm chỉ có thể tham gia 1 cuộc thi.
-                                                                    </DialogDescription>
-                                                                    {
-                                                                        !contest.public && <Input placeholder="Mã tham gia" className="placeholder:italic" />
-                                                                    }
-                                                                    <DialogFooter className="mt-4">
-                                                                        <DialogClose asChild>
-                                                                            <Button variant="ghost">
-                                                                                Đóng
-                                                                            </Button>
-                                                                        </DialogClose>
-                                                                        <Button onClick={() => handleConfirmJoinContest(contest?.id)}>Xác nhận</Button>
-                                                                    </DialogFooter>
-                                                                </DialogContent>
-                                                            </Dialog>
+                                                    contest?.start_time > moment(new Date().getTime()).unix() ?
+                                                        <Button className="mt-3 border border-foreground/10" variant="secondary">
+                                                            <PencilLine className="size-[14px] mr-3" /> Ghi danh sớm
+                                                        </Button> :
+                                                        contest?.end_time > moment(new Date().getTime()).unix() ?
+                                                            <div className="flex gap-3 items-center mt-3">
+                                                                <Dialog>
+                                                                    <DialogTrigger>
+                                                                        <Button className="px-5">Tham gia cuộc thi</Button>
+                                                                    </DialogTrigger>
+                                                                    <DialogContent>
+                                                                        <DialogHeader>
+                                                                            <DialogTitle>Xác nhận tham gia cuộc thi</DialogTitle>
+                                                                        </DialogHeader>
+                                                                        <DialogDescription className="-mt-0.5 leading-6">
+                                                                            Bạn có
+                                                                            <Badge variant="secondary" className="text-[11px] p-0 px-1 pr-2 leading-5 mx-1">
+                                                                                <History className="size-[14px] mr-1.5" />
+                                                                                {timestampChange(contest.duration).hours > 0 && `${timestampChange(contest.duration).hours} giờ `}
+                                                                                {`${timestampChange(contest.duration).minutes.toString().padStart(2, "0")} phút `}
+                                                                            </Badge>để hoàn thành bài thi này. Sau khi hết thời gian, bạn sẽ không thể tiếp tục tham gia cuộc thi này. Bạn chỉ có thể tham gia cuộc thi một lần và trong cùng một thời điểm chỉ có thể tham gia 1 cuộc thi.
+                                                                        </DialogDescription>
+                                                                        {
+                                                                            !contest.public &&
+                                                                            <Input placeholder="Mã tham gia" type="search" value={joinKey} className="placeholder:italic" onChange={(e) => setJoinKey(e.target.value)} />
+                                                                        }
+                                                                        <DialogFooter className="mt-4">
+                                                                            <DialogClose asChild>
+                                                                                <Button variant="ghost">
+                                                                                    Đóng
+                                                                                </Button>
+                                                                            </DialogClose>
+                                                                            <DialogClose asChild>
+                                                                                <Button onClick={() => handleConfirmJoinContest(contest?.id, contest?.public)}>Xác nhận</Button>
+                                                                            </DialogClose>
+                                                                        </DialogFooter>
+                                                                    </DialogContent>
+                                                                </Dialog>
+                                                                <Link to={`/contest/${contest?.id}`}>
+                                                                    <Button className="px-5 pr-3" variant="secondary">Chi tiết<ChevronRight className="w-4 h-4 ml-2" /></Button>
+                                                                </Link>
+                                                            </div> :
                                                             <Link to={`/contest/${contest?.id}`}>
-                                                                <Button className="px-5 pr-4" variant="secondary">Bảng xếp hạng<ChevronRight className="w-4 h-4 ml-2" /></Button>
+                                                                <Button className="px-5 pr-3 mt-2" variant="secondary">Xem kết quả<ChevronRight className="w-4 h-4 ml-2" /></Button>
                                                             </Link>
-                                                        </div> :
-                                                        <Link to={`/contest/${contest?.id}`}>
-                                                            <Button className="px-5 pr-4 mt-2" variant="secondary">Bảng xếp hạng<ChevronRight className="w-4 h-4 ml-2" /></Button>
-                                                        </Link>
                                                 }
                                             </div>
                                             <div className="flex flex-col gap-4">
                                                 <div className="flex flex-col items-end pr-2 text-sm">
                                                     {
-                                                        contest?.end_time > moment(new Date().getTime()).unix() ?
-                                                            <span className="italic text-green-600 dark:text-green-500 font-semibold dark:font-medium mb-1">
-                                                                Đang diễn ra
-                                                                <span className="relative inline-flex h-3 w-3 ml-2.5">
-                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
-                                                                </span>
+                                                        contest?.start_time > moment(new Date().getTime()).unix() ?
+                                                            <span className="italic text-amber-600 dark:text-amber-500 font-semibold dark:font-medium mb-1.5">
+                                                                Sắp diễn ra
                                                             </span> :
-                                                            <span className="italic text-red-500 font-semibold dark:font-medium  mb-1">Đã kết thúc</span>
+                                                            contest?.end_time > moment(new Date().getTime()).unix() ?
+                                                                <span className="italic text-green-600 dark:text-green-500 font-semibold dark:font-medium mb-1.5">
+                                                                    Đang diễn ra
+                                                                    <span className="relative inline-flex h-3 w-3 ml-2.5">
+                                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                                                    </span>
+                                                                </span> :
+                                                                <span className="italic text-red-500 font-semibold mb-1">Đã kết thúc</span>
                                                     }
                                                     <p className="text-nowrap font-semibold dark:font-medium my-0.5">
-                                                        <span className="text-xs opacity-60 mr-1">Bắt đầu: </span>
-                                                        <span className='text-green-600 dark:text-green-500 font-semibold border border-green-500 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
+                                                        <span className="text-xs opacity-60 mr-1 italic">Bắt đầu từ </span>
+                                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
                                                         {timestampToDateTime(contest?.start_time).date}
                                                     </p>
                                                     <p className="text-nowrap font-semibold dark:font-medium">
-                                                        <span className="text-xs opacity-60 mr-1">Kết thúc: </span>
-                                                        <span className='text-green-600 dark:text-green-500 font-semibold border border-green-500 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
+                                                        <span className="text-xs opacity-60 mr-1 italic">đến </span>
+                                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
                                                         {timestampToDateTime(contest?.end_time).date}
                                                     </p>
                                                 </div>

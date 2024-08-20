@@ -78,7 +78,7 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import Loader2 from '@/components/ui/loader2';
-import { getContestsForAdmin, togglePublishContestByID, updatePublicContestByID } from '@/service/API/Contest';
+import { deleteContestByID, getContestsForAdmin, togglePinnedContestByID, togglePublishContestByID, updatePublicContestByID } from '@/service/API/Contest';
 import { Switch } from '@/components/ui/switch';
 import { handleCopyText } from '@/service/UIService';
 import ReactHtmlParser from "react-html-parser";
@@ -164,6 +164,28 @@ function ContestManager() {
         getData();
     }
 
+    const handleUpdatePinned = async (_id: string) => {
+        const response = await toast.promise(
+            togglePinnedContestByID(_id),
+            {
+                loading: 'Đang cập nhật...',
+                success: 'Cập nhật thành công',
+                error: 'Cập nhật không thành công, hãy thử lại'
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+
+        console.log(response);
+        getData();
+    }
+
     const handleUpdatePublic = async (contest_id: string, status: boolean) => {
         await toast.promise(
             updatePublicContestByID(contest_id, status),
@@ -184,9 +206,9 @@ function ContestManager() {
         getData();
     }
 
-    const handleDeleteProblem = async (problem_id: string) => {
+    const handleDeleteContest = async (problem_id: string) => {
         await toast.promise(
-            deleteProblemByID(problem_id),
+            deleteContestByID(problem_id),
             {
                 loading: 'Đang xoá...',
                 success: 'Xoá thành công',
@@ -272,15 +294,19 @@ function ContestManager() {
                         <span className='leading-6'>{row.getValue("name")}</span>
                     </p>
                     {
-                        (row.getValue("end_time") as any) > moment(new Date().getTime()).unix() ?
-                            <span className="italic text-green-600 dark:text-green-500 font-semibold dark:font-medium">
-                                <span className="relative inline-flex h-2 w-2 mr-2.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                                </span>
-                                Đang diễn ra
+                        (row.getValue("start_time") as any) > moment(new Date().getTime()).unix() ?
+                            <span className="italic text-amber-600 dark:text-amber-500 font-semibold dark:font-medium mb-1.5">
+                                Sắp diễn ra
                             </span> :
-                            <span className="italic text-red-500 font-semibold dark:font-medium">Đã kết thúc</span>
+                            (row.getValue("end_time") as any) > moment(new Date().getTime()).unix() ?
+                                <span className="italic text-green-600 dark:text-green-500 font-semibold dark:font-medium">
+                                    <span className="relative inline-flex h-2 w-2 mr-2.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                    </span>
+                                    Đang diễn ra
+                                </span> :
+                                <span className="italic text-red-500 font-semibold dark:font-medium">Đã kết thúc</span>
                     }
                 </div>
             ),
@@ -431,20 +457,20 @@ function ContestManager() {
                                     <DropdownMenuContent side="top" align="end">
                                         {
                                             row.getValue("pinned") ?
-                                                <DropdownMenuItem className="cursor-pointer">
+                                                <DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdatePinned(row.getValue("id"))}>
                                                     <PinOff className="size-[14px] mr-3" />Bỏ ghim
                                                 </DropdownMenuItem>
                                                 :
-                                                <DropdownMenuItem className="cursor-pointer">
+                                                <DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdatePinned(row.getValue("id"))}>
                                                     <Pin className="size-[14px] mr-3" />Ghim
                                                 </DropdownMenuItem>
                                         }
-                                        <Link to={`/admin/problems/${row.getValue("id")}/edit`} className="cursor-pointer">
+                                        <Link to={`/admin/contests/${row.getValue("id")}`} className="cursor-pointer">
                                             <DropdownMenuItem className="cursor-pointer">
                                                 <BarChartBig className="size-[14px] mr-3" />Chi tiết
                                             </DropdownMenuItem>
                                         </Link>
-                                        <Link to={`/admin/problems/${row.getValue("id")}/edit`} className="cursor-pointer">
+                                        <Link to={`/admin/contests/${row.getValue("id")}/edit`} className="cursor-pointer">
                                             <DropdownMenuItem className="cursor-pointer">
                                                 <Pencil className="size-[13px] mr-3" />Chỉnh sửa
                                             </DropdownMenuItem>
@@ -458,10 +484,10 @@ function ContestManager() {
                                 </DropdownMenu>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Xác nhận xoá bài tập này</DialogTitle>
+                                        <DialogTitle>Xác nhận xoá cuộc thi này</DialogTitle>
                                     </DialogHeader>
                                     <DialogDescription>
-                                        Sau khi xoá, bài tập này sẽ không thể khôi phục.
+                                        Sau khi xoá, cuộc thi này sẽ không thể khôi phục.
                                     </DialogDescription>
                                     <AlertDialogFooter className="mt-2">
                                         <DialogClose>
@@ -470,7 +496,7 @@ function ContestManager() {
                                             </Button>
                                         </DialogClose>
                                         <DialogClose>
-                                            <Button className="w-fit px-4" variant="destructive" onClick={() => handleDeleteProblem(row.getValue("id"))}>
+                                            <Button className="w-fit px-4" variant="destructive" onClick={() => handleDeleteContest(row.getValue("id"))}>
                                                 Xoá
                                             </Button>
                                         </DialogClose>
