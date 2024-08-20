@@ -36,7 +36,7 @@ import { githubLightInit, githubDarkInit } from '@uiw/codemirror-theme-github';
 import { javascript } from '@codemirror/lang-javascript';
 
 import { useTheme } from "@/components/theme-provider";
-import { ChevronLeft, CornerDownRight, Upload } from "lucide-react";
+import { ChevronLeft, CornerDownRight, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
     Tooltip,
@@ -71,9 +71,10 @@ function SubmitProblem() {
 
     const [problem, setProblem] = useState<any>();
     const [mySubmited, setMySubmited] = useState<any>();
+    const [warningShow, setWarningShow] = useState(true);
 
     const handleGetProblem = async () => {
-        try{
+        try {
             const response = await getProblemByIDorSlug(problem_id as any);
             setProblem(response);
             handleGetMySubmited();
@@ -151,6 +152,7 @@ function SubmitProblem() {
                         color: '#fff',
                         paddingLeft: '15px',
                         fontFamily: 'Plus Jakarta Sans',
+                        maxWidth: '700px',
                     }
                 });
 
@@ -318,8 +320,19 @@ public class Main {
                 </TooltipProvider>
             </div>
 
-            <div className="flex flex-col gap-5">
-                <p className="text-lg font-bold">Nộp bài tập</p>
+            <div className="flex flex-col gap-2">
+                {
+                    warningShow &&
+                    <div className="flex items-center justify-between border rounded-md p-2 px-3 pr-2 text-[13px] italic text-amber-500 font-medium dark:text-amber-400 border-amber-400/50 bg-amber-500/10">
+                        <span>
+                            <i className="fa-solid fa-circle-info mr-2"></i>
+                            Vui lòng KHÔNG sử dụng tiếng Việt có dấu trong mã nguồn để tránh xảy ra lỗi
+                        </span>
+                        <Button size="icon" variant="ghost" className="size-5" onClick={() => setWarningShow(false)}>
+                            <X className="size-4" />
+                        </Button>
+                    </div>
+                }
                 <div className="border rounded-lg overflow-hidden">
                     <CodeMirror
                         value={code}
@@ -344,7 +357,7 @@ public class Main {
                         autoFocus
                     />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mt-3">
                     <Link to={`/course/${problem?.slug || problem_id}`} className="text-sm flex items-center gap-2 opacity-50 hover:opacity-100 hover:text-green-600 dark:hover:text-green-500 duration-200">
                         <ChevronLeft className="w-4" />Quay lại
                     </Link>

@@ -106,7 +106,7 @@ function Problem() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const tab = queryParams.get('tab');
-    const is2XL = useMediaQuery({ query: '(min-width: 1536px)' })
+    const is2XL = useMediaQuery({ query: '(min-width: 1536px)' });
 
     const loginContext = useLogin();
 

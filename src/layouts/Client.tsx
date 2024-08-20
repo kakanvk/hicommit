@@ -7,7 +7,6 @@ import { Footer } from "@/components/Footer";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import HomePage from "@/pages/client/Home";
-import Contest from "@/pages/client/Contest";
 import Chat from "@/pages/client/Chat";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -21,7 +20,6 @@ import CourseManagerByID from "@/pages/teacher/CourseManagerByID";
 import Analysis from "@/pages/teacher/Analysis";
 import CreateProblem from "@/pages/teacher/CreateProblem";
 import Forum from "@/pages/client/Forum";
-import ContestByID from "@/pages/client/ContestByID";
 import Problems from "@/pages/client/Problems";
 import CreatePost from "@/pages/client/CreatePost";
 import Courses from "@/pages/client/Courses";
@@ -29,6 +27,8 @@ import ReadPost from "@/pages/client/ReadPost";
 import CreateCourse from "@/pages/teacher/CreateCourse";
 import EditCourse from "@/pages/teacher/EditCourse";
 import EditProblem from "@/pages/teacher/EditProblem";
+import Contests from "@/pages/client/Contests";
+import Contest from "@/pages/client/Contest";
 
 function ClientLayout() {
 
@@ -77,8 +77,8 @@ function ClientLayout() {
                                             <Route path="" element={<HomePage />} />
                                             <Route path="message/*" element={<Chat />} />
                                             <Route path="contest" >
-                                                <Route path="" element={<Contest />} />
-                                                <Route path=":contest_id" element={<ContestByID />} />
+                                                <Route path="" element={<Contests />} />
+                                                <Route path=":contest_id" element={<Contest />} />
                                             </Route>
                                             <Route path="courses" element={<Courses />} />
                                             <Route path="course/:course_id">

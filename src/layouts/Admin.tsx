@@ -16,6 +16,8 @@ import EditPost from "@/pages/admin/EditPost";
 import ProblemManager from "@/pages/admin/ProblemManager";
 import CreateProblem from "@/pages/admin/CreateProblem";
 import EditProblem from "@/pages/admin/EditProblem";
+import ContestManager from "@/pages/admin/ContestManager";
+import CreateContest from "@/pages/admin/CreateContest";
 
 function AdminLayout() {
 
@@ -74,6 +76,10 @@ function AdminLayout() {
                                                 <Route path="" element={<ProblemManager />} />
                                                 <Route path="create" element={<CreateProblem />} />
                                                 <Route path=":id/edit" element={<EditProblem />} />
+                                            </Route>
+                                            <Route path="contests">
+                                                <Route path="" element={<ContestManager />} />
+                                                <Route path="create" element={<CreateContest />} />
                                             </Route>
                                         </Routes>
                                     </div>

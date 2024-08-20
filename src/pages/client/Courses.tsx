@@ -236,7 +236,7 @@ function Courses() {
                             <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
                                 {
                                     courses.map((course, index) => (
-                                        <BlurFade key={course?.id} delay={0.15 * index} yOffset={0}>
+                                        <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
                                             <div className="h-full flex flex-col border rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                 <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
                                                     <img src={course?.thumbnail} />
@@ -369,7 +369,7 @@ function Courses() {
                                     <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
                                         {
                                             joinedCourses.map((course, index) => (
-                                                <BlurFade key={course?.id} delay={0.15 * index} yOffset={0}>
+                                                <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
                                                     <div className="flex flex-col border h-full rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                         <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
                                                             <img src={course?.thumbnail} />

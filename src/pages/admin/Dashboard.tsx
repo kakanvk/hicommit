@@ -32,6 +32,7 @@ import NumberTicker from "@/components/magicui/number-ticker";
 
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
+import { useMediaQuery } from "react-responsive";
 
 const chartData = [
     { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
@@ -84,6 +85,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 function Dashboard() {
+
+    const is2XL = useMediaQuery({ query: '(min-width: 1536px)' });
 
     const totalVisitors = useMemo(() => {
         return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
@@ -256,7 +259,7 @@ function Dashboard() {
                                                                 </tspan>
                                                                 <tspan
                                                                     x={viewBox.cx}
-                                                                    y={(viewBox.cy || 0) + 25}
+                                                                    y={(viewBox.cy || 0) + (is2XL ? 33 : 25)}
                                                                     className="fill-muted-foreground text-xs 2xl:text-sm"
                                                                 >
                                                                     Hoàn thành

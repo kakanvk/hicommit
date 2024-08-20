@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const formatTimeAgo = (timestamp: any, language: any) => {
     const now = new Date();
     const pastTime = new Date(timestamp);
@@ -69,4 +71,30 @@ const formatDateTime = (timestamp: any, language: any) => {
     return formattedDateTime;
 };
 
-export { formatTimeAgo, formatDateTime }
+const timestampToDateTime = (timestamp: any) => {
+    const dateTime = moment.unix(timestamp);
+    return {
+        date: dateTime.format('DD.MM.YYYY'),
+        time: dateTime.format('HH:mm')
+    };
+};
+
+const combineDateAndTimeToTimestamp = (date: Date, timeString: string) => {
+    // Cộng lên 1 ngày
+    const dateString = date.toISOString().split('T')[0]; 
+    const combined = `${dateString} ${timeString}`;
+    return moment(combined).add(1, 'day').unix();
+};
+
+const timestampChange = (timestamp: number) => {
+    const duration = moment.duration(timestamp, 'seconds');
+
+    return {
+        days: Math.floor(duration.asDays()),  // Số ngày
+        hours: duration.hours(),               // Số giờ trong ngày
+        minutes: duration.minutes(),           // Số phút trong giờ
+        seconds: duration.seconds()            // Số giây trong phút
+    };
+};
+
+export { formatTimeAgo, formatDateTime, timestampToDateTime, timestampChange, combineDateAndTimeToTimestamp };
