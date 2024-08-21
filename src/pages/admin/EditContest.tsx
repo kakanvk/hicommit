@@ -209,7 +209,7 @@ function EditContest() {
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
-                                    Tạo cuộc thi
+                                    Chỉnh sửa cuộc thi
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
