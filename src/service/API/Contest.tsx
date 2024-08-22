@@ -71,6 +71,16 @@ const getMembersByContestID = async (contestID: string) => {
     }
 }
 
+const getSubmissionsByContestID = async (contestID: string) => {
+    try {
+        const response = await axiosInstance.get(`/contests/${contestID}/submissions`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting contests:', error);
+        throw error;
+    }
+}
+
 // ADMIN
 const getContestsForAdmin = async () => {
     try {
@@ -201,6 +211,7 @@ export {
     getJoinedContest,
     getProblemsByContestID,
     getMembersByContestID,
+    getSubmissionsByContestID,
     // ADMIN
     createContest,
     getContestsForAdmin,

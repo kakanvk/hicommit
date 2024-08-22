@@ -236,6 +236,23 @@ public class Main {
                         </>
                     }
                     {
+                        problem?.type === "CONTEST" &&
+                        <>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink asChild>
+                                    <Link to="/contests">Các cuộc thi</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbLink>
+                                    <Link to={`/contest/${problem?.parent?.id}`}>{problem?.parent?.name}</Link>
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                        </>
+                    }
+                    {
                         problem?.type === "FREE" &&
                         <>
                             <BreadcrumbItem>
@@ -276,6 +293,13 @@ public class Main {
                         </Link>
                     </p>
                     {
+                        problem?.type === "CONTEST" ?
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <CornerDownRight className="size-3 inline" />
+                            <Link className={`rounded-md bg-green-500/10 border border-green-500 text-green-600 dark:text-green-400 text-[12px] p-0.5 px-2 font-medium leading-5 text-nowrap`} to={`/contest/${problem?.parent?.id}`}>
+                                {problem?.parent?.name}
+                            </Link >
+                        </div> :
                         problem?.type === "COURSE" ?
                             <div className="flex items-center gap-2 flex-wrap">
                                 <Link className="flex items-center gap-2 text-sm font-medium opacity-60 hover:text-green-600 dark:hover:text-green-500 hover:opacity-100 duration-300 w-fit" to={`/course/${problem?.parent?.id}`}>

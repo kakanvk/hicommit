@@ -9,10 +9,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { getSubmissionsByContestID } from "@/service/API/Contest";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 
 function Ranking() {
+
+    const { contest_id } = useParams<{ contest_id: string }>();
 
     let sampleData = [
         {
@@ -168,13 +172,22 @@ function Ranking() {
 
     const [data, setData] = useState(sampleData);
 
-    // Mỗi 5 giây, đổi thứ tự ngẫu nhiên của data
+    const getSubmissions = async () => {
+        const data = await getSubmissionsByContestID(contest_id as any);
+        console.log(data);
+    }
+
     useEffect(() => {
-        const interval = setInterval(() => {
-            setData([...data.sort(() => Math.random() - 0.5)]);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [data]);
+        getSubmissions();
+    }, []);
+
+    // Mỗi 5 giây, đổi thứ tự ngẫu nhiên của data
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         setData([...data.sort(() => Math.random() - 0.5)]);
+    //     }, 5000);
+    //     return () => clearInterval(interval);
+    // }, [data]);
 
     return (
         <div className="Ranking w-full">

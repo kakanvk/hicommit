@@ -7,6 +7,8 @@ declare global {
   }
 }
 
+// Remove the declaration for "*.svg" module
+
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css'
 import ClientLayout from './layouts/Client';

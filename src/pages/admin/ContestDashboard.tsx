@@ -69,7 +69,7 @@ import Ranking from "./Ranking";
 import { Button } from "@/components/ui/button";
 import { exitContest, getContestByID, getProblemsByContestID, getContestByIDForAdmin, getContestDescriptionByID, getJoinedContest, joinContest, updateProblemsByID, deleteProblemInContestByID, getMembersByContestID, updateStatusUserContest } from "@/service/API/Contest";
 import BlurFade from "@/components/magicui/blur-fade";
-import { formatTimeAgo, timestampChange } from "@/service/DateTimeService";
+import { formatTimeAgo, timestampChange, timestampToDateTime } from "@/service/DateTimeService";
 import moment from "moment";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
@@ -831,13 +831,28 @@ function CountDown(props: any) {
         <div>
             {
                 contest?.start_time > moment(new Date().getTime()).unix() ?
-                    <BlurFade delay={0.3} yOffset={0}>
-                        <div className="w-[280px] 2xl:w-[300px] p-4 py-7 border rounded-lg bg-secondary/10 sticky top-4">
+                    <BlurFade delay={0.2} yOffset={0}>
+                        <div className="w-[280px] 2xl:w-[300px] p-7 border rounded-lg bg-secondary/10 sticky top-4">
                             <div className="relative flex flex-col items-center justify-center gap-2">
                                 <h2 className="font-bold text-lg">Bắt đầu sau</h2>
-                                <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5">
-                                    <span className="text-3xl font-extrabold">{countdown}</span>
-                                </span>
+                                {
+                                    countdown &&
+                                    <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5 border p-2 px-4 rounded-lg border-2 border-primary bg-primary/10">
+                                        <span className="text-3xl font-extrabold">{countdown}</span>
+                                    </span>
+                                }
+                            </div>
+                            <div className="flex flex-col mt-4 gap-1">
+                                <p className="text-nowrap font-semibold dark:font-medium my-0.5">
+                                    <span className="text-xs opacity-60 mr-1 italic">Diễn ra từ </span>
+                                    <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
+                                    {timestampToDateTime(contest?.start_time).date}
+                                </p>
+                                <p className="text-nowrap font-semibold dark:font-medium">
+                                    <span className="text-xs opacity-60 mr-1 italic">Kết thúc </span>
+                                    <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
+                                    {timestampToDateTime(contest?.end_time).date}
+                                </p>
                             </div>
                         </div>
                     </BlurFade> :

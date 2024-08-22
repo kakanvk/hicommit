@@ -37,7 +37,7 @@ import Ranking from "./Ranking";
 import { Button } from "@/components/ui/button";
 import { exitContest, getContestByID, getContestDescriptionByID, getJoinedContest, joinContest } from "@/service/API/Contest";
 import BlurFade from "@/components/magicui/blur-fade";
-import { timestampChange } from "@/service/DateTimeService";
+import { timestampChange, timestampToDateTime } from "@/service/DateTimeService";
 import moment from "moment";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
@@ -312,11 +312,11 @@ function Contest() {
                                                                             <TableCell>
                                                                                 <Link to={`/problem/${problem?.slug}`} className="hover:text-green-600 dark:hover:text-green-500 font-semibold">
                                                                                     <span className="mr-2">{problem.name}</span>
-                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "PASSED" && <i className="text-[12px] translate-y-[1px] fa-solid fa-circle-check text-green-600"></i>}
-                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "FAILED" && <i className="text-[12px] translate-y-[1px] fa-solid fa-circle-xmark text-red-500"></i>}
-                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "ERROR" && <i className="text-[12px] translate-y-[1px] fa-solid fa-circle-exclamation text-amber-500"></i>}
-                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "COMPILE_ERROR" && <i className="text-[12px] translate-y-[1px] fa-solid fa-triangle-exclamation text-zinc-400"></i>}
-                                                                                    {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
+                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "PASSED" && <i className="text-[12px] fa-solid fa-circle-check text-green-600"></i>}
+                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "FAILED" && <i className="text-[12px] fa-solid fa-circle-xmark text-red-500"></i>}
+                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "ERROR" && <i className="text-[12px] fa-solid fa-circle-exclamation text-amber-500"></i>}
+                                                                                    {mySubmited[problem?.slug as keyof typeof mySubmited] === "COMPILE_ERROR" && <i className="text-[12px] fa-solid fa-triangle-exclamation text-zinc-400"></i>}
+                                                                                    {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="text-[12px] fa-solid fa-circle-minus text-zinc-400"></i>}
                                                                                 </Link>
                                                                             </TableCell>
                                                                             <TableCell>
@@ -344,7 +344,7 @@ function Contest() {
                                                     <h2 className="">Đề bài:</h2>
                                                     <div className="h-[200px] border rounded-lg bg-secondary/40 dark:bg-secondary/10 flex flex-col items-center justify-center gap-2">
                                                         <i className="fa-solid fa-lock mr-3 text-2xl opacity-50"></i>
-                                                        <span className="opacity-60 text-sm">Chỉ hiển thị với những người tham gia cuộc thi</span>
+                                                        <span className="opacity-60 text-sm">Chỉ hiển thị trong thời gian diễn ra cuộc thi</span>
                                                     </div>
                                                 </div>
                                             </BlurFade>
@@ -353,7 +353,20 @@ function Contest() {
                             </TabsContent>
                             <TabsContent value="ranking" className="w-full">
                                 <div className="flex flex-col gap-5 py-3">
-                                    <Ranking />
+                                    {
+                                        contest?.start_time <= moment(new Date().getTime()).unix() ?
+                                            <BlurFade delay={0.2} yOffset={0} blur="2px">
+                                                <Ranking />
+                                            </BlurFade> :
+                                            <BlurFade delay={0.2} yOffset={0} blur="2px">
+                                                <div className="w-full flex flex-col gap-2">
+                                                    <div className="h-[200px] border rounded-lg bg-secondary/40 dark:bg-secondary/10 flex flex-col items-center justify-center gap-2">
+                                                        <i className="fa-solid fa-lock mr-3 text-2xl opacity-50"></i>
+                                                        <span className="opacity-60 text-sm">Chỉ hiển thị trong thời gian diễn ra cuộc thi</span>
+                                                    </div>
+                                                </div>
+                                            </BlurFade>
+                                    }
                                 </div>
                             </TabsContent>
                             <TabsContent value="history" className="w-full">
@@ -367,12 +380,27 @@ function Contest() {
                 {
                     contest?.start_time > moment(new Date().getTime()).unix() ?
                         <BlurFade delay={0.2} yOffset={0}>
-                            <div className="w-[280px] 2xl:w-[300px] p-4 py-7 border rounded-lg bg-secondary/10 sticky top-4">
+                            <div className="w-[280px] 2xl:w-[300px] p-7 border rounded-lg bg-secondary/10 sticky top-4">
                                 <div className="relative flex flex-col items-center justify-center gap-2">
                                     <h2 className="font-bold text-lg">Bắt đầu sau</h2>
-                                    <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5">
-                                        <span className="text-3xl font-extrabold">{countdown}</span>
-                                    </span>
+                                    {
+                                        countdown &&
+                                        <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5 border p-2 px-4 rounded-lg border-2 border-primary bg-primary/10">
+                                            <span className="text-3xl font-extrabold">{countdown}</span>
+                                        </span>
+                                    }
+                                </div>
+                                <div className="flex flex-col mt-4 gap-1">
+                                    <p className="text-nowrap font-semibold dark:font-medium my-0.5">
+                                        <span className="text-xs opacity-60 mr-1 italic">Diễn ra từ </span>
+                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
+                                        {timestampToDateTime(contest?.start_time).date}
+                                    </p>
+                                    <p className="text-nowrap font-semibold dark:font-medium">
+                                        <span className="text-xs opacity-60 mr-1 italic">Kết thúc </span>
+                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
+                                        {timestampToDateTime(contest?.end_time).date}
+                                    </p>
                                 </div>
                             </div>
                         </BlurFade> :

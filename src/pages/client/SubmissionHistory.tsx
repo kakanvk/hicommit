@@ -151,7 +151,7 @@ function SubmissionHistory(props: any) {
                         </div>
                     </> : isInitial &&
                     <div className="w-full flex justify-center py-10 bg-secondary/30 dark:bg-secondary/10 border rounded-lg">
-                        <p className="text-center">Bạn chưa từng nộp bài tập này. <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
+                        <p className="text-center">Bạn chưa có bài nộp nào. <Link to={`submit`} className="text-primary font-medium">Nộp bài ngay<MoveRight className="inline w-5 h-5 ml-1.5" /></Link></p>
                     </div>
             }
         </div >

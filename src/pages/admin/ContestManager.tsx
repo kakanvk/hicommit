@@ -291,7 +291,7 @@ function ContestManager() {
                             }
                             {row.getValue("slug")}
                         </Badge>
-                        <span className='leading-6'>{row.getValue("name")}</span>
+                        <Link to={`/admin/contests/${row.getValue("id")}`} className='leading-6 hover:text-primary'>{row.getValue("name")}</Link>
                     </p>
                     {
                         (row.getValue("start_time") as any) > moment(new Date().getTime()).unix() ?
