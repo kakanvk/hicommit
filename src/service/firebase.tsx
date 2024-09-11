@@ -44,6 +44,7 @@ const handleLogout = async () => {
     try {
         await signOut(auth);
         await logout();
+        localStorage.removeItem('encryptedGithubAccessToken');
     } catch (err) {
         console.error(err);
     }

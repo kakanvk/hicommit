@@ -29,6 +29,7 @@ import EditCourse from "@/pages/teacher/EditCourse";
 import EditProblem from "@/pages/teacher/EditProblem";
 import Contests from "@/pages/client/Contests";
 import Contest from "@/pages/client/Contest";
+import Discussion from "@/pages/client/Discussion";
 
 function ClientLayout() {
 
@@ -89,6 +90,7 @@ function ClientLayout() {
                                             <Route path="problem/:problem_id">
                                                 <Route path="" element={<Problem />} />
                                                 <Route path="submit" element={<SubmitProblem />} />
+                                                <Route path="discussion/:discussion_id" element={<Discussion />} />
                                             </Route>
                                             <Route path="forum">
                                                 <Route path="" element={<Forum />} />

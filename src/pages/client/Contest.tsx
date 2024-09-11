@@ -18,6 +18,14 @@ import {
 } from "@/components/ui/table"
 
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+import {
     Dialog,
     DialogClose,
     DialogContent,
@@ -29,19 +37,22 @@ import {
 } from "@/components/ui/dialog"
 
 import RingProgress from "@/components/ui/ringProcess";
-import { AlignEndHorizontal, AlignLeft, ArrowRight, BarChartBig, Eye, History, LogOut, MessagesSquare, X } from "lucide-react";
+import { AlignEndHorizontal, AlignLeft, ArrowRight, BarChartBig, Eye, History, LogOut, MessagesSquare, MoveRight, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useState } from "react";
 import Ranking from "./Ranking";
 import { Button } from "@/components/ui/button";
-import { exitContest, getContestByID, getContestDescriptionByID, getJoinedContest, joinContest } from "@/service/API/Contest";
+import { exitContest, getContestByID, getContestDescriptionByID, getJoinedContest, getMembersByContestID, getSubmissionsByContestID, joinContest } from "@/service/API/Contest";
 import BlurFade from "@/components/magicui/blur-fade";
-import { timestampChange, timestampToDateTime } from "@/service/DateTimeService";
+import { formatTimeAgo, timestampChange, timestampToDateTime } from "@/service/DateTimeService";
 import moment from "moment";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import { getMySubmited } from "@/service/API/Submission";
+import { GitGraph, GitGraphBody, GitGraphFree, GitGraphHead, GitGraphNode } from "@/components/ui/git-graph";
+import { useLogin } from "@/service/LoginContext";
+import { useSocket } from "@/service/SocketContext";
 
 // Function to calculate the remaining time and the progress percentage
 const calculateTimeLeft = (endTime: number, totalTime: number): { timeLeft: string; percent: number } => {
@@ -83,6 +94,10 @@ function Contest() {
 
     const { contest_id } = useParams<{ contest_id: string }>();
 
+    const loginContext = useLogin();
+
+    const { socket } = useSocket() as any;
+
     const navigate = useNavigate();
 
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(0, 0));
@@ -93,13 +108,112 @@ function Contest() {
     const [description, setDescription] = useState<any>(null);
     const [mySubmited, setMySubmited] = useState<any>(null);
 
+    const [submissions, setSubmissions] = useState<any[]>([]);
+    const [submissionsFiltered, setSubmissionsFiltered] = useState<any[]>([]);
+    const [problemMap, setProblemMap] = useState<any>({});
+    const [members, setMembers] = useState<any[]>([]);
+    const [selectedMember, setSelectedMember] = useState<string>("all");
+
     const [warningShow, setWarningShow] = useState(true);
     const [inputKey, setInputKey] = useState<string>("");
+
+    const [topThree, setTopThree] = useState<any[]>([]);
+
+    const statusPriority = {
+        "PASSED": 5,
+        "FAILED": 4,
+        "ERROR": 3,
+        "COMPILE_ERROR": 2,
+        "PENDING": 1
+    };
+
+    const fetchData = async () => {
+        const submissions = await getSubmissionsByContestID(contest_id as any);
+        const participants = await getMembersByContestID(contest_id as any);
+
+        const calculatedLeaderboard = participants.map((participant: any) => {
+            const userSubmissions = submissions.filter((sub: any) => sub.username === participant.username);
+
+            let highestStatus = "PENDING";
+            let totalScore = 0;
+            let penalty = 0;
+
+            const solvedProblems = new Set();
+
+            if (userSubmissions.length === 0) {
+                highestStatus = "NONE";
+            } else {
+                userSubmissions.forEach((sub: any) => {
+                    if (statusPriority[sub.status as keyof typeof statusPriority] > statusPriority[highestStatus as keyof typeof statusPriority]) {
+                        highestStatus = sub.status;
+                    }
+
+                    if (sub.status === "PASSED" && !solvedProblems.has(sub.problem_slug)) {
+                        totalScore += sub.score;
+                        penalty += sub.duration;
+                        solvedProblems.add(sub.problem_slug);
+                        // problemResults[sub.problem_slug].score = sub.score;
+                    } else if (sub.status === "FAILED") {
+                        penalty += 5;
+                    } else if (sub.status === "ERROR") {
+                        penalty += 10;
+                    } else if (sub.status === "COMPILE_ERROR") {
+                        penalty += 20;
+                    }
+                });
+            }
+
+            return {
+                username: participant.username,
+                avatar_url: participant.avatar_url,
+                id: participant.id,
+                status: highestStatus,
+                try: userSubmissions.length,
+                score: totalScore,
+                penalty
+            };
+        });
+
+        calculatedLeaderboard.sort((a: any, b: any) => {
+            if (a.status === "NONE") return 1;
+            if (b.status === "NONE") return -1;
+
+            if (b.score === a.score) {
+                return a.penalty - b.penalty;
+            }
+            return b.score - a.score;
+        });
+
+        // Cắt lấy top 3 có score lớn nhất và score > 0
+        const topThreePlayers = calculatedLeaderboard.filter((player: any) => player.score > 0).slice(0, 3);
+        setTopThree(topThreePlayers);
+
+        console.log(topThreePlayers);
+    };
 
     const getData = async () => {
         const data = await getContestByID(contest_id as any);
         console.log(data);
         setContest(data);
+
+        if (loginContext.user) {
+            const userIndex = data.members.findIndex((member: any) => member.username === loginContext.user.username);
+            if (userIndex > -1) {
+                const user = data.members.splice(userIndex, 1);
+                data.members.unshift(user[0]);
+            }
+        }
+
+        setMembers(data.members);
+
+        const problems = data.problems.map((problem: any, index: number) => {
+            return {
+                [problem.slug]: problem.name
+            }
+        });
+
+        setProblemMap(Object.assign({}, ...problems));
+
         setTimeLeft(calculateTimeLeft(data.end_time as any, data.duration as any));
     }
 
@@ -118,6 +232,21 @@ function Contest() {
     const handleGetMySubmited = async () => {
         const response = await getMySubmited();
         setMySubmited(response);
+    }
+
+    const handleFilterSubmissions = () => {
+        if (selectedMember === "all") {
+            setSubmissionsFiltered(submissions);
+        } else {
+            const data = submissions.filter((submission: any) => submission.username === selectedMember);
+            setSubmissionsFiltered(data);
+        }
+    }
+
+    const getSubmissions = async () => {
+        const data = await getSubmissionsByContestID(contest_id as any);
+        // console.log(data);
+        setSubmissions(data);
     }
 
     const handleExitContest = async () => {
@@ -145,7 +274,21 @@ function Contest() {
     }
 
     useEffect(() => {
-        Promise.allSettled([getData(), getDescription(), getJoinedContestData(), handleGetMySubmited()]);
+        socket.on('new_submission', () => {
+            getSubmissions();
+        });
+
+        return () => {
+            socket.off('new_submission');
+        };
+    }, []);
+
+    useEffect(() => {
+        handleFilterSubmissions();
+    }, [selectedMember, submissions]);
+
+    useEffect(() => {
+        Promise.allSettled([getData(), getDescription(), getJoinedContestData(), handleGetMySubmited(), getSubmissions(), fetchData()]);
     }, []);
 
     useEffect(() => {
@@ -271,7 +414,7 @@ function Contest() {
                                         className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                                     >
                                         <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
-                                            <History className="w-4 mr-2" />Lịch sử nộp bài
+                                            <History className="w-4 mr-2" />Các bài nộp
                                         </Button>
                                     </TabsTrigger>
                                 </TabsList>
@@ -371,7 +514,98 @@ function Contest() {
                             </TabsContent>
                             <TabsContent value="history" className="w-full">
                                 <div className="flex flex-col gap-5 py-3">
-                                    Ranking here.
+                                    <div>
+                                        <Select value={selectedMember} onValueChange={(value) => setSelectedMember(value)}>
+                                            <SelectTrigger className="w-[180px] rounded-lg bg-secondary/10">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Tất cả</SelectItem>
+                                                {
+                                                    members?.map((member: any, index: number) => (
+                                                        <SelectItem key={index} value={member.username}>
+                                                            {member.username}
+                                                            {loginContext.user.username === member.username &&
+                                                                <span className="italic text-primary ml-1 text-sm">(Bạn)</span>
+                                                            }
+                                                        </SelectItem>
+                                                    ))
+                                                }
+                                            </SelectContent>
+                                        </Select>
+                                        {
+                                            (submissionsFiltered?.length > 0) ?
+                                                <div>
+                                                    <GitGraph>
+                                                        <GitGraphBody className="pl-6">
+                                                            <BlurFade delay={0.1} yOffset={0}>
+                                                                <GitGraphFree className="h-3" />
+                                                            </BlurFade>
+                                                            {
+                                                                submissionsFiltered?.map((submission, index) => {
+                                                                    return (
+                                                                        <BlurFade key={submission?.id} delay={0.15 + index * 0.05} yOffset={0}>
+                                                                            <GitGraphNode end={index === submissionsFiltered?.length - 1 ? true : false} className="py-0">
+                                                                                <Link className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border bg-zinc-100/80 dark:bg-zinc-900 hover:bg-zinc-200/50 hover:dark:bg-zinc-800/70 p-3 px-5 rounded-lg duration-100" to={`/submission/${submission.id}`}>
+                                                                                    <div className="flex-1 flex flex-col gap-2">
+                                                                                        <p className="font-semibold text-base">
+                                                                                            {
+                                                                                                problemMap[submission?.problem_slug] ?
+                                                                                                    <span className="text-sm">{problemMap[submission?.problem_slug]}</span> :
+                                                                                                    <span className="text-sm">{submission?.problem_slug}</span>
+                                                                                            }
+                                                                                            {submission?.status === "PENDING" &&
+                                                                                                <span className="relative inline-flex h-3 w-3 ml-2.5">
+                                                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                                                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                                                                                </span>
+                                                                                            }
+                                                                                            {submission?.status === "PASSED" && <i className="fa-solid fa-circle-check text-green-600 ml-2.5 text-[14px]"></i>}
+                                                                                            {(submission?.status === "FAILED" || submission?.status === "ERROR" || submission?.status === "COMPILE_ERROR") && <i className="fa-solid fa-circle-xmark text-red-500 ml-2.5 text-[14px]"></i>}
+                                                                                        </p>
+                                                                                        <div className="text-[14px] flex items-baseline gap-1.5 flex-wrap">
+                                                                                            <span className="opacity-70">Commit bởi</span>
+                                                                                            <strong className="font-semibold hover:underline cursor-pointer">{submission?.username}</strong>
+                                                                                            <span className="opacity-50 text-[13px] font-medium dark:font-normal ml-0.5">
+                                                                                                <i className="fa-solid fa-circle text-[3px] -translate-y-[3.5px] mr-2"></i>
+                                                                                                {formatTimeAgo(submission.createdAt, "vi")}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="flex flex-col items-start sm:items-end gap-1">
+                                                                                        <span className="text-xs opacity-60">Thời gian</span>
+                                                                                        <strong>
+                                                                                            {
+                                                                                                submission.status === "PENDING" ? (
+                                                                                                    <span className="text-sm text-amber-500">Đang chấm</span>
+                                                                                                ) : submission.duration + "s"
+
+                                                                                            }
+                                                                                        </strong>
+                                                                                    </div>
+                                                                                </Link>
+                                                                            </GitGraphNode>
+                                                                        </BlurFade>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </GitGraphBody>
+                                                    </GitGraph>
+                                                    <div className="mt-8">
+                                                        <p className="text-sm">
+                                                            <i className="fa-solid fa-circle-info mr-2 opacity-50"></i>
+                                                            <span className="opacity-70">Được thực hiện bởi</span>
+                                                            <Badge variant="secondary" className="rounded px-1.5 -translate-y-[2px] ml-2">
+                                                                <i className="fa-regular fa-circle-play mr-1"></i>GitHub Actions
+                                                            </Badge>
+                                                        </p>
+                                                    </div>
+                                                </div> :
+                                                <div className="w-full flex justify-center py-10 bg-secondary/30 dark:bg-secondary/10 border rounded-lg mt-5">
+                                                    <p className="text-center">Chưa có bài nộp nào.</p>
+                                                </div>
+                                        }
+                                    </div>
                                 </div>
                             </TabsContent>
                         </Tabs>
@@ -379,171 +613,174 @@ function Contest() {
                 </div>
                 {
                     contest?.start_time > moment(new Date().getTime()).unix() ?
-                        <BlurFade delay={0.2} yOffset={0}>
-                            <div className="w-[280px] 2xl:w-[300px] p-7 border rounded-lg bg-secondary/10 sticky top-4">
-                                <div className="relative flex flex-col items-center justify-center gap-2">
-                                    <h2 className="font-bold text-lg">Bắt đầu sau</h2>
-                                    {
-                                        countdown &&
-                                        <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5 border p-2 px-4 rounded-lg border-2 border-primary bg-primary/10">
-                                            <span className="text-3xl font-extrabold">{countdown}</span>
-                                        </span>
-                                    }
-                                </div>
-                                <div className="flex flex-col mt-4 gap-1">
-                                    <p className="text-nowrap font-semibold dark:font-medium my-0.5">
-                                        <span className="text-xs opacity-60 mr-1 italic">Diễn ra từ </span>
-                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
-                                        {timestampToDateTime(contest?.start_time).date}
-                                    </p>
-                                    <p className="text-nowrap font-semibold dark:font-medium">
-                                        <span className="text-xs opacity-60 mr-1 italic">Kết thúc </span>
-                                        <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
-                                        {timestampToDateTime(contest?.end_time).date}
-                                    </p>
-                                </div>
+                        <BlurFade delay={0.2} yOffset={0} className="w-[280px] 2xl:w-[300px] p-7 border rounded-lg bg-secondary/10 sticky top-4">
+                            <div className="relative flex flex-col items-center justify-center gap-2">
+                                <h2 className="font-bold text-lg">Bắt đầu sau</h2>
+                                {
+                                    countdown &&
+                                    <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5 border p-2 px-4 rounded-lg border-2 border-primary bg-primary/10">
+                                        <span className="text-3xl font-extrabold">{countdown}</span>
+                                    </span>
+                                }
+                            </div>
+                            <div className="flex flex-col mt-4 gap-1">
+                                <p className="text-nowrap font-semibold dark:font-medium my-0.5">
+                                    <span className="text-xs opacity-60 mr-1 italic">Diễn ra từ </span>
+                                    <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.start_time).time}</span>
+                                    {timestampToDateTime(contest?.start_time).date}
+                                </p>
+                                <p className="text-nowrap font-semibold dark:font-medium">
+                                    <span className="text-xs opacity-60 mr-1 italic">Kết thúc </span>
+                                    <span className='text-foreground/70 font-semibold border border-foreground/30 rounded text-[12px] px-0.5 mr-1.5'>{timestampToDateTime(contest?.end_time).time}</span>
+                                    {timestampToDateTime(contest?.end_time).date}
+                                </p>
                             </div>
                         </BlurFade> :
                         timeLeft.percent <= 0 ? (
-                            <BlurFade delay={0.2} yOffset={0}>
-                                <div className="w-[290px] 2xl:w-[320px] p-4 pb-2 border rounded-lg bg-secondary/10 sticky top-4">
-                                    <div className="relative flex flex-col items-center justify-center gap-6">
-                                        <h2 className="font-bold text-lg">Kết quả cuộc thi</h2>
-                                        <div className="flex flex-col gap-2.5 w-full">
+                            <BlurFade delay={0.2} yOffset={0} className="w-[290px] 2xl:w-[320px] p-4 pb-2 border rounded-lg bg-secondary/10 sticky top-4">
+                                <div className="relative flex flex-col items-center justify-center gap-6">
+                                    <h2 className="font-bold text-lg">Kết quả cuộc thi</h2>
+                                    <div className="flex flex-col gap-2.5 w-full">
+                                        {
+                                            topThree[0] &&
                                             <BlurFade delay={0.25}>
                                                 <div className="flex items-center gap-2 w-full border rounded-lg p-3 pl-4 bg-primary text-white">
                                                     <span className="w-4 text-sm font-bold">1</span>
                                                     <div className="flex items-center">
-                                                        <img src="https://avatars.githubusercontent.com/u/93561031?v=4" className="size-[26px] rounded-full inline mr-2 border border-white" />
-                                                        <span className="lowercase text-sm font-semibold line-clamp-1 break-words">kakanvk</span>
+                                                        <img src={topThree[0]?.avatar_url} className="size-[26px] rounded-full inline mr-2 border border-white" />
+                                                        <span className="lowercase text-sm font-semibold line-clamp-1 break-words">{topThree[0]?.username}</span>
                                                     </div>
                                                     <Badge variant="secondary" className="ml-auto rounded-md bg-white text-primary text-[12px] p-0.5 px-2 font-black leading-5 text-nowrap">
-                                                        500
+                                                        {topThree[0]?.score}
                                                     </Badge>
                                                 </div>
                                             </BlurFade>
+                                        }
+                                        {
+                                            topThree[1] &&
                                             <BlurFade delay={0.3}>
                                                 <div className="flex items-center gap-2 w-full border border-foreground/10 rounded-lg p-3 pl-4 bg-secondary">
                                                     <span className="w-4 text-sm font-bold opacity-70">2</span>
                                                     <div className="flex items-center">
-                                                        <img src="https://avatars.githubusercontent.com/u/168247648?v=4" className="size-[26px] rounded-full inline mr-2 border border-foreground/20" />
-                                                        <span className="lowercase text-sm font-semibold text-l line-clamp-1 break-words">kakaintest</span>
+                                                        <img src={topThree[1]?.avatar_url} className="size-[26px] rounded-full inline mr-2 border border-foreground/20" />
+                                                        <span className="lowercase text-sm font-semibold text-l line-clamp-1 break-words">{topThree[1]?.username}</span>
                                                     </div>
                                                     <Badge variant="secondary" className="ml-auto rounded-md bg-foreground/10 dark:bg-foreground/20 text-[12px] p-0.5 px-2 font-black leading-5 text-nowrap">
-                                                        300
+                                                        {topThree[1]?.score}
                                                     </Badge>
                                                 </div>
                                             </BlurFade>
+                                        }
+                                        {
+                                            topThree[2] &&
                                             <BlurFade delay={0.35}>
                                                 <div className="flex items-center gap-2 w-full border rounded-lg p-3 pl-4 bg-secondary/10">
                                                     <span className="w-4 text-sm font-bold opacity-70">3</span>
                                                     <div className="flex items-center">
-                                                        <img src="https://avatars.githubusercontent.com/u/167604394?v=4" className="size-[26px] rounded-full inline mr-2 border border-foreground/20" />
-                                                        <span className="lowercase text-sm font-semibold text-l line-clamp-1 break-words">nguyenthuhakt</span>
+                                                        <img src={topThree[2]?.avatar_url} className="size-[26px] rounded-full inline mr-2 border border-foreground/20" />
+                                                        <span className="lowercase text-sm font-semibold text-l line-clamp-1 break-words">{topThree[2]?.username}</span>
                                                     </div>
                                                     <Badge variant="secondary" className="ml-auto rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-black leading-5 text-nowrap">
-                                                        200
+                                                        {topThree[2]?.score}
                                                     </Badge>
                                                 </div>
                                             </BlurFade>
-                                            <BlurFade delay={0.4}>
-                                                <Button variant="ghost" className="group/more w-full">
-                                                    Xem tất cả<ArrowRight className="size-[14px] ml-2 duration-100 group-hover/more:ml-3" />
-                                                </Button>
-                                            </BlurFade>
-                                        </div>
+                                        }
+                                        <BlurFade delay={0.4}>
+                                            <Button variant="ghost" className="group/more w-full">
+                                                Xem tất cả<ArrowRight className="size-[14px] ml-2 duration-100 group-hover/more:ml-3" />
+                                            </Button>
+                                        </BlurFade>
                                     </div>
                                 </div>
                             </BlurFade>
                         ) :
-                            <BlurFade delay={0.2} yOffset={0}>
-                                <div className="w-[280px] sticky top-4 flex flex-col gap-4">
-                                    <div className="relative border p-4 rounded-lg bg-secondary/10 aspect-square flex flex-col items-center justify-center">
-                                        <RingProgress radius={120} stroke={10} progress={timeLeft.percent} textSize={25} label=" " />
-                                        <div className="flex flex-col items-center absolute">
-                                            <span className="text-[14px] opacity-80 font-light">Thời gian còn lại</span>
-                                            <span className="text-3xl font-extrabold">{timeLeft.timeLeft}</span>
-                                            <span className="text-nowrap italic opacity-60 text-sm mt-1">
-                                                <History className="size-[14px] mr-1 inline -translate-y-[1px]" />
-                                                {timestampChange(contest?.duration).hours > 0 && `${timestampChange(contest?.duration).hours.toString().padStart(2, "0")} giờ `}
-                                                {`${timestampChange(contest?.duration).minutes.toString().padStart(2, "0")} phút `}
-                                            </span>
-                                        </div>
+                            <BlurFade delay={0.2} yOffset={0} className="w-[280px] sticky top-6 flex flex-col gap-4">
+                                <div className="relative border p-4 rounded-lg bg-secondary/10 aspect-square flex flex-col items-center justify-center">
+                                    <RingProgress radius={120} stroke={10} progress={timeLeft.percent} textSize={25} label=" " />
+                                    <div className="flex flex-col items-center absolute">
+                                        <span className="text-[14px] opacity-80 font-light">Thời gian còn lại</span>
+                                        <span className="text-3xl font-extrabold">{timeLeft.timeLeft}</span>
+                                        <span className="text-nowrap italic opacity-60 text-sm mt-1">
+                                            <History className="size-[14px] mr-1 inline -translate-y-[1px]" />
+                                            {timestampChange(contest?.duration).hours > 0 && `${timestampChange(contest?.duration).hours.toString().padStart(2, "0")} giờ `}
+                                            {`${timestampChange(contest?.duration).minutes.toString().padStart(2, "0")} phút `}
+                                        </span>
                                     </div>
-                                    {
-                                        joinedContest?.id === contest_id ?
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button variant="destructive" className="w-full">
-                                                        Rời khỏi cuộc thi<ArrowRight className="size-[14px] ml-2 duration-100 group-hover/more:ml-3" />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Xác nhận rời khỏi cuộc thi này</DialogTitle>
-                                                    </DialogHeader>
-                                                    <DialogDescription>
-                                                        Sau khi rời khỏi, mọi kết quả sẽ bị huỷ và bạn sẽ không thể tham gia lại cuộc thi này.
-                                                    </DialogDescription>
-                                                    <DialogFooter className="mt-2">
-                                                        <DialogClose>
-                                                            <Button variant="ghost">
-                                                                Đóng
-                                                            </Button>
-                                                        </DialogClose>
-                                                        <DialogClose>
-                                                            <Button className="w-fit px-4" variant="destructive" onClick={() => handleExitContest()}>
-                                                                Tôi hiểu và muốn rời khỏi
-                                                            </Button>
-                                                        </DialogClose>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog> :
-                                            <BlurFade delay={0.3}>
-                                                <div className="sticky top-6 w-full flex flex-col items-center gap-2">
-                                                    <p className="text-[13px] w-full mt-3">
-                                                        <i className="fa-solid fa-circle-info mr-2 opacity-40 text-xs"></i>
-                                                        <span className="opacity-60">Bạn chưa tham gia cuộc thi này</span>
-                                                    </p>
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <Button className="w-full">
-                                                                {!contest?.public && <i className="fa-solid fa-lock mr-3 text-xs translate-y-[1px]"></i>}
-                                                                Tham gia ngay
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>Xác nhận tham gia cuộc thi này</DialogTitle>
-                                                            </DialogHeader>
-                                                            <DialogDescription className="-mt-0.5 leading-6">
-                                                                Bạn có chắc chắn rằng bạn muốn tham gia cuộc thi này. {contest?.join_key && 'Vui lòng nhập mã tham gia để tiếp tục.'}
-                                                            </DialogDescription>
-                                                            {
-                                                                !contest?.public &&
-                                                                <Input
-                                                                    placeholder="Mã tham gia"
-                                                                    className="placeholder:italic"
-                                                                    value={inputKey}
-                                                                    onChange={(e) => setInputKey(e.target.value)}
-                                                                />
-                                                            }
-                                                            <DialogFooter className="mt-4">
-                                                                <DialogClose asChild>
-                                                                    <Button variant="ghost">
-                                                                        Đóng
-                                                                    </Button>
-                                                                </DialogClose>
-                                                                <DialogClose asChild>
-                                                                    <Button onClick={() => handleJoinContest()}>Xác nhận</Button>
-                                                                </DialogClose>
-                                                            </DialogFooter>
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                </div>
-                                            </BlurFade>
-                                    }
                                 </div>
+                                {
+                                    joinedContest?.id === contest_id ?
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="destructive" className="w-full">
+                                                    Rời khỏi cuộc thi<ArrowRight className="size-[14px] ml-2 duration-100 group-hover/more:ml-3" />
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Xác nhận rời khỏi cuộc thi này</DialogTitle>
+                                                </DialogHeader>
+                                                <DialogDescription>
+                                                    Sau khi rời khỏi, mọi kết quả sẽ bị huỷ và bạn sẽ không thể tham gia lại cuộc thi này.
+                                                </DialogDescription>
+                                                <DialogFooter className="mt-2">
+                                                    <DialogClose>
+                                                        <Button variant="ghost">
+                                                            Đóng
+                                                        </Button>
+                                                    </DialogClose>
+                                                    <DialogClose>
+                                                        <Button className="w-fit px-4" variant="destructive" onClick={() => handleExitContest()}>
+                                                            Tôi hiểu và muốn rời khỏi
+                                                        </Button>
+                                                    </DialogClose>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog> :
+                                        <BlurFade delay={0.3}>
+                                            <div className="sticky top-6 w-full flex flex-col items-center gap-2">
+                                                <p className="text-[13px] w-full mt-3">
+                                                    <i className="fa-solid fa-circle-info mr-2 opacity-40 text-xs"></i>
+                                                    <span className="opacity-60">Bạn chưa tham gia cuộc thi này</span>
+                                                </p>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button className="w-full">
+                                                            {!contest?.public && <i className="fa-solid fa-lock mr-3 text-xs translate-y-[1px]"></i>}
+                                                            Tham gia ngay
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>Xác nhận tham gia cuộc thi này</DialogTitle>
+                                                        </DialogHeader>
+                                                        <DialogDescription className="-mt-0.5 leading-6">
+                                                            Bạn có chắc chắn rằng bạn muốn tham gia cuộc thi này. {contest?.join_key && 'Vui lòng nhập mã tham gia để tiếp tục.'}
+                                                        </DialogDescription>
+                                                        {
+                                                            !contest?.public &&
+                                                            <Input
+                                                                placeholder="Mã tham gia"
+                                                                className="placeholder:italic"
+                                                                value={inputKey}
+                                                                onChange={(e) => setInputKey(e.target.value)}
+                                                            />
+                                                        }
+                                                        <DialogFooter className="mt-4">
+                                                            <DialogClose asChild>
+                                                                <Button variant="ghost">
+                                                                    Đóng
+                                                                </Button>
+                                                            </DialogClose>
+                                                            <DialogClose asChild>
+                                                                <Button onClick={() => handleJoinContest()}>Xác nhận</Button>
+                                                            </DialogClose>
+                                                        </DialogFooter>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                        </BlurFade>
+                                }
                             </BlurFade>
                 }
             </div>

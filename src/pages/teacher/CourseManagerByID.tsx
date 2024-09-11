@@ -521,23 +521,23 @@ function CourseManagerByID() {
                                             </Tooltip>
                                         </TooltipProvider>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-[50%] ">
+                                    <DialogContent className="max-w-[60%] ">
                                         <DialogHeader>
                                             <DialogTitle>Cài đặt khoá học</DialogTitle>
                                         </DialogHeader>
                                         <div className="mt-1 -ml-2">
                                             <Tabs defaultValue="general" className="w-full flex gap-10" orientation="vertical">
                                                 <TabsList className="flex flex-col h-fit bg-tranparent gap-2 p-0">
-                                                    <TabsTrigger value="general" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
+                                                    <TabsTrigger value="general" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <Settings className="w-4 h-4 mr-2" />Chung
                                                     </TabsTrigger>
-                                                    <TabsTrigger value="advance" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
+                                                    <TabsTrigger value="advance" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <Gem className="w-4 h-4 mr-2" />Nâng cao
                                                     </TabsTrigger>
-                                                    <TabsTrigger value="access" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
+                                                    <TabsTrigger value="access" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <ScanEye className="w-4 h-4 mr-2" />Quyền truy cập
                                                     </TabsTrigger>
-                                                    <TabsTrigger value="member" className="pr-6 data-[state=active]:bg-secondary w-full justify-start">
+                                                    <TabsTrigger value="member" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <Users className="w-4 h-4 mr-2" />Thành viên
                                                     </TabsTrigger>
                                                 </TabsList>

@@ -87,7 +87,6 @@ const combineDateAndTimeToTimestamp = (date: Date, timeString: string) => {
     const dateString = `${year}-${month}-${day}`;
     const combined = `${dateString} ${timeString}`;
 
-    console.log("combined", combined);
     return moment(combined).unix();
 };
 

@@ -378,108 +378,104 @@ function Course() {
                 </div>
                 {
                     courseData.isJoined ?
-                        <BlurFade delay={0.3}>
-                            <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
-                                <span className="font-semibold">Tiến độ khoá học</span>
-                                <RingProgress radius={90} stroke={12} progress={mergedProblems.length > 0 ? ((mergedProblems.filter((problem: any) => problem.status === "PASSED").length / mergedProblems.length) * 100).toFixed(0) : 0 as any} textSize={28} />
-                                <div className="w-full font-medium flex flex-col gap-4 mt-5">
-                                    <div className="flex gap-3 justify-start items-center">
-                                        <div className="flex items-center gap-2.5">
-                                            <i className="fa-solid fa-circle-check text-green-600"></i>
-                                            <span className="text-sm">Kết quả chính xác:</span>
-                                        </div>
-                                        <Badge variant="secondary" className="rounded px-1.5">
-                                            {mergedProblems.filter((problem: any) => problem.status === "PASSED").length}/{mergedProblems.length}
-                                        </Badge>
+                        <BlurFade delay={0.3} className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5 px-6">
+                            <span className="font-semibold">Tiến độ khoá học</span>
+                            <RingProgress radius={90} stroke={12} progress={mergedProblems.length > 0 ? ((mergedProblems.filter((problem: any) => problem.status === "PASSED").length / mergedProblems.length) * 100).toFixed(0) : 0 as any} textSize={28} />
+                            <div className="w-full font-medium flex flex-col gap-4 mt-5">
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-circle-check text-green-600"></i>
+                                        <span className="text-sm">Kết quả chính xác:</span>
                                     </div>
-                                    <div className="flex gap-3 justify-start items-center">
-                                        <div className="flex items-center gap-2.5">
-                                            <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                            <span className="text-sm">Sai kết quả:</span>
-                                        </div>
-                                        <Badge variant="secondary" className="rounded px-1.5">
-                                            {mergedProblems.filter((problem: any) => problem.status === "FAILED").length}/{mergedProblems.length}
-                                        </Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "PASSED").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-circle-xmark text-red-500"></i>
+                                        <span className="text-sm">Sai kết quả:</span>
                                     </div>
-                                    <div className="flex gap-3 justify-start items-center">
-                                        <div className="flex items-center gap-2.5">
-                                            <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                            <span className="text-sm">Gặp vấn đề:</span>
-                                        </div>
-                                        <Badge variant="secondary" className="rounded px-1.5">
-                                            {mergedProblems.filter((problem: any) => problem.status === "ERROR").length}/{mergedProblems.length}
-                                        </Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "FAILED").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
+                                        <span className="text-sm">Gặp vấn đề:</span>
                                     </div>
-                                    <div className="flex gap-3 justify-start items-center">
-                                        <div className="flex items-center gap-2.5">
-                                            <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>
-                                            <span className="text-sm">Lỗi biên dịch:</span>
-                                        </div>
-                                        <Badge variant="secondary" className="rounded px-1.5">
-                                            {mergedProblems.filter((problem: any) => problem.status === "COMPILE_ERROR").length}/{mergedProblems.length}
-                                        </Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "ERROR").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>
+                                        <span className="text-sm">Lỗi biên dịch:</span>
                                     </div>
-                                    <div className="flex gap-3 justify-start items-center">
-                                        <div className="flex items-center gap-2.5">
-                                            <i className="fa-solid fa-circle-minus text-zinc-400"></i>
-                                            <span className="text-sm">Chưa nộp bài:</span>
-                                        </div>
-                                        <Badge variant="secondary" className="rounded px-1.5">
-                                            {mergedProblems.filter((problem: any) => problem.status === "NONE").length}/{mergedProblems.length}
-                                        </Badge>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "COMPILE_ERROR").length}/{mergedProblems.length}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-3 justify-start items-center">
+                                    <div className="flex items-center gap-2.5">
+                                        <i className="fa-solid fa-circle-minus text-zinc-400"></i>
+                                        <span className="text-sm">Chưa nộp bài:</span>
                                     </div>
+                                    <Badge variant="secondary" className="rounded px-1.5">
+                                        {mergedProblems.filter((problem: any) => problem.status === "NONE").length}/{mergedProblems.length}
+                                    </Badge>
                                 </div>
                             </div>
                         </BlurFade> :
-                        <BlurFade delay={0.3}>
-                            <div className="sticky top-6 w-[320px] flex flex-col items-center gap-2">
-                                <div className="bg-secondary dark:bg-secondary/30 w-full aspect-[3/2] relative rounded-lg overflow-hidden border">
-                                    <img src={courseData?.thumbnail} />
-                                </div>
-                                <h1 className="font-semibold w-full">
-                                    <Badge variant="secondary" className="rounded px-1.5 -translate-y-[1px] mr-2">{courseData?.class_name}</Badge>
-                                    {courseData?.name}
-                                </h1>
-                                <p className="text-[13px] w-full mt-3">
-                                    <i className="fa-solid fa-circle-info mr-2 opacity-40 text-xs"></i>
-                                    <span className="opacity-60">Bạn chưa tham gia khoá học này</span>
-                                </p>
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button className="w-full">
-                                            {!courseData?.isPublic && <i className="fa-solid fa-lock mr-2 text-xs"></i>}
-                                            Tham gia ngay
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Xác nhận tham gia khoá học</DialogTitle>
-                                        </DialogHeader>
-                                        <DialogDescription className="-mt-0.5 leading-6">
-                                            Bạn có chắc chắn rằng bạn muốn tham gia khoá học này. {courseData?.join_key && 'Vui lòng nhập mã tham gia để tiếp tục.'}
-                                        </DialogDescription>
-                                        {
-                                            !courseData?.isPublic &&
-                                            <Input
-                                                placeholder="Mã tham gia"
-                                                className="placeholder:italic"
-                                                value={inputKey}
-                                                onChange={(e) => setInputKey(e.target.value)}
-                                            />
-                                        }
-                                        <DialogFooter className="mt-4">
-                                            <DialogClose asChild>
-                                                <Button variant="ghost">
-                                                    Đóng
-                                                </Button>
-                                            </DialogClose>
-                                            <DialogClose asChild>
-                                                <Button onClick={() => handleJoinCourse()}>Xác nhận</Button>
-                                            </DialogClose>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
+                        <BlurFade delay={0.3} className="sticky top-6 w-[320px] flex flex-col items-center gap-2">
+                            <div className="bg-secondary dark:bg-secondary/30 w-full aspect-[3/2] relative rounded-lg overflow-hidden border">
+                                <img src={courseData?.thumbnail} />
                             </div>
+                            <h1 className="font-semibold w-full">
+                                <Badge variant="secondary" className="rounded px-1.5 -translate-y-[1px] mr-2">{courseData?.class_name}</Badge>
+                                {courseData?.name}
+                            </h1>
+                            <p className="text-[13px] w-full mt-3">
+                                <i className="fa-solid fa-circle-info mr-2 opacity-40 text-xs"></i>
+                                <span className="opacity-60">Bạn chưa tham gia khoá học này</span>
+                            </p>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="w-full">
+                                        {!courseData?.isPublic && <i className="fa-solid fa-lock mr-2 text-xs"></i>}
+                                        Tham gia ngay
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Xác nhận tham gia khoá học</DialogTitle>
+                                    </DialogHeader>
+                                    <DialogDescription className="-mt-0.5 leading-6">
+                                        Bạn có chắc chắn rằng bạn muốn tham gia khoá học này. {courseData?.join_key && 'Vui lòng nhập mã tham gia để tiếp tục.'}
+                                    </DialogDescription>
+                                    {
+                                        !courseData?.isPublic &&
+                                        <Input
+                                            placeholder="Mã tham gia"
+                                            className="placeholder:italic"
+                                            value={inputKey}
+                                            onChange={(e) => setInputKey(e.target.value)}
+                                        />
+                                    }
+                                    <DialogFooter className="mt-4">
+                                        <DialogClose asChild>
+                                            <Button variant="ghost">
+                                                Đóng
+                                            </Button>
+                                        </DialogClose>
+                                        <DialogClose asChild>
+                                            <Button onClick={() => handleJoinCourse()}>Xác nhận</Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </BlurFade>
                 }
             </div>

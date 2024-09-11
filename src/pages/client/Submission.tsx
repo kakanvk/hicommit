@@ -64,6 +64,7 @@ import toast from "react-hot-toast";
 import BlurFade from "@/components/magicui/blur-fade";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { useLogin } from "@/service/LoginContext";
 
 const timeAgo = (isoDate: any) => {
     try {
@@ -78,6 +79,8 @@ const timeAgo = (isoDate: any) => {
 function Result() {
 
     const { socket } = useSocket() as any;
+
+    const loginContext = useLogin();
 
     const { theme } = useTheme();
 
@@ -328,13 +331,16 @@ function Result() {
                                                         }
                                                     </Badge>
                                                 </div>
-                                                <div className="flex justify-between gap-6 items-center border p-3 px-4 rounded-lg bg-secondary/10">
-                                                    <Label className="flex-1 flex flex-col gap-1.5 cursor-pointer" htmlFor="public-code">
-                                                        <h3 className="text-[16px]"><i className="fa-solid fa-triangle-exclamation mr-2 text-sm text-amber-500/80"></i>Công khai mã nguồn</h3>
-                                                        <p className="text-xs opacity-50 dark:font-light">Mã nguồn này sẽ được công khai với mọi người.</p>
-                                                    </Label>
-                                                    <Switch id="public-code" />
-                                                </div>
+                                                {
+                                                    loginContext.user?.username === submission?.actor?.username &&
+                                                    <div className="flex justify-between gap-6 items-center border p-3 px-4 rounded-lg bg-secondary/10">
+                                                        <Label className="flex-1 flex flex-col gap-1.5 cursor-pointer" htmlFor="public-code">
+                                                            <h3 className="text-[16px]"><i className="fa-solid fa-triangle-exclamation mr-2 text-sm text-amber-500/80"></i>Công khai mã nguồn</h3>
+                                                            <p className="text-xs opacity-50 dark:font-light">Mã nguồn này sẽ được công khai với mọi người.</p>
+                                                        </Label>
+                                                        <Switch id="public-code" />
+                                                    </div>
+                                                }
                                                 <DialogFooter >
                                                     <DialogClose>
                                                         <Button variant="ghost" className="mr-1">Đóng</Button>
@@ -458,6 +464,7 @@ function Result() {
                                                                                             testcase?.actual_output === "" ? "(Rỗng)" : testcase?.actual_output
                                                                                     }
                                                                                 </CodeArea>
+                                                                                <span className="italic text-xs opacity-50 font-medium">* Luôn chú ý đến các khoảng trắng trong dữ liệu đầu ra.</span>
                                                                             </div>
                                                                         </div>
                                                                         <DialogFooter className="mt-4">
@@ -583,7 +590,6 @@ function Result() {
                                         <span className="text-sm font-medium opacity-70">2s</span>
                                     </div>
                                 </div>
-
                             </div>
                         </BlurFade>
                         <BlurFade delay={0.5} yOffset={0} blur="2px">
@@ -601,101 +607,99 @@ function Result() {
                             </div>
                         </BlurFade>
                     </div>
-                    <BlurFade delay={0.3} yOffset={0} blur="2px">
-                        <div className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5">
-                            <span className="font-semibold">Kết quả chấm bài</span>
-                            <RingProgress radius={90} stroke={12} progress={((submission?.pass_count / submission?.problem?.testcase_count) * 100).toFixed(0) as any} label="" textSize={28} />
-                            <div className="w-full flex flex-col mt-3">
-                                <div className="flex gap-2 justify-start items-center">
-                                    <span className="text-sm">Tổng thời gian chấm:</span>
-                                    <Badge variant="secondary" className="rounded px-1 text-xs">{submission?.duration}s</Badge>
-                                </div>
-                                <Accordion type="multiple" className="flex flex-col gap-1 mb-6">
-                                    <AccordionItem value="item-1" className="border-0">
-                                        <AccordionTrigger className="text-sm font-semibold border-b-[1px] border-zinc-600 pb-1 hover:no-underline">
-                                            <span>
-                                                Unit Test
-                                                {submission?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i>}
-                                                {submission?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-amber-500 -translate-y-1"></i>}
-                                                {submission?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-red-500 -translate-y-1"></i>}
-                                                {submission?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-zinc-400 -translate-y-1"></i>}
-                                            </span>
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="flex flex-col gap-3 pt-4">
-                                                <div className="flex gap-3 justify-start items-center">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <i className="fa-solid fa-circle-check text-green-600"></i>
-                                                        <span className="text-sm opacity-70">Số Test case đúng:</span>
-                                                    </div>
-                                                    <Badge variant="secondary" className="rounded px-2">{submission?.pass_count || 0}/{submission?.problem?.testcase_count}</Badge>
-                                                </div>
-                                                <div className="flex gap-3 justify-start items-center">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <i className="fa-solid fa-circle-xmark text-red-500"></i>
-                                                        <span className="text-sm opacity-70">Số Test case sai:</span>
-                                                    </div>
-                                                    <Badge variant="secondary" className="rounded px-2">
-                                                        {submission?.testcases?.filter((testcase: any) => testcase.status === "failed").length}/{submission?.problem?.testcase_count}
-                                                    </Badge>
-                                                </div>
-                                                <div className="flex gap-3 justify-start items-center">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
-                                                        <span className="text-sm opacity-70">Gặp vấn đề:</span>
-                                                    </div>
-                                                    <Badge variant="secondary" className="rounded px-2">
-                                                        {submission?.testcases?.filter((testcase: any) => testcase.status === "error").length}/{submission?.problem?.testcase_count}
-                                                    </Badge>
-                                                </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                    <AccordionItem value="item-2" className="border-0">
-                                        <AccordionTrigger className="text-sm font-semibold border-b-[1px] border-zinc-600 pb-1 hover:no-underline">
-                                            <span>Chất lượng mã nguồn<i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i></span>
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="flex flex-col gap-3 pt-4">
-                                                <div className="flex gap-3 justify-start items-center">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <i className="fa-solid fa-circle-check text-green-600"></i>
-                                                        <span className="text-sm opacity-70">Không có vấn đề nào</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
-                                {
-                                    submission?.status?.toUpperCase() === "PASSED" &&
-                                    <Button size="sm" className="border gap-2 bg-green-600 hover:bg-green-600">
-                                        <i className="fa-solid fa-circle-check"></i>
-                                        <span className="font-semibold">Kết quả chính xác</span>
-                                    </Button>
-                                }
-                                {
-                                    submission?.status?.toUpperCase() === "FAILED" &&
-                                    <Button size="sm" className="border gap-2 bg-red-500 hover:bg-red-500">
-                                        <i className="fa-solid fa-circle-xmark text-[13px]"></i>
-                                        <span className="font-semibold">Sai kết quả</span>
-                                    </Button>
-                                }
-                                {
-                                    submission?.status?.toUpperCase() === "ERROR" &&
-                                    <Button size="sm" className="border gap-2 bg-amber-500 hover:bg-amber-500 text-zinc-900">
-                                        <i className="fa-solid fa-circle-exclamation"></i>
-                                        <span className="font-bold">Gặp vấn đề</span>
-                                    </Button>
-                                }
-                                {
-                                    submission?.status?.toUpperCase() === "COMPILE_ERROR" &&
-                                    <Button size="sm" className="border gap-2 bg-secondary hover:bg-secondary text-black dark:text-white">
-                                        <i className="fa-solid fa-triangle-exclamation"></i>
-                                        <span className="font-semibold">Lỗi biên dịch</span>
-                                    </Button>
-                                }
+                    <BlurFade delay={0.3} yOffset={0} blur="2px" className="sticky top-6 w-[270px] bg-zinc-100/80 dark:bg-zinc-900 border rounded-lg flex flex-col items-center p-5">
+                        <span className="font-semibold">Kết quả chấm bài</span>
+                        <RingProgress radius={90} stroke={12} progress={((submission?.pass_count / submission?.problem?.testcase_count) * 100).toFixed(0) as any} label="" textSize={28} />
+                        <div className="w-full flex flex-col mt-3">
+                            <div className="flex gap-2 justify-start items-center">
+                                <span className="text-sm">Tổng thời gian chấm:</span>
+                                <Badge variant="secondary" className="rounded px-1 text-xs">{submission?.duration}s</Badge>
                             </div>
+                            <Accordion type="multiple" className="flex flex-col gap-1 mb-6">
+                                <AccordionItem value="item-1" className="border-0">
+                                    <AccordionTrigger className="text-sm font-semibold border-b-[1px] border-zinc-600 pb-1 hover:no-underline">
+                                        <span>
+                                            Unit Test
+                                            {submission?.status?.toUpperCase() === "PASSED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-amber-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "FAILED" && <i className="fa-solid fa-circle text-[5px] ml-2 text-red-500 -translate-y-1"></i>}
+                                            {submission?.status?.toUpperCase() === "COMPILE_ERROR" && <i className="fa-solid fa-circle text-[5px] ml-2 text-zinc-400 -translate-y-1"></i>}
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="flex flex-col gap-3 pt-4">
+                                            <div className="flex gap-3 justify-start items-center">
+                                                <div className="flex items-center gap-2.5">
+                                                    <i className="fa-solid fa-circle-check text-green-600"></i>
+                                                    <span className="text-sm opacity-70">Số Test case đúng:</span>
+                                                </div>
+                                                <Badge variant="secondary" className="rounded px-2">{submission?.pass_count || 0}/{submission?.problem?.testcase_count}</Badge>
+                                            </div>
+                                            <div className="flex gap-3 justify-start items-center">
+                                                <div className="flex items-center gap-2.5">
+                                                    <i className="fa-solid fa-circle-xmark text-red-500"></i>
+                                                    <span className="text-sm opacity-70">Số Test case sai:</span>
+                                                </div>
+                                                <Badge variant="secondary" className="rounded px-2">
+                                                    {submission?.testcases?.filter((testcase: any) => testcase.status === "failed").length}/{submission?.problem?.testcase_count}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex gap-3 justify-start items-center">
+                                                <div className="flex items-center gap-2.5">
+                                                    <i className="fa-solid fa-circle-exclamation text-amber-500"></i>
+                                                    <span className="text-sm opacity-70">Gặp vấn đề:</span>
+                                                </div>
+                                                <Badge variant="secondary" className="rounded px-2">
+                                                    {submission?.testcases?.filter((testcase: any) => testcase.status === "error").length}/{submission?.problem?.testcase_count}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-2" className="border-0">
+                                    <AccordionTrigger className="text-sm font-semibold border-b-[1px] border-zinc-600 pb-1 hover:no-underline">
+                                        <span>Chất lượng mã nguồn<i className="fa-solid fa-circle text-[5px] ml-2 text-green-600 dark:text-green-500 -translate-y-1"></i></span>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="flex flex-col gap-3 pt-4">
+                                            <div className="flex gap-3 justify-start items-center">
+                                                <div className="flex items-center gap-2.5">
+                                                    <i className="fa-solid fa-circle-check text-green-600"></i>
+                                                    <span className="text-sm opacity-70">Không có vấn đề nào</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                            {
+                                submission?.status?.toUpperCase() === "PASSED" &&
+                                <Button size="sm" className="border gap-2 bg-green-600 hover:bg-green-600">
+                                    <i className="fa-solid fa-circle-check"></i>
+                                    <span className="font-semibold">Kết quả chính xác</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "FAILED" &&
+                                <Button size="sm" className="border gap-2 bg-red-500 hover:bg-red-500">
+                                    <i className="fa-solid fa-circle-xmark text-[13px]"></i>
+                                    <span className="font-semibold">Sai kết quả</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "ERROR" &&
+                                <Button size="sm" className="border gap-2 bg-amber-500 hover:bg-amber-500 text-zinc-900">
+                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <span className="font-bold">Gặp vấn đề</span>
+                                </Button>
+                            }
+                            {
+                                submission?.status?.toUpperCase() === "COMPILE_ERROR" &&
+                                <Button size="sm" className="border gap-2 bg-secondary hover:bg-secondary text-black dark:text-white">
+                                    <i className="fa-solid fa-triangle-exclamation"></i>
+                                    <span className="font-semibold">Lỗi biên dịch</span>
+                                </Button>
+                            }
                         </div>
                     </BlurFade>
                 </div>

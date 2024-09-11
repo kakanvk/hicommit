@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/pagination"
 import { Separator } from "@/components/ui/separator";
 import { ArrowUpDown, ChevronDown, EllipsisVertical, Eye, Plus, Search, Shuffle, Tag } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
     Select,
@@ -103,6 +103,8 @@ const labelArr = {
 
 function Problems() {
 
+    const navigate = useNavigate();
+
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -113,12 +115,15 @@ function Problems() {
     });
     const [rowSelection, setRowSelection] = useState({});
     const [data, setData] = useState<Problem[]>([]);
+    const [dataFiltered, setDataFiltered] = useState<Problem[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [tags, setTags] = useState<string[]>([]);
     const [filteredTags, setFilteredTags] = useState(tags);
     const [searchTagValue, setSearchTagValue] = useState("");
     const [mySubmited, setMySubmited] = useState<any[]>([]);
+    const [filterByStatus, setFilterByStatus] = useState("all");
+    const [filterByTags, setFilterByTags] = useState<string[]>([]);
 
     useEffect(() => {
         setFilteredTags(tags.filter(tag => tag.toLowerCase().includes(searchTagValue.trim().toLowerCase())))
@@ -128,12 +133,48 @@ function Problems() {
         const problems = await getProblems();
         // console.log(problems);
         setData(problems);
+        setDataFiltered(problems);
         setLoading(false);
     }
 
     const handleGetMySubmited = async () => {
         const response = await getMySubmited();
         setMySubmited(response);
+    }
+
+    const handleOnClickTag = (tag: string) => {
+        const newFilterByTags = [...filterByTags];
+
+        if (newFilterByTags.includes(tag)) {
+            newFilterByTags.splice(newFilterByTags.indexOf(tag), 1);
+        } else {
+            newFilterByTags.push(tag);
+        }
+        setFilterByTags(newFilterByTags);
+
+        const newDataFiltered = data.filter(problem => problem.tags.some(tag => newFilterByTags.includes(tag)));
+        if (newFilterByTags.length === 0) {
+            setDataFiltered(data);
+        } else {
+            setDataFiltered(newDataFiltered);
+        }
+    }
+
+    const handleFilterByStatus = (value: string) => {
+        setFilterByStatus(value);
+        if (value === "completed") {
+            setDataFiltered(data.filter(problem => mySubmited[problem.slug as keyof typeof mySubmited] === "PASSED"));
+        } else if (value === "uncomplete") {
+            setDataFiltered(data.filter(problem => mySubmited[problem.slug as keyof typeof mySubmited] !== "PASSED"));
+        } else {
+            setDataFiltered(data);
+        }
+    }
+
+    const handleSelectRandomProblem = () => {
+        const randomIndex = Math.floor(Math.random() * dataFiltered.length);
+        const randomProblem = dataFiltered[randomIndex];
+        navigate(`/problem/${randomProblem.slug}`);
     }
 
     const getTags = async () => {
@@ -263,7 +304,7 @@ function Problems() {
             accessorKey: "level",
             header: ({ column }) => {
                 return (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 nowrap">
                         <span>Cấp độ</span>
                     </div>
                 )
@@ -321,7 +362,7 @@ function Problems() {
     ]
 
     const table = useReactTable({
-        data,
+        data: dataFiltered,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -365,7 +406,7 @@ function Problems() {
                                             className="bg-transparent flex-1 rounded-md pl-9"
                                         />
                                     </div>
-                                    <Select defaultValue="all">
+                                    <Select value={filterByStatus} onValueChange={(value) => handleFilterByStatus(value)}>
                                         <SelectTrigger className="w-[180px] bg-transparent">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -521,7 +562,9 @@ function Problems() {
                                         {
                                             filteredTags.map((tag, index) => (
                                                 <BlurFade key={index} delay={0.15 + 0.05 * index} yOffset={0} blur="2px">
-                                                    <Badge variant="secondary" className="bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer">{tag}</Badge>
+                                                    <Badge variant={filterByTags.includes(tag) ? "default" : "secondary"} className={`text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer ${filterByTags.includes(tag) ? "text-white" : "text-black dark:text-white bg-secondary/50 dark:bg-secondary/60"}`}     onClick={() => handleOnClickTag(tag)}>
+                                                        {tag}
+                                                    </Badge>
                                                 </BlurFade>
                                             ))
                                         }
@@ -529,7 +572,7 @@ function Problems() {
                                             filteredTags.length === 0 && <span className="text-sm text-muted-foreground">Không có kết quả phù hợp</span>
                                         }
                                     </div>
-                                    <Button size="sm" className="mt-1"><Shuffle className="w-4 h-4 mr-3" />Lấy ngẫu nhiên</Button>
+                                    <Button size="sm" className="mt-1" onClick={handleSelectRandomProblem}><Shuffle className="w-4 h-4 mr-3" />Lấy ngẫu nhiên</Button>
                                 </div>
                             </div>
                         </div>

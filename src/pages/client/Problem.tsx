@@ -85,6 +85,9 @@ import BlurFade from "@/components/magicui/blur-fade";
 
 import { cn } from "@/lib/utils";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
+import Discussions from "./Discussions";
+import { getDiscussions } from "@/service/API/Discussion";
+import { useSocket } from "@/service/SocketContext";
 
 const chartConfig = {
     quanlity: {
@@ -106,9 +109,10 @@ const chartConfig = {
 
 function Problem() {
 
+    const { socket } = useSocket() as any;
+
     const { problem_id } = useParams<{ problem_id: string }>();
 
-    const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const tab = queryParams.get('tab');
     const is2XL = useMediaQuery({ query: '(min-width: 1536px)' });
@@ -117,6 +121,7 @@ function Problem() {
 
     const [problem, setProblem] = useState<any>();
     const [submissions, setSubmissions] = useState<any[]>([]);
+    const [discussions, setDiscussions] = useState<any[]>([]);
     const [selectedType, setSelectedType] = useState("all");
     const [chartData, setChartData] = useState<any[]>([]);
     const [mySubmited, setMySubmited] = useState<any>({});
@@ -130,6 +135,11 @@ function Problem() {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const handleGetDiscussions = async () => {
+        const data = await getDiscussions(problem_id as any);
+        setDiscussions(data);
     }
 
     const handleGetSubmissons = async (slug: any) => {
@@ -176,6 +186,17 @@ function Problem() {
     useEffect(() => {
         handleGetProblem();
         handleGetMySubmited();
+        handleGetDiscussions();
+    }, []);
+
+    useEffect(() => {
+        socket.on('newDiscussion', (discussion: any) => {
+            handleGetDiscussions();
+        });
+
+        return () => {
+            socket.off('newDiscussion');
+        };
     }, []);
 
     return (
@@ -205,7 +226,7 @@ function Problem() {
                             <>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink asChild>
-                                        <Link to="/contests">Các cuộc thi</Link>
+                                        <Link to="/contest">Các cuộc thi</Link>
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
@@ -327,7 +348,7 @@ function Problem() {
                                             <MessagesSquare className="w-4 mr-2" />
                                             Thảo luận
                                             <Badge variant="secondary" className="px-1.5 rounded-md ml-2 inline">
-                                                12
+                                                {discussions?.length}
                                             </Badge>
                                         </Button>
                                     </TabsTrigger>
@@ -441,38 +462,38 @@ function Problem() {
                                                 <DialogContent className="min-w-[650px]">
                                                     <DialogHeader>
                                                         <DialogTitle className="mb-5 flex items-center gap-2 text-green-600 dark:text-green-500">
-                                                            <i className="fa-solid fa-circle-info text-[14px] translate-y-[1.5px]"></i>Hướng dẫn nộp bài
+                                                            <i className="fa-solid fa-circle-info text-[14px] translate-y-[1.5px]"></i>Hướng dẫn nộp bài qua Git
                                                         </DialogTitle>
                                                         <DialogDescription className="text-">
                                                             <ScrollArea className={'[&>[data-radix-scroll-area-viewport]]:max-h-[400px] pr-4 pb-2 translate-x-1'}>
                                                                 <div className="flex flex-col gap-7">
                                                                     <div className="border-l-4 pl-3 text-sm">
                                                                         <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
-                                                                            Lưu ý: Đảm bảo rằng Git đã được cài đặt trước khi thực hiện các bước bên dưới. Có thể tham khảo tại: <Link to="https://git-scm.com" className="font-semibold text-green-600 dark:text-green-500" target="blank">https://git-scm.com</Link>
+                                                                            Đảm bảo rằng <strong>Git</strong> và <strong>Hicommit-CLI</strong> đã được cài đặt trước khi thực hiện các bước bên dưới. Tham khảo bài viết: <Link to="#" className="font-semibold text-green-600 dark:text-green-500 italic" target="_blank">https://hicommit.com/forum/hicommit-for-beginer</Link>
                                                                         </p>
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 1: Clone dự án về máy</span>
                                                                         <CodeArea>
-                                                                            {`git clone https://github.com/hicommit/hicommit-works.git`}
+                                                                            {`git clone https://github.com/${loginContext.user.username}/hicommit-problems.git`}
                                                                         </CodeArea>
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 2: Di chuyển vào thư mục của bài tập</span>
                                                                         <CodeArea>
-                                                                            {`cd hicommit-works`}
+                                                                            {`cd hicommit-problems`}
                                                                         </CodeArea>
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 3: Chuyển sang nhánh của bài tập</span>
                                                                         <CodeArea>
-                                                                            {`git checkout work-hello-world`}
+                                                                            {`git checkout ${problem?.slug}`}
                                                                         </CodeArea>
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 4: Viết mã nguồn</span>
                                                                         <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
-                                                                            Dựa vào yêu cầu đề bài, hãy viết mã nguồn vào file <Badge variant="secondary" className="rounded px-1.5">main.*</Badge> để xử lý tất cả các trường hợp cần thiết.
+                                                                            Dựa vào yêu cầu đề bài, hãy viết mã nguồn vào file <Badge variant="secondary" className="rounded-md px-1.5">main.*</Badge> hoặc <Badge variant="secondary" className="rounded-md px-1.5">Main.*</Badge> (đối với ngôn ngữ Java) để giải quyết vấn đề đặt ra.
                                                                         </p>
                                                                         <div className="border-l-4 pl-3 text-sm">
                                                                             <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
@@ -482,6 +503,9 @@ function Problem() {
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 5: Thêm các thay đổi vào Git</span>
+                                                                        <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
+                                                                            Để nộp bài, bạn cần thêm các thay đổi vào Git bằng lệnh sau:
+                                                                        </p>
                                                                         <CodeArea>
                                                                             {`git add .`}
                                                                         </CodeArea>
@@ -489,14 +513,25 @@ function Problem() {
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 6: Xác nhận các thay đổi</span>
                                                                         <CodeArea>
-                                                                            {`git commit -m "Submit work"`}
+                                                                            {`git commit -m "Solve ${problem?.slug}"`}
                                                                         </CodeArea>
+                                                                        <div className="border-l-4 pl-3 text-sm">
+                                                                            <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
+                                                                                Hãy thay thế trong dấu "" bằng thông điệp bạn muốn.
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
                                                                     <div className="flex flex-col gap-2.5">
                                                                         <span className="font-bold text-sm">Bước 7: Cập nhật các thay đổi lên GitHub</span>
+                                                                        <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
+                                                                            Cập nhật các thay đổi này lên Github
+                                                                        </p>
                                                                         <CodeArea>
                                                                             {`git push`}
                                                                         </CodeArea>
+                                                                        <p className="dark:font-normal text-zinc-500 dark:text-zinc-400">
+                                                                            Sau khi push thành công, có thể kiểm tra tại <Link to={`https://github.com/${loginContext.user.username}/hicommit-problems`} className="font-semibold text-green-600 dark:text-green-500 italic" target="_blank">https://github.com/{loginContext.user.username}/hicommit-problems</Link>
+                                                                        </p>
                                                                     </div>
                                                                 </div>
                                                             </ScrollArea>
@@ -519,8 +554,8 @@ function Problem() {
                                 </div>
                             </TabsContent>
                             <TabsContent value="discuss">
-                                <div className="p-4 py-7">
-                                    Thảo luận ở đây
+                                <div className="py-5">
+                                    <Discussions />
                                 </div>
                             </TabsContent>
                             <TabsContent value="history">
@@ -537,115 +572,112 @@ function Problem() {
                         </div>
                     </BlurFade>
                 </div>
-
-                <BlurFade delay={0.4} yOffset={0} blur="2px">
-                    <div className="sticky top-6 w-[270px] 2xl:w-[300px] flex flex-col items-center gap-6">
-                        <Card className="flex flex-col w-full bg-zinc-100/70 dark:bg-zinc-900/50">
-                            <CardHeader className="items-center pb-0 pt-4">
-                                <p className="text-start w-full text-sm mb-1">Tỉ lệ hoàn thành bài tập</p>
-                                <Select onValueChange={setSelectedType} value={selectedType}>
-                                    <SelectTrigger className="dark:bg-transparent">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Toàn hệ thống</SelectItem>
-                                        <SelectItem value="me">Chỉ mình tôi</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </CardHeader>
-                            <CardContent className="flex-1 px-2 pb-0">
-                                <ChartContainer
-                                    config={chartConfig}
-                                    className="mx-auto aspect-[5/6] w-full"
-                                >
-                                    {
-                                        // Nếu tổng quantity = 0 thì hiển thị thông báo
-                                        chartData.reduce((acc, cur) => acc + cur.quanlity, 0) === 0 ?
-                                            <div className="flex flex-col gap-1 items-center justify-center h-full pb-4">
-                                                <img src={NotAvailable} alt="Not available" className="size-[100px] 2xl:size-[120px] mb-3 border rounded-full border-foreground/20 grayscale-[20%]" />
-                                                <p className="text-center text-sm dark:text-zinc-300 opacity-60">Chưa có dữ liệu</p>
-                                            </div> :
-                                            <PieChart>
-                                                <ChartTooltip
-                                                    cursor={false}
-                                                    content={<ChartTooltipContent hideLabel className="w-[165px]" />}
-                                                />
-                                                <Pie
-                                                    data={chartData}
-                                                    dataKey="quanlity"
-                                                    nameKey="status"
-                                                    innerRadius={is2XL ? 62 : 53}
-                                                >
-                                                    <Label
-                                                        content={({ viewBox }) => {
-                                                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                                                return (
-                                                                    <text
+                <BlurFade delay={0.4} yOffset={0} blur="2px" className="sticky top-6 w-[270px] 2xl:w-[300px] flex flex-col items-center gap-6">
+                    <Card className="flex flex-col w-full bg-zinc-100/70 dark:bg-zinc-900/50">
+                        <CardHeader className="items-center pb-0 pt-4">
+                            <p className="text-start w-full text-sm mb-1">Tỉ lệ hoàn thành bài tập</p>
+                            <Select onValueChange={setSelectedType} value={selectedType}>
+                                <SelectTrigger className="dark:bg-transparent">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Toàn hệ thống</SelectItem>
+                                    <SelectItem value="me">Chỉ mình tôi</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </CardHeader>
+                        <CardContent className="flex-1 px-2 pb-0">
+                            <ChartContainer
+                                config={chartConfig}
+                                className="mx-auto aspect-[5/6] w-full"
+                            >
+                                {
+                                    // Nếu tổng quantity = 0 thì hiển thị thông báo
+                                    chartData.reduce((acc, cur) => acc + cur.quanlity, 0) === 0 ?
+                                        <div className="flex flex-col gap-1 items-center justify-center h-full pb-4">
+                                            <img src={NotAvailable} alt="Not available" className="size-[100px] 2xl:size-[120px] mb-3 border rounded-full border-foreground/20 grayscale-[20%]" />
+                                            <p className="text-center text-sm dark:text-zinc-300 opacity-60">Chưa có dữ liệu</p>
+                                        </div> :
+                                        <PieChart>
+                                            <ChartTooltip
+                                                cursor={false}
+                                                content={<ChartTooltipContent hideLabel className="w-[165px]" />}
+                                            />
+                                            <Pie
+                                                data={chartData}
+                                                dataKey="quanlity"
+                                                nameKey="status"
+                                                innerRadius={is2XL ? 62 : 53}
+                                            >
+                                                <Label
+                                                    content={({ viewBox }) => {
+                                                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                                            return (
+                                                                <text
+                                                                    x={viewBox.cx}
+                                                                    y={viewBox.cy}
+                                                                    textAnchor="middle"
+                                                                    dominantBaseline="middle"
+                                                                    className="-translate-y-2"
+                                                                >
+                                                                    <tspan
                                                                         x={viewBox.cx}
                                                                         y={viewBox.cy}
-                                                                        textAnchor="middle"
-                                                                        dominantBaseline="middle"
-                                                                        className="-translate-y-2"
+                                                                        className="fill-foreground text-2xl 2xl:text-3xl font-bold"
                                                                     >
-                                                                        <tspan
-                                                                            x={viewBox.cx}
-                                                                            y={viewBox.cy}
-                                                                            className="fill-foreground text-2xl 2xl:text-3xl font-bold"
-                                                                        >
-                                                                            {/* Làm tròn 2 chữ số thập phân */}
-                                                                            {((chartData.find((item) => item.status === "PASSED")?.quanlity || 0) / chartData.reduce((acc, cur) => acc + cur.quanlity, 0) * 100).toFixed(0)}%
-                                                                        </tspan>
-                                                                        <tspan
-                                                                            x={viewBox.cx}
-                                                                            y={viewBox.cy as any + (is2XL ? 25 : 22)}
-                                                                            className="fill-foreground text-xs opacity-80"
-                                                                        >
-                                                                            Hoàn thành
-                                                                        </tspan>
-                                                                    </text>
-                                                                )
-                                                            }
-                                                        }}
-                                                    />
-                                                </Pie>
-                                                <ChartLegend
-                                                    content={<ChartLegendContent nameKey="status" />}
-                                                    className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"
+                                                                        {/* Làm tròn 2 chữ số thập phân */}
+                                                                        {((chartData.find((item) => item.status === "PASSED")?.quanlity || 0) / chartData.reduce((acc, cur) => acc + cur.quanlity, 0) * 100).toFixed(0)}%
+                                                                    </tspan>
+                                                                    <tspan
+                                                                        x={viewBox.cx}
+                                                                        y={viewBox.cy as any + (is2XL ? 25 : 22)}
+                                                                        className="fill-foreground text-xs opacity-80"
+                                                                    >
+                                                                        Hoàn thành
+                                                                    </tspan>
+                                                                </text>
+                                                            )
+                                                        }
+                                                    }}
                                                 />
-                                            </PieChart>
-                                    }
-                                </ChartContainer>
-                            </CardContent>
-                        </Card>
-                        {
-                            problem?.type !== "CONTEST" ?
-                                <div className="w-full flex flex-col gap-2">
-                                    <h3 className="font-medium"><Tag className="w-[16px] inline mr-1 text-primary" />Tags:</h3>
-                                    {
-                                        problem?.tags.length > 0 &&
-                                        <div className="flex gap-1 gap-y-1.5 flex-wrap">
-                                            {problem?.tags.map((tag: any, index: any) => (
-                                                <Badge key={index} variant="outline" className="capitalize text-[12px] p-0.5 px-2.5 font-normal dark:font-light leading-5">{tag}</Badge>
-                                            ))}
-                                        </div>
-                                    }
-                                </div> :
-                                <div className="w-full p-3 py-2 rounded-md bg-green-500/10 border border-green-500 text-green-600 dark:text-green-400">
-                                    <span className="text-sm">Bài tập này nằm trong một cuộc thi</span>
-                                </div>
-                        }
-                        <div className="w-full flex gap-2">
-                            <h3 className="font-medium text-base"><CodeXml className="w-[20px] inline mr-1.5 text-primary" />Ngôn ngữ lập trình:</h3>
-                            <Badge className="w-fit px-1.5 rounded" variant="secondary">
-                                {problem?.language === "c" && "C"}
-                                {problem?.language === "cpp" && "C++"}
-                                {problem?.language === "java" && "Java"}
-                            </Badge>
-                        </div>
-                        <div className="w-full flex gap-2">
-                            <h3 className="font-medium text-base"><Gem className="w-4 h-4 inline mr-1.5 text-primary -translate-y-[2.5px]" />Điểm:</h3>
-                            <Badge className="w-fit px-1.5 rounded" variant="secondary">{problem?.score}</Badge>
-                        </div>
+                                            </Pie>
+                                            <ChartLegend
+                                                content={<ChartLegendContent nameKey="status" />}
+                                                className="-translate-y-2 flex-col gap-2 items-start px-3 pb-1"
+                                            />
+                                        </PieChart>
+                                }
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                    {
+                        problem?.type !== "CONTEST" ?
+                            <div className="w-full flex flex-col gap-2">
+                                <h3 className="font-medium"><Tag className="w-[16px] inline mr-1 text-primary" />Tags:</h3>
+                                {
+                                    problem?.tags.length > 0 &&
+                                    <div className="flex gap-1 gap-y-1.5 flex-wrap">
+                                        {problem?.tags.map((tag: any, index: any) => (
+                                            <Badge key={index} variant="outline" className="capitalize text-[12px] p-0.5 px-2.5 font-normal dark:font-light leading-5">{tag}</Badge>
+                                        ))}
+                                    </div>
+                                }
+                            </div> :
+                            <div className="w-full p-3 py-2 rounded-md bg-green-500/10 border border-green-500 text-green-600 dark:text-green-400">
+                                <span className="text-sm">Bài tập này nằm trong một cuộc thi</span>
+                            </div>
+                    }
+                    <div className="w-full flex gap-2">
+                        <h3 className="font-medium text-base"><CodeXml className="w-[20px] inline mr-1.5 text-primary" />Ngôn ngữ lập trình:</h3>
+                        <Badge className="w-fit px-1.5 rounded" variant="secondary">
+                            {problem?.language === "c" && "C"}
+                            {problem?.language === "cpp" && "C++"}
+                            {problem?.language === "java" && "Java"}
+                        </Badge>
+                    </div>
+                    <div className="w-full flex gap-2">
+                        <h3 className="font-medium text-base"><Gem className="w-4 h-4 inline mr-1.5 text-primary -translate-y-[2.5px]" />Điểm:</h3>
+                        <Badge className="w-fit px-1.5 rounded" variant="secondary">{problem?.score}</Badge>
                     </div>
                 </BlurFade>
             </div>

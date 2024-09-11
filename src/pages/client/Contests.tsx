@@ -224,9 +224,12 @@ function Contests() {
                                                             </HoverCardContent>
                                                         </HoverCard>
                                                         <span className="opacity-70 flex items-center gap-2"><i className="fa-solid fa-circle text-[3px]"></i>{formatTimeAgo(contest.createdAt, "vi")}</span>
-                                                        <Badge variant="secondary" className="text-[12px] p-1 px-3 font-normal">
-                                                            <UsersRound className="h-3 w-3 mr-2" />{contest.members > 0 ? contest.members + " người tham gia" : "Chưa có người tham gia"}
-                                                        </Badge>
+                                                        {
+                                                            contest.members > 0 &&
+                                                            <Badge variant="secondary" className="text-[12px] p-1 px-3 font-normal">
+                                                                <UsersRound className="h-3 w-3 mr-2" />{contest.members} người tham gia
+                                                            </Badge>
+                                                        }
                                                     </div>
                                                 </div>
                                                 {
