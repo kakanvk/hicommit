@@ -50,10 +50,21 @@ const getMySubmited = async () => {
     }
 }
 
+const togglePublicCode = async (id: string) => {
+    try {
+        const response = await axiosInstance.put(`/submissions/${id}/public`);
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling public code:', error);
+        throw error;
+    }
+}
+
 export { 
     getMySubmissions, 
     getSubmissionsByProblemSlug, 
     getMySubmissionsByProblemSlug,
     getSubmissionsByID,
-    getMySubmited
+    getMySubmited,
+    togglePublicCode
 };

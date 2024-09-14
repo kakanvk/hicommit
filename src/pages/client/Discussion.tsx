@@ -1,7 +1,7 @@
-import { getDiscussionById, updateDiscussion, updateDiscussionStatus } from "@/service/API/Discussion";
+import { deleteDiscussion, getDiscussionById, updateDiscussion, updateDiscussionStatus } from "@/service/API/Discussion";
 import { Http2ServerResponse } from "http2";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
     Breadcrumb,
@@ -56,11 +56,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import AvatarCircles from "@/components/magicui/avatar-circles";
 import NoRecored from "@/assets/imgs/no-record.svg";
+
+const avatarUrls = [
+    "https://avatars.githubusercontent.com/u/16860528",
+    "https://avatars.githubusercontent.com/u/20110627",
+    "https://avatars.githubusercontent.com/u/106103625",
+    "https://avatars.githubusercontent.com/u/59228569",
+];
 
 function Discussion() {
 
     const { socket } = useSocket() as any;
+    const navigate = useNavigate();
 
     const { discussion_id } = useParams<{ discussion_id: string }>();
     const loginContext = useLogin();
@@ -96,6 +105,7 @@ function Discussion() {
         const response = await getCommentsByDiscussionID(discussion_id as string);
         setComments(response);
         filterComments(response, filter);
+        console.log(response);
     };
 
     const filterComments = (_comments: any[], _filter: string) => {
@@ -198,6 +208,29 @@ function Discussion() {
         getDiscussion();
     };
 
+    const handleDeleteDiscussion = async () => {
+        await toast.promise(
+            deleteDiscussion(discussion_id as string),
+            {
+                loading: 'Đang xoá...',
+                success: 'Xoá cuộc thảo luận thành công',
+                error: 'Xoá cuộc thảo luận thất bại'
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            }
+        );
+        setTimeout(() => {
+            navigate(`/problem/${discussion?.problem?.slug}`);
+        }, 500);
+    };
+
     useEffect(() => {
         getDiscussion();
         getComments();
@@ -246,16 +279,16 @@ function Discussion() {
                                 </DialogTrigger>
                                 <DialogContent className="max-w-[60%] ">
                                     <DialogHeader>
-                                        <DialogTitle>Cài đặt cuộc thảo luận</DialogTitle>
+                                        <DialogTitle>Cài đặt</DialogTitle>
                                     </DialogHeader>
                                     <div className="mt-1 -ml-2">
                                         <Tabs defaultValue="content" className="w-full flex gap-10" orientation="vertical">
                                             <TabsList className="flex flex-col h-fit bg-tranparent gap-2 p-0">
                                                 <TabsTrigger value="content" className="pr-16 data-[state=active]:bg-secondary w-full justify-start rounded-md">
-                                                    <Pencil className="size-[14px] mr-2.5" />Nội dung
+                                                    <Settings className="size-4 mr-2" />Chung
                                                 </TabsTrigger>
                                                 <TabsTrigger value="status" className="pr-16 data-[state=active]:bg-secondary w-full justify-start rounded-md">
-                                                    <Settings2 className="w-4 h-4 mr-2" />Trạng thái
+                                                    <Gem className="w-4 h-4 mr-2" />Nâng cao
                                                 </TabsTrigger>
                                             </TabsList>
                                             <div className="py-1 flex-1">
@@ -285,13 +318,42 @@ function Discussion() {
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="status" className="mt-0 min-h-[400px]">
-                                                    <div className="flex flex-col gap-4">
+                                                    <div className="flex flex-col gap-8">
                                                         <div className="flex justify-between gap-10 items-center">
                                                             <Label className="flex-1 flex flex-col gap-2 cursor-pointer" htmlFor="close-discussion-switch">
-                                                                <h3 className="text-[16px]">Đóng cuộc thảo luận</h3>
+                                                                <h3 className="text-[16px] font-semibold">Đóng cuộc thảo luận</h3>
                                                                 <p className="text-sm opacity-50 dark:font-light">Khi đóng cuộc thảo luận, người dùng sẽ không thể tham gia vào cuộc thảo luận này.</p>
                                                             </Label>
                                                             <Switch checked={discussion?.status === "CLOSED"} id="close-discussion-switch" onCheckedChange={() => handleToggleDiscussionStatus()} />
+                                                        </div>
+                                                        <div className="flex justify-between gap-5 items-center">
+                                                            <Label className="flex-1 flex flex-col gap-1.5">
+                                                                <h3 className="text-[16px] font-semibold">Xoá cuộc thảo luận này</h3>
+                                                                <p className="text-sm opacity-50 dark:font-light">Sau khi xoá, sẽ không thể truy cập được.</p>
+                                                            </Label>
+                                                            <Dialog>
+                                                                <DialogTrigger>
+                                                                    <Button variant="destructive" size="sm" className="border border-destructive/70 bg-destructive/10 hover:bg-destructive/20 dark:bg-destructive/40 dark:hover:bg-destructive/50 text-destructive dark:text-white">
+                                                                        <Trash2 className="w-4 h-4 mr-2" />Xoá cuộc thảo luận
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Xoá cuộc thảo luận này?</DialogTitle>
+                                                                    </DialogHeader>
+                                                                    <DialogDescription>
+                                                                        Sau khi xoá, cuộc thảo luận này và mọi dữ liệu liên quan sẽ không thể truy cập được nữa.
+                                                                    </DialogDescription>
+                                                                    <DialogFooter>
+                                                                        <DialogClose asChild>
+                                                                            <Button variant="ghost">Đóng</Button>
+                                                                        </DialogClose>
+                                                                        <DialogClose asChild onClick={() => handleDeleteDiscussion()}>
+                                                                            <Button variant="destructive">Xoá cuộc thảo luận</Button>
+                                                                        </DialogClose>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
                                                         </div>
                                                     </div>
                                                 </TabsContent>
@@ -302,7 +364,7 @@ function Discussion() {
                             </Dialog>
                         }
                     </div>
-                    <div className="flex flex-col gap-4 bg-secondary/50 dark:bg-secondary/50 border p-4 px-5 rounded-lg">
+                    <div className="flex flex-col gap-4 bg-secondary/40 dark:bg-secondary/50 border p-4 px-5 rounded-lg">
                         <div className="flex justify-between items-center">
                             <div className="flex gap-2 items-center text-sm">
                                 <Avatar className="size-6">
@@ -344,7 +406,7 @@ function Discussion() {
                     <div>
                         {
                             filteredComments.length > 0 ?
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-5">
                                     {
                                         filteredComments.map((comment, index) => (
                                             <BlurFade key={comment.id} delay={0.15 + index * 0.1} yOffset={0} className="flex flex-col gap-4 bg-secondary/30 dark:bg-secondary/30 border p-4 px-5 rounded-lg">
@@ -410,7 +472,7 @@ function Discussion() {
                                                     }
                                                 </div>
                                                 <p>{comment.description}</p>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-3 items-center">
                                                     <Button
                                                         variant={comment?.liked_by.includes(loginContext?.user?.username as string) ? "default" : "outline"}
                                                         size="sm"
@@ -422,6 +484,7 @@ function Discussion() {
                                                             {comment?.liked_by.length}
                                                         </span>
                                                     </Button>
+                                                    <AvatarCircles numPeople={comment?.liked_by.length - 5} avatarUrls={comment?.liked_avatar.slice(0, 5)} size={8} showPlus={comment?.liked_by.length > 5} />
                                                 </div>
                                             </BlurFade>
                                         ))

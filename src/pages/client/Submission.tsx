@@ -54,7 +54,7 @@ import { javascript } from '@codemirror/lang-javascript';
 
 import { useTheme } from "@/components/theme-provider";
 import { useEffect, useState } from "react";
-import { getSubmissionsByID } from "@/service/API/Submission";
+import { getSubmissionsByID, togglePublicCode } from "@/service/API/Submission";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import CodeArea from "@/components/ui/code-area";
@@ -88,6 +88,7 @@ function Result() {
 
     const [code, setCode] = useState('');
     const [submission, setSubmission] = useState<any>({});
+    const [errorMap, setErrorMap] = useState<any>([]);
 
     const [isCopied, setIsCopied] = useState(false);
 
@@ -145,7 +146,45 @@ function Result() {
         const codeDecoded = atob(submission?.code);
         setCode(codeDecoded);
 
+        if (submission?.review) {
+            // Lọc ra các mã lỗi (syntax.category, evaluation.category, style_check.category)
+            const syntax = submission?.review?.syntax?.map((review: any) => review.category);
+            const evaluation = submission?.review?.evaluation?.map((review: any) => review.category);
+            const style_check = submission?.review?.style_check?.map((review: any) => review.category);
+
+            const newErrorMap = new Set([
+                ...syntax,
+                ...evaluation,
+                ...style_check
+            ]);
+
+            setErrorMap(Array.from(newErrorMap));
+
+            console.log(errorMap);
+        }
+
         console.log(submission);
+    }
+
+    const handleTogglePublicCode = async () => {
+        await toast.promise(
+            togglePublicCode(submission_id as string),
+            {
+                loading: 'Đang cập nhật...',
+                success: 'Công khai mã nguồn thành công',
+                error: 'Công khai mã nguồn thất bại'
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                }
+            });
+
+        getSubmission();
     }
 
     useEffect(() => {
@@ -275,84 +314,87 @@ function Result() {
                                             {timeAgo(submission?.createdAt)}
                                         </span>
 
-                                        <Dialog>
-                                            <DialogTrigger>
-                                                <Badge className="w-fit text-green-600 dark:text-green-500 flex gap-1.5 border-primary px-2 py-0 font-medium rounded-md hover:bg-secondary cursor-pointer ml-2" variant="outline">
-                                                    <Code className="w-3.5" />
-                                                    <span>Xem mã nguồn</span>
-                                                </Badge>
-                                            </DialogTrigger>
-                                            <DialogContent className="min-w-[750px]">
-                                                <DialogHeader>
-                                                    <DialogTitle className="flex items-center gap-2">
-                                                        <SquareCode className="w-5 text-primary" />Mã nguồn
-                                                        <Badge variant="secondary" className="px-1.5 rounded-sm">
-                                                            {submission?.problem?.language === "c" && "C"}
-                                                            {submission?.problem?.language === "cpp" && "C++"}
-                                                            {submission?.problem?.language === "java" && "Java"}
-                                                        </Badge>
-                                                    </DialogTitle>
-                                                </DialogHeader>
-                                                <div className="relative group/code mt-2">
-                                                    <div className="w-full border rounded-lg overflow-hidden z-19">
-                                                        <CodeMirror
-                                                            value={code}
-                                                            placeholder="Please enter your code here..."
-                                                            readOnly={true}
-                                                            theme={theme === "dark" ?
-                                                                githubDarkInit({
-                                                                    settings: {
-                                                                        background: 'rgb(15 15 15)',
-                                                                    }
-                                                                }) :
-                                                                githubLightInit({
-                                                                    settings: {
-                                                                        gutterBackground: "rgb(235 235 235)",
-                                                                        background: 'rgb(248 248 248)',
-                                                                        lineHighlight: '#8a91991a',
-                                                                    }
-                                                                })
-                                                            }
-                                                            onChange={(value) => setCode(value)}
-                                                            extensions={[javascript({ jsx: true })]}
-                                                            height="350px"
-                                                            autoFocus
-                                                        />
-                                                    </div>
-                                                    <Badge
-                                                        className='invisible group-hover/code:visible duration-200 absolute top-1 right-1 font-medium rounded-md border bg-background/50 cursor-pointer py-[3px] scale-90'
-                                                        variant="outline"
-                                                        onClick={() => handleCopyText()}
-                                                    >
-                                                        {
-                                                            isCopied ?
-                                                                <Check className='w-[15px] translate-x-[0.5px]' /> :
-                                                                <Copy className='w-[15px] translate-x-[0.5px]' />
-                                                        }
+                                        {
+                                            (submission?.public || loginContext.user?.username === submission?.actor?.username) &&
+                                            <Dialog>
+                                                <DialogTrigger>
+                                                    <Badge className="w-fit text-green-600 dark:text-green-500 flex gap-1.5 border-primary px-2 py-0 font-medium rounded-md hover:bg-secondary cursor-pointer ml-2" variant="outline">
+                                                        <Code className="w-3.5" />
+                                                        <span>Xem mã nguồn</span>
                                                     </Badge>
-                                                </div>
-                                                {
-                                                    loginContext.user?.username === submission?.actor?.username &&
-                                                    <div className="flex justify-between gap-6 items-center border p-3 px-4 rounded-lg bg-secondary/10">
-                                                        <Label className="flex-1 flex flex-col gap-1.5 cursor-pointer" htmlFor="public-code">
-                                                            <h3 className="text-[16px]"><i className="fa-solid fa-triangle-exclamation mr-2 text-sm text-amber-500/80"></i>Công khai mã nguồn</h3>
-                                                            <p className="text-xs opacity-50 dark:font-light">Mã nguồn này sẽ được công khai với mọi người.</p>
-                                                        </Label>
-                                                        <Switch id="public-code" />
+                                                </DialogTrigger>
+                                                <DialogContent className="min-w-[750px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="flex items-center gap-2">
+                                                            <SquareCode className="w-5 text-primary" />Mã nguồn
+                                                            <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                                {submission?.problem?.language === "c" && "C"}
+                                                                {submission?.problem?.language === "cpp" && "C++"}
+                                                                {submission?.problem?.language === "java" && "Java"}
+                                                            </Badge>
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="relative group/code mt-2">
+                                                        <div className="w-full border rounded-lg overflow-hidden z-19">
+                                                            <CodeMirror
+                                                                value={code}
+                                                                placeholder="Please enter your code here..."
+                                                                readOnly={true}
+                                                                theme={theme === "dark" ?
+                                                                    githubDarkInit({
+                                                                        settings: {
+                                                                            background: 'rgb(15 15 15)',
+                                                                        }
+                                                                    }) :
+                                                                    githubLightInit({
+                                                                        settings: {
+                                                                            gutterBackground: "rgb(235 235 235)",
+                                                                            background: 'rgb(248 248 248)',
+                                                                            lineHighlight: '#8a91991a',
+                                                                        }
+                                                                    })
+                                                                }
+                                                                onChange={(value) => setCode(value)}
+                                                                extensions={[javascript({ jsx: true })]}
+                                                                height="350px"
+                                                                autoFocus
+                                                            />
+                                                        </div>
+                                                        <Badge
+                                                            className='invisible group-hover/code:visible duration-200 absolute top-1 right-1 font-medium rounded-md border bg-background/50 cursor-pointer py-[3px] scale-90'
+                                                            variant="outline"
+                                                            onClick={() => handleCopyText()}
+                                                        >
+                                                            {
+                                                                isCopied ?
+                                                                    <Check className='w-[15px] translate-x-[0.5px]' /> :
+                                                                    <Copy className='w-[15px] translate-x-[0.5px]' />
+                                                            }
+                                                        </Badge>
                                                     </div>
-                                                }
-                                                <DialogFooter >
-                                                    <DialogClose>
-                                                        <Button variant="ghost" className="mr-1">Đóng</Button>
-                                                    </DialogClose>
-                                                    <DialogClose asChild>
-                                                        <Link to={`/problem/${submission?.problem?.slug}/submit`}>
-                                                            <Button>Nộp lại</Button>
-                                                        </Link>
-                                                    </DialogClose>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
+                                                    {
+                                                        loginContext.user?.username === submission?.actor?.username &&
+                                                        <div className="flex justify-between gap-6 items-center border p-3 px-4 rounded-lg bg-secondary/10">
+                                                            <Label className="flex-1 flex flex-col gap-1.5 cursor-pointer" htmlFor="public-code">
+                                                                <h3 className="text-[16px]"><i className="fa-solid fa-triangle-exclamation mr-2 text-sm text-amber-500/80"></i>Công khai mã nguồn</h3>
+                                                                <p className="text-xs opacity-50 dark:font-light">Mã nguồn này sẽ được công khai với mọi người.</p>
+                                                            </Label>
+                                                            <Switch id="public-code" checked={submission?.public} onCheckedChange={() => handleTogglePublicCode()} />
+                                                        </div>
+                                                    }
+                                                    <DialogFooter >
+                                                        <DialogClose>
+                                                            <Button variant="ghost" className="mr-1">Đóng</Button>
+                                                        </DialogClose>
+                                                        <DialogClose asChild>
+                                                            <Link to={`/problem/${submission?.problem?.slug}/submit`}>
+                                                                <Button>Nộp lại</Button>
+                                                            </Link>
+                                                        </DialogClose>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        }
                                     </div>
                                 </div>
                                 <TooltipProvider delayDuration={100}>
@@ -579,19 +621,107 @@ function Result() {
                                             </span>
                                         </Badge>
                                     </p>
-                                    <Clock className="w-4 flex-none" />
                                 </div>
-                                <div className="flex flex-col gap-5 p-5">
-                                    <div className="flex items-center justify-between">
-                                        <p className="flex items-baseline gap-3">
-                                            <i className="fa-solid fa-circle-check text-primary"></i>
-                                            <span className="text-sm font-medium opacity-60">Không có vấn đề trong mã nguồn</span>
-                                        </p>
-                                        <span className="text-sm font-medium opacity-70">2s</span>
-                                    </div>
-                                </div>
+                                <BlurFade delay={0.55} yOffset={0} blur="2px" className="flex flex-col gap-3 p-5">
+                                    {
+                                        submission?.review?.syntax?.length > 0 &&
+                                        submission?.review?.syntax?.map((syntax: any, index: number) => (
+                                            <div className="flex items-start justify-between gap-6">
+                                                <p className="leading-7">
+                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{syntax.category}</span>
+                                                    <p key={index} className="inline">
+                                                        <span className="text-sm font-medium opacity-70">
+                                                            {syntax.issue.split('`').map((part: any, i: number) =>
+                                                                i % 2 === 0
+                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                            )}
+                                                        </span>
+                                                    </p>
+                                                </p>
+                                            </div>
+                                        ))
+                                    }
+                                    {
+                                        submission?.review?.evaluation?.length > 0 &&
+                                        submission?.review?.evaluation?.map((evaluation: any, index: number) => (
+                                            <div className="flex items-start justify-between gap-6">
+                                                <p className="leading-7">
+                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{evaluation.category}</span>
+                                                    <p key={index} className="inline">
+                                                        <span className="text-sm font-medium opacity-70">
+                                                            {evaluation.issue.split('`').map((part: any, i: number) =>
+                                                                i % 2 === 0
+                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                            )}
+                                                        </span>
+                                                    </p>
+                                                </p>
+                                            </div>
+                                        ))
+                                    }
+                                    {
+                                        submission?.review?.style_check?.length > 0 &&
+                                        submission?.review?.style_check?.map((style_check: any, index: number) => (
+                                            <div className="flex items-start justify-between gap-6">
+                                                <p className="leading-7">
+                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{style_check.category}</span>
+                                                    <p key={index} className="inline">
+                                                        <span className="text-sm font-medium opacity-70">
+                                                            {style_check.issue.split('`').map((part: any, i: number) =>
+                                                                i % 2 === 0
+                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                            )}
+                                                        </span>
+                                                    </p>
+                                                </p>
+                                            </div>
+                                        ))
+                                    }
+                                    {
+                                        submission?.review?.length === 0 ?
+                                            /* From Uiverse.io by Amerss */
+                                            submission?.status === "PENDING" ?
+                                                <div className="flex items-center gap-3">
+                                                    <span className="relative inline-flex h-3 w-3 ml-1">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                                    </span>
+                                                    <p>
+                                                        <span className="mr-2">Đang chấm</span>
+                                                        <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                                        <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                                        <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                                    </p>
+                                                </div> :
+                                                <p className="text-sm font-medium opacity-70">Không có vấn đề nào trong mã nguồn</p> : null
+                                    }
+                                </BlurFade>
                             </div>
                         </BlurFade>
+                        {
+                            submission?.review?.suggestions?.length > 0 &&
+                            <BlurFade delay={0.6} yOffset={0} blur="2px" className="flex flex-col gap-2">
+                                <h3 className="font-semibold">Các gợi ý chỉnh sửa:</h3>
+                                <div className="flex flex-col gap-2 pl-1">
+                                    {
+                                        submission?.review?.suggestions?.map((suggestion: any, index: number) => (
+                                            <BlurFade key={index} delay={0.7 + index * 0.05} yOffset={0} blur="2px" >
+                                                <span className="text-sm font-medium opacity-70">
+                                                    {index + 1}. {suggestion.split('`').map((part: any, i: number) =>
+                                                        i % 2 === 0
+                                                            ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                            : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                    )}
+                                                </span>
+                                            </BlurFade>
+                                        ))
+                                    }
+                                </div>
+                            </BlurFade>
+                        }
                         <BlurFade delay={0.5} yOffset={0} blur="2px">
                             <div className="mt-10">
                                 <p className="text-sm">
@@ -663,10 +793,20 @@ function Result() {
                                     <AccordionContent>
                                         <div className="flex flex-col gap-3 pt-4">
                                             <div className="flex gap-3 justify-start items-center">
-                                                <div className="flex items-center gap-2.5">
-                                                    <i className="fa-solid fa-circle-check text-green-600"></i>
-                                                    <span className="text-sm opacity-70">Không có vấn đề nào</span>
-                                                </div>
+                                                {
+                                                    submission?.review?.length === 0 ?
+                                                        <div className="flex items-center gap-2.5">
+                                                            <i className="fa-solid fa-circle-check text-green-600"></i>
+                                                            <span className="text-sm opacity-70">Không có vấn đề nào</span>
+                                                        </div> :
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {
+                                                                Array.from(errorMap).map((error: any, index: number) => (
+                                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px]">{error}</span>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                }
                                             </div>
                                         </div>
                                     </AccordionContent>

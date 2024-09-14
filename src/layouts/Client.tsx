@@ -30,6 +30,7 @@ import EditProblem from "@/pages/teacher/EditProblem";
 import Contests from "@/pages/client/Contests";
 import Contest from "@/pages/client/Contest";
 import Discussion from "@/pages/client/Discussion";
+import GeminiChat from "@/pages/client/GeminiChat";
 
 function ClientLayout() {
 
@@ -62,6 +63,8 @@ function ClientLayout() {
     const scrollToTop = () => {
         clientContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    const notFooterArr = ["/message", "/gemini-chat"];
 
     return (
         <div className="ClientLayout flex flex-col h-[100vh]">
@@ -109,9 +112,10 @@ function ClientLayout() {
                                             </Route>
                                             <Route path="analysis" element={<Analysis />} />
                                             <Route path="submission/:submission_id" element={<Result />} />
+                                            <Route path="gemini-chat" element={<GeminiChat />} />
                                         </Routes>
                                     </div>
-                                    {!location.pathname.startsWith("/message") && <Footer />}
+                                    {!notFooterArr.includes(location.pathname) && <Footer />}
                                 </div>
                             </div>
                             {
