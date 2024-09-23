@@ -358,7 +358,7 @@ function Problem() {
                                     className="px-1 border-b-2 border-b-transparent drop-shadow-none data-[state=active]:border-b-primary rounded-none bg-transparent data-[state=active]:bg-transparent duration-500"
                                 >
                                     <Button variant="ghost" size="sm" className="hover:bg-secondary/60">
-                                        <History className="w-4 mr-2" />Bài nộp của tôi
+                                        <History className="w-4 mr-2" />Các bài nộp
                                     </Button>
                                 </TabsTrigger>
                             </TabsList>

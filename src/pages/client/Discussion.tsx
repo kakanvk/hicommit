@@ -386,7 +386,7 @@ function Discussion() {
                         <span className="font-semibold">
                             Các câu trả lời
                             <Badge variant="secondary" className="px-1.5 rounded-sm ml-2 inline">
-                                0
+                                {comments?.length}
                             </Badge>
                         </span>
                         <Select value={filter} onValueChange={(value) => {

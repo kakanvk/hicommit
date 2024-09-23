@@ -171,8 +171,8 @@ function Result() {
             togglePublicCode(submission_id as string),
             {
                 loading: 'Đang cập nhật...',
-                success: 'Công khai mã nguồn thành công',
-                error: 'Công khai mã nguồn thất bại'
+                success: 'Thay đổi thành công',
+                error: 'Thay đổi thất bại'
             },
             {
                 style: {
@@ -607,100 +607,103 @@ function Result() {
                                 </div>
                             </div>
                         </BlurFade>
-                        <BlurFade delay={0.4} yOffset={0} blur="2px">
-                            <div className="flex flex-col border rounded-lg overflow-hidden">
-                                <div className="bg-zinc-100 dark:bg-zinc-900 p-3 px-5 flex items-center justify-between gap-4 border-b">
-                                    <p className="font-bold">
-                                        Đánh giá chất lượng mã nguồn
-                                        <span className="opacity-50 font-medium ml-2 text-sm">(Code Quality)</span>
-                                        <Badge className="rounded px-1.5 ml-2 -translate-y-[1px]" variant="secondary">
-                                            <span>
-                                                {submission?.problem?.language === "c" && "C"}
-                                                {submission?.problem?.language === "cpp" && "C++"}
-                                                {submission?.problem?.language === "java" && "Java"}
-                                            </span>
-                                        </Badge>
-                                    </p>
+                        {
+                            submission?.problem?.type !== "CONTEST" &&
+                            <BlurFade delay={0.4} yOffset={0} blur="2px">
+                                <div className="flex flex-col border rounded-lg overflow-hidden">
+                                    <div className="bg-zinc-100 dark:bg-zinc-900 p-3 px-5 flex items-center justify-between gap-4 border-b">
+                                        <p className="font-bold">
+                                            Đánh giá chất lượng mã nguồn
+                                            <span className="opacity-50 font-medium ml-2 text-sm">(Code Quality)</span>
+                                            <Badge className="rounded px-1.5 ml-2 -translate-y-[1px]" variant="secondary">
+                                                <span>
+                                                    {submission?.problem?.language === "c" && "C"}
+                                                    {submission?.problem?.language === "cpp" && "C++"}
+                                                    {submission?.problem?.language === "java" && "Java"}
+                                                </span>
+                                            </Badge>
+                                        </p>
+                                    </div>
+                                    <BlurFade delay={0.55} yOffset={0} blur="2px" className="flex flex-col gap-3 p-5">
+                                        {
+                                            submission?.review?.syntax?.length > 0 &&
+                                            submission?.review?.syntax?.map((syntax: any, index: number) => (
+                                                <div className="flex items-start justify-between gap-6">
+                                                    <p className="leading-7">
+                                                        <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{syntax.category}</span>
+                                                        <p key={index} className="inline">
+                                                            <span className="text-sm font-medium opacity-70">
+                                                                {syntax.issue.split('`').map((part: any, i: number) =>
+                                                                    i % 2 === 0
+                                                                        ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                        : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                                )}
+                                                            </span>
+                                                        </p>
+                                                    </p>
+                                                </div>
+                                            ))
+                                        }
+                                        {
+                                            submission?.review?.evaluation?.length > 0 &&
+                                            submission?.review?.evaluation?.map((evaluation: any, index: number) => (
+                                                <div className="flex items-start justify-between gap-6">
+                                                    <p className="leading-7">
+                                                        <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{evaluation.category}</span>
+                                                        <p key={index} className="inline">
+                                                            <span className="text-sm font-medium opacity-70">
+                                                                {evaluation.issue.split('`').map((part: any, i: number) =>
+                                                                    i % 2 === 0
+                                                                        ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                        : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                                )}
+                                                            </span>
+                                                        </p>
+                                                    </p>
+                                                </div>
+                                            ))
+                                        }
+                                        {
+                                            submission?.review?.style_check?.length > 0 &&
+                                            submission?.review?.style_check?.map((style_check: any, index: number) => (
+                                                <div className="flex items-start justify-between gap-6">
+                                                    <p className="leading-7">
+                                                        <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{style_check.category}</span>
+                                                        <p key={index} className="inline">
+                                                            <span className="text-sm font-medium opacity-70">
+                                                                {style_check.issue.split('`').map((part: any, i: number) =>
+                                                                    i % 2 === 0
+                                                                        ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
+                                                                        : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
+                                                                )}
+                                                            </span>
+                                                        </p>
+                                                    </p>
+                                                </div>
+                                            ))
+                                        }
+                                        {
+                                            submission?.review?.length === 0 ?
+                                                /* From Uiverse.io by Amerss */
+                                                submission?.status === "PENDING" ?
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="relative inline-flex h-3 w-3 ml-1">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                                        </span>
+                                                        <p>
+                                                            <span className="mr-2">Đang chấm</span>
+                                                            <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
+                                                            <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
+                                                            <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
+                                                        </p>
+                                                    </div> :
+                                                    <p className="text-sm font-medium opacity-70">Không có vấn đề nào trong mã nguồn</p> : null
+                                        }
+                                    </BlurFade>
                                 </div>
-                                <BlurFade delay={0.55} yOffset={0} blur="2px" className="flex flex-col gap-3 p-5">
-                                    {
-                                        submission?.review?.syntax?.length > 0 &&
-                                        submission?.review?.syntax?.map((syntax: any, index: number) => (
-                                            <div className="flex items-start justify-between gap-6">
-                                                <p className="leading-7">
-                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{syntax.category}</span>
-                                                    <p key={index} className="inline">
-                                                        <span className="text-sm font-medium opacity-70">
-                                                            {syntax.issue.split('`').map((part: any, i: number) =>
-                                                                i % 2 === 0
-                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
-                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
-                                                            )}
-                                                        </span>
-                                                    </p>
-                                                </p>
-                                            </div>
-                                        ))
-                                    }
-                                    {
-                                        submission?.review?.evaluation?.length > 0 &&
-                                        submission?.review?.evaluation?.map((evaluation: any, index: number) => (
-                                            <div className="flex items-start justify-between gap-6">
-                                                <p className="leading-7">
-                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{evaluation.category}</span>
-                                                    <p key={index} className="inline">
-                                                        <span className="text-sm font-medium opacity-70">
-                                                            {evaluation.issue.split('`').map((part: any, i: number) =>
-                                                                i % 2 === 0
-                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
-                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
-                                                            )}
-                                                        </span>
-                                                    </p>
-                                                </p>
-                                            </div>
-                                        ))
-                                    }
-                                    {
-                                        submission?.review?.style_check?.length > 0 &&
-                                        submission?.review?.style_check?.map((style_check: any, index: number) => (
-                                            <div className="flex items-start justify-between gap-6">
-                                                <p className="leading-7">
-                                                    <span className="text-xs font-semibold bg-red-400/20 text-red-500 dark:text-red-400 rounded px-1.5 py-0.5 text-[13px] inline mr-2">{style_check.category}</span>
-                                                    <p key={index} className="inline">
-                                                        <span className="text-sm font-medium opacity-70">
-                                                            {style_check.issue.split('`').map((part: any, i: number) =>
-                                                                i % 2 === 0
-                                                                    ? part.replace(/\n/g, '\\n') // Thay thế để hiển thị \n như là một chuỗi
-                                                                    : <code key={i} className="inline bg-secondary rounded px-1.5 py-0.5 text-[13px] text-nowrap">{part.replace(/\n/g, '\\n')}</code>
-                                                            )}
-                                                        </span>
-                                                    </p>
-                                                </p>
-                                            </div>
-                                        ))
-                                    }
-                                    {
-                                        submission?.review?.length === 0 ?
-                                            /* From Uiverse.io by Amerss */
-                                            submission?.status === "PENDING" ?
-                                                <div className="flex items-center gap-3">
-                                                    <span className="relative inline-flex h-3 w-3 ml-1">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
-                                                    </span>
-                                                    <p>
-                                                        <span className="mr-2">Đang chấm</span>
-                                                        <span className="animate-[ping_1.5s_0.5s_ease-in-out_infinite]">.</span>
-                                                        <span className="animate-[ping_1.5s_0.7s_ease-in-out_infinite]">.</span>
-                                                        <span className="animate-[ping_1.5s_0.9s_ease-in-out_infinite]">.</span>
-                                                    </p>
-                                                </div> :
-                                                <p className="text-sm font-medium opacity-70">Không có vấn đề nào trong mã nguồn</p> : null
-                                    }
-                                </BlurFade>
-                            </div>
-                        </BlurFade>
+                            </BlurFade>
+                        }
                         {
                             submission?.review?.suggestions?.length > 0 &&
                             <BlurFade delay={0.6} yOffset={0} blur="2px" className="flex flex-col gap-2">

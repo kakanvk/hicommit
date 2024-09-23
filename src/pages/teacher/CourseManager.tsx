@@ -45,11 +45,14 @@ function transform(node: any) {
 function CourseManager() {
 
     const [createdCourses, setCreatedCourses] = useState<any[]>([]);
+    const [filteredCourses, setFilteredCourses] = useState<any[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
 
     const handleGetCreatedCourse = async () => {
         try {
             const response = await getCreatedCourses();
             setCreatedCourses(response);
+            setFilteredCourses(response);
             console.log(response);
         } catch (error) {
             console.error('Error getting post:', error);
@@ -59,6 +62,13 @@ function CourseManager() {
     useEffect(() => {
         handleGetCreatedCourse();
     }, []);
+
+    useEffect(() => {
+        const filtered = createdCourses.filter((course) => {
+            return course.name.toLowerCase().includes(searchKeyword.toLowerCase());
+        });
+        setFilteredCourses(filtered);
+    }, [searchKeyword, createdCourses]);
 
     return (
         <div className="CourseManager p-7">
@@ -164,16 +174,18 @@ function CourseManager() {
                                     type="search"
                                     placeholder="Tìm kiếm khoá học"
                                     className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
                                 />
                             </div>
                         </div>
                     </div>
 
                     {
-                        createdCourses.length > 0 ?
+                        filteredCourses.length > 0 ?
                             <div className="grid grid-cols-1 lg:grid-cols-1 2xl:grid-cols-2 gap-4 w-full">
                                 {
-                                    createdCourses.map((course, index) => (
+                                    filteredCourses.map((course, index) => (
                                         <BlurFade key={course?.id} delay={0.15 * index}>
                                             <Link className="flex rounded-lg gap-4 dark:bg-zinc-900 bg-zinc-100 p-4 px-5 border h-full" to={`${course?.id}`}>
                                                 <div className="h-[120px] aspect-[3/2] border rounded-md bg-secondary/50 overflow-hidden">

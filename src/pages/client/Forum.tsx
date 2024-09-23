@@ -47,16 +47,26 @@ import BlurFade from "@/components/magicui/blur-fade";
 function Forum() {
 
     const [posts, setPosts] = useState<any[]>([]);
+    const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
 
     const handleGetPosts = async () => {
         try {
             const response = await getPosts();
             setPosts(response);
+            setFilteredPosts(response);
             console.log(response);
         } catch (error) {
             console.error('Error getting posts:', error);
         }
     }
+
+    useEffect(() => {
+        const filtered = posts.filter((post) =>
+            post.title.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+        setFilteredPosts(filtered);
+    }, [searchKeyword, posts]);
 
     useEffect(() => {
         handleGetPosts();
@@ -78,6 +88,8 @@ function Forum() {
                                     type="search"
                                     placeholder="Tìm kiếm bài viết"
                                     className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
                                 />
                             </div>
                             <Dialog>
@@ -133,7 +145,7 @@ function Forum() {
                     </div>
                 </BlurFade>
                 <div className="flex flex-col gap-6 relative">
-                    {posts.map((post: any, index) => (
+                    {filteredPosts.map((post: any, index) => (
                         <BlurFade key={post.id} delay={0.1 * index} inView>
                             <div className="flex items-start gap-5">
                                 <Link className="h-[180px] aspect-[3/2] overflow-hidden border rounded-xl" to={post.slug}>

@@ -47,6 +47,12 @@ function Courses() {
 
     const [courses, setCourses] = useState<any[]>([]);
     const [joinedCourses, setJoinedCourses] = useState<any[]>([]);
+    const [searchKeyWord, setSearchKeyWord] = useState<string>("");
+    const [filterClass, setFilterClass] = useState<string>("all");
+    const [filterStatus, setFilterStatus] = useState<string>("all");
+
+    const [filteredCourses, setFilteredCourses] = useState<any[]>([]);
+    const [filteredJoinedCourses, setFilteredJoinedCourses] = useState<any[]>([]);
 
     const loginContext = useLogin();
 
@@ -99,6 +105,22 @@ function Courses() {
     }
 
     useEffect(() => {
+        // Lọc khoá học
+        let filtered = courses;
+        if (searchKeyWord) {
+            filtered = filtered.filter((course) => course.name.toLowerCase().includes(searchKeyWord.toLowerCase()));
+        }
+        setFilteredCourses(filtered);
+
+        // Lọc khoá học đã tham gia
+        let filteredJoined = joinedCourses;
+        if (searchKeyWord) {
+            filteredJoined = filteredJoined.filter((course) => course.name.toLowerCase().includes(searchKeyWord.toLowerCase()));
+        }
+        setFilteredJoinedCourses(filteredJoined);
+    }, [searchKeyWord, courses, joinedCourses]);
+
+    useEffect(() => {
         handleGetCreatedCourse();
         handleGetJoinedCourse();
     }, []);
@@ -135,10 +157,6 @@ function Courses() {
                                                 DA20TTB
                                                 <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
                                             </Badge>
-                                            <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
-                                                C++
-                                                <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
-                                            </Badge>
                                         </div>
                                         <TooltipProvider delayDuration={200}>
                                             <Tooltip>
@@ -157,20 +175,6 @@ function Courses() {
                                                             </DialogTitle>
                                                         </DialogHeader>
                                                         <DialogDescription className="flex flex-col gap-4">
-                                                            <div className="flex flex-col gap-1.5">
-                                                                <span>Ngôn ngữ lập trình</span>
-                                                                <Select defaultValue="all">
-                                                                    <SelectTrigger className="bg-secondary" >
-                                                                        <SelectValue />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="all">Tất cả</SelectItem>
-                                                                        <SelectItem value="DA20TTB">C</SelectItem>
-                                                                        <SelectItem value="DA21TTB">C++</SelectItem>
-                                                                        <SelectItem value="DA21TTB">Java</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
                                                             <div className="flex flex-col gap-1.5">
                                                                 <span>Lớp học</span>
                                                                 <Select defaultValue="all">
@@ -192,8 +196,8 @@ function Courses() {
                                                                     </SelectTrigger>
                                                                     <SelectContent>
                                                                         <SelectItem value="all">Tất cả</SelectItem>
-                                                                        <SelectItem value="DA20TTB">Chưa kết thúc</SelectItem>
-                                                                        <SelectItem value="DA21TTB">Đã kết thúc</SelectItem>
+                                                                        <SelectItem value="public">Công khai</SelectItem>
+                                                                        <SelectItem value="private">Riêng tư</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -223,6 +227,8 @@ function Courses() {
                                                 type="search"
                                                 placeholder="Tìm kiếm khoá học"
                                                 className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                                value={searchKeyWord}
+                                                onChange={(e) => setSearchKeyWord(e.target.value)}
                                             />
                                         </div>
                                         <Button variant="outline" size="icon">
@@ -235,7 +241,7 @@ function Courses() {
                         <TabsContent value="all-courses">
                             <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
                                 {
-                                    courses.map((course, index) => (
+                                    filteredCourses.map((course, index) => (
                                         <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
                                             <div className="h-full flex flex-col border rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                 <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
@@ -307,9 +313,11 @@ function Courses() {
                                                         </div>
                                                     </div>
                                                     <div className="mt-5 flex gap-2">
-                                                        <Button className="flex-1">
-                                                            Tham gia
-                                                        </Button>
+                                                        <Link to={`/course/${course.slug || course.id}`} className="flex-1">
+                                                            <Button className="w-full">
+                                                                Tham gia
+                                                            </Button>
+                                                        </Link>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger>
                                                                 <Button size="icon" variant="secondary">
@@ -355,7 +363,7 @@ function Courses() {
                         </TabsContent>
                         <TabsContent value="my-courses">
                             {
-                                joinedCourses.length === 0 ? (
+                                filteredJoinedCourses.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-[500px]">
                                         <LayoutList className="w-20 h-20 opacity-30" />
                                         <h3 className="text-lg font-semibold mt-4">
@@ -438,9 +446,11 @@ function Courses() {
                                                                 </div>
                                                             </div>
                                                             <div className="mt-5 flex gap-2">
-                                                                <Button className="flex-1" variant='secondary'>
-                                                                    Tiếp tục khoá học
-                                                                </Button>
+                                                                <Link to={`/course/${course.slug || course.id}`} className="flex-1">
+                                                                    <Button className="w-full" variant='secondary'>
+                                                                        Tiếp tục khoá học
+                                                                    </Button>
+                                                                </Link>
                                                             </div>
                                                         </div>
                                                     </div>

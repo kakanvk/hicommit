@@ -56,11 +56,26 @@ function Contests() {
     const [joinKey, setJoinKey] = useState<string>("");
     const [joinedContest, setJoinedContest] = useState<any>();
 
+    const [filteredContests, setFilteredContests] = useState<any[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
+
     const getData = async () => {
         const response = await getContests();
         console.log(response);
         setData(response);
+        setFilteredContests(response);
     }
+
+    const filterContests = () => {
+        const filtered = data.filter((contest) =>
+            contest.name.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+        setFilteredContests(filtered);
+    }
+
+    useEffect(() => {
+        filterContests();
+    }, [searchKeyword, data]);
 
     const getJoinedContestData = async () => {
         const response = await getJoinedContest();
@@ -150,6 +165,8 @@ function Contests() {
                                     type="search"
                                     placeholder="Tìm kiếm cuộc thi"
                                     className="w-full rounded-md pl-9 flex-1 bg-transparent"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
                                 />
                             </div>
                             <Select defaultValue="all">

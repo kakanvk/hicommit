@@ -31,11 +31,11 @@ import {
 import NumberTicker from "@/components/magicui/number-ticker";
 
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { getAnalysis } from "@/service/API/Analysis";
 
 const chartData = [
-    { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
     { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
     { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
     { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
@@ -59,27 +59,23 @@ const barChartConfig = {
 } satisfies ChartConfig
 
 const chartConfig = {
-    visitors: {
-        label: "Visitors",
+    quanlity: {
+        label: "Số bài nộp",
     },
-    chrome: {
-        label: "Chrome",
-        color: "hsl(var(--chart-1))",
-    },
-    safari: {
-        label: "Safari",
+    PASSED: {
+        label: "Chính xác",
         color: "hsl(var(--chart-2))",
     },
-    firefox: {
-        label: "Firefox",
+    FAILED: {
+        label: "Sai kết quả",
         color: "hsl(var(--chart-3))",
     },
-    edge: {
-        label: "Edge",
+    ERROR: {
+        label: "Gặp vấn đề",
         color: "hsl(var(--chart-4))",
     },
-    other: {
-        label: "Other",
+    COMPILE_ERROR: {
+        label: "Lỗi biên dịch",
         color: "hsl(var(--chart-5))",
     },
 } satisfies ChartConfig;
@@ -87,6 +83,69 @@ const chartConfig = {
 function Dashboard() {
 
     const is2XL = useMediaQuery({ query: '(min-width: 1536px)' });
+
+    const [overview, setOverview] = useState<any>(null);
+    const [overviewByTime, setOverviewByTime] = useState<any>({
+        users_count: 0,
+        problems_count: 0,
+        submissions_count: 0,
+        posts_count: 0,
+    });
+    const [time, setTime] = useState<string>("all_time");
+
+    const [submissionChartData, setSubmissionChartData] = useState<any>(null);
+
+    // {
+    //     1_day: {
+    //         users_count: 100,
+    //         problems_count: 100,
+    //         submissions_count: 100,
+    //         posts_count: 100
+    //     },
+    //     7_day: {
+    //         users_count: 100,
+    //         problems_count: 100,
+    //         submissions_count: 100,
+    //         posts_count: 100
+    //     },
+    //     30_day: {
+    //         users_count: 100,
+    //         problems_count: 100,
+    //         submissions_count: 100,
+    //         posts_count: 100
+    //     }
+    //     all_time: {
+    //         users_count: 100,
+    //         problems_count: 100,
+    //         submissions_count: 100,
+    //         posts_count: 100
+    //     }
+    //     submissions: {
+    //         total: 100,
+    //         PASSED: 100,
+    //         FAILED: 100,
+    //         ERROR: 100,
+    //         COMPILE_ERROR: 100,
+    //     }
+    // }
+
+    useEffect(() => {
+        getAnalysis().then((res) => {
+            setOverview(res);
+            setOverviewByTime(res[time]);
+
+            const newSubmissionChartData = [
+                { status: "PASSED", quanlity: res.submissions.PASSED, fill: "#22c55e" },
+                { status: "FAILED", quanlity: res.submissions.FAILED, fill: "#ef4444" },
+                { status: "ERROR", quanlity: res.submissions.ERROR, fill: "#fbbf24" },
+                { status: "COMPILE_ERROR", quanlity: res.submissions.COMPILE_ERROR, fill: "#d3d3d3" },
+            ]
+
+            setSubmissionChartData(newSubmissionChartData);
+        }).catch((err) => {
+            console.log(err);
+        });
+    }, []);
 
     const totalVisitors = useMemo(() => {
         return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
@@ -115,14 +174,18 @@ function Dashboard() {
                                 <h1 className="text-xl font-bold">Tổng quan hệ thống</h1>
                                 <p className="text-sm opacity-60 italic dark:font-light">* Dữ liệu chỉ mang tính tương đối</p>
                             </div>
-                            <Select defaultValue="all">
+                            <Select value={time} onValueChange={(value) => {
+                                setTime(value);
+                                setOverviewByTime(overview[value]);
+                            }}>
                                 <SelectTrigger className="w-[220px] bg-transparent rounded-lg">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Toàn bộ thời gian</SelectItem>
-                                    <SelectItem value="30day">Trong 30 ngày qua</SelectItem>
-                                    <SelectItem value="7day">Trong 7 ngày qua</SelectItem>
+                                    <SelectItem value="all_time">Toàn bộ thời gian</SelectItem>
+                                    <SelectItem value="30_day">Trong 30 ngày qua</SelectItem>
+                                    <SelectItem value="7_day">Trong 7 ngày qua</SelectItem>
+                                    <SelectItem value="1_day">Trong 1 ngày qua</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -130,7 +193,7 @@ function Dashboard() {
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
                                     <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
-                                        <NumberTicker value={234} />
+                                        <NumberTicker value={overviewByTime?.users_count} />
                                     </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Người dùng</p>
                                 </div>
@@ -139,7 +202,7 @@ function Dashboard() {
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
                                     <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
-                                        <NumberTicker value={2354} />
+                                        <NumberTicker value={overviewByTime?.problems_count} />
                                     </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Bài tập được tạo</p>
                                 </div>
@@ -148,7 +211,7 @@ function Dashboard() {
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
                                     <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
-                                        <NumberTicker value={23534} />
+                                        <NumberTicker value={overviewByTime?.submissions_count} />
                                     </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Lượt nộp bài</p>
                                 </div>
@@ -157,7 +220,7 @@ function Dashboard() {
                             <div className="flex justify-between">
                                 <div className="flex flex-col gap-1.5">
                                     <h2 className="font-bold text-2xl 2xl:text-3xl text-primary">
-                                        <NumberTicker value={78} />
+                                        <NumberTicker value={overviewByTime?.posts_count} />
                                     </h2>
                                     <p className="opacity-60 text-sm 2xl:text-base">Bài viết</p>
                                 </div>
@@ -167,14 +230,11 @@ function Dashboard() {
                     </div>
                     <div className="w-full flex gap-5">
                         <Card className="bg-secondary/20 rounded-xl flex flex-col flex-[1.5]">
-                            <CardHeader className="space-y-0 pb-0">
-                                <CardDescription>Time in Bed</CardDescription>
-                                <CardTitle className="flex items-baseline gap-1 text-4xl tabular-nums">
-                                    8
-                                    <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">hr</span>
-                                    35
-                                    <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">min</span>
+                            <CardHeader className="space-y-2 pb-0">
+                                <CardTitle className="flex items-baseline gap-1 text-xl tabular-nums">
+                                    Lượt nộp bài theo ngày
                                 </CardTitle>
+                                <CardDescription>Dữ liệu trong 7 ngày qua</CardDescription>
                             </CardHeader>
                             <CardContent className="p-0 flex-1">
                                 <ChartContainer config={{ time: { label: "Time", color: "hsl(var(--chart-2))" } }} className="h-full w-full">
@@ -230,14 +290,14 @@ function Dashboard() {
                                     <PieChart>
                                         <ChartTooltip
                                             cursor={false}
-                                            content={<ChartTooltipContent hideLabel />}
+                                            content={<ChartTooltipContent hideLabel className="w-[150px]" />}
                                         />
                                         <Pie
-                                            data={chartData}
-                                            dataKey="visitors"
-                                            nameKey="browser"
-                                            innerRadius={'60%'}
-                                            strokeWidth={5}
+                                            data={submissionChartData}
+                                            dataKey="quanlity"
+                                            nameKey="status"
+                                            innerRadius={'58%'}
+                                            strokeWidth={6}
                                         >
                                             <Label
                                                 content={({ viewBox }) => {
@@ -255,7 +315,7 @@ function Dashboard() {
                                                                     y={(viewBox.cy || 0) + 0}
                                                                     className="fill-foreground text-3xl 2xl:text-5xl font-bold"
                                                                 >
-                                                                    {totalVisitors.toLocaleString()}
+                                                                    {submissionChartData.find((data: any) => data.status === "PASSED")?.quanlity}
                                                                 </tspan>
                                                                 <tspan
                                                                     x={viewBox.cx}
@@ -274,9 +334,6 @@ function Dashboard() {
                                 </ChartContainer>
                             </CardContent>
                             <CardFooter className="flex-col gap-2 text-sm">
-                                {/* <div className="flex items-center gap-2 font-medium leading-none">
-                                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                                </div> */}
                                 <div className="leading-none text-muted-foreground italic ">
                                     * Dữ liệu chỉ mang tính tương đối
                                 </div>
@@ -291,14 +348,14 @@ function Dashboard() {
                                 <ChartContainer config={chartConfig} className="h-full w-full">
                                     <BarChart
                                         accessibilityLayer
-                                        data={chartData}
+                                        data={submissionChartData}
                                         layout="vertical"
                                         margin={{
                                             left: 5,
                                         }}
                                     >
                                         <YAxis
-                                            dataKey="browser"
+                                            dataKey="status"
                                             type="category"
                                             tickLine={false}
                                             tickMargin={10}
@@ -306,20 +363,19 @@ function Dashboard() {
                                             tickFormatter={(value) =>
                                                 chartConfig[value as keyof typeof chartConfig]?.label
                                             }
+                                            className="italic"
                                         />
-                                        <XAxis dataKey="visitors" type="number" hide />
+                                        <XAxis dataKey="quanlity" type="number" hide />
                                         <ChartTooltip
                                             cursor={false}
                                             content={<ChartTooltipContent hideLabel />}
+
                                         />
-                                        <Bar dataKey="visitors" layout="vertical" radius={5} />
+                                        <Bar dataKey="quanlity" layout="vertical" radius={5} />
                                     </BarChart>
                                 </ChartContainer>
                             </CardContent>
-                            <CardFooter className="flex-col items-start gap-2 text-sm">
-                                {/* <div className="flex gap-2 font-medium leading-none">
-                                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                                </div> */}
+                            <CardFooter className="flex-col gap-2 text-sm">
                                 <div className="leading-none text-muted-foreground italic">
                                     * Dữ liệu chỉ mang tính tương đối
                                 </div>

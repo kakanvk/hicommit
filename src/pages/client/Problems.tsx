@@ -304,7 +304,7 @@ function Problems() {
             accessorKey: "level",
             header: ({ column }) => {
                 return (
-                    <div className="flex items-center gap-1 nowrap">
+                    <div className="flex items-center gap-1 text-nowrap">
                         <span>Cấp độ</span>
                     </div>
                 )

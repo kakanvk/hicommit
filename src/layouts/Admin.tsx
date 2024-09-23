@@ -21,6 +21,11 @@ import CreateContest from "@/pages/admin/CreateContest";
 import EditContest from "@/pages/admin/EditContest";
 import ContestDashboard from "@/pages/admin/ContestDashboard";
 import CreateProblemForContest from "@/pages/admin/CreateProblemForContest";
+import CourseManager from "@/pages/admin/CourseManager";
+import CourseDashboard from "@/pages/admin/CourseDashboard";
+import EditCourse from "@/pages/admin/EditCourse";
+import CreateCourse from "@/pages/admin/CreateCourse";
+import CreateProblemForCourse from "@/pages/admin/CreateProblemForCourse";
 
 function AdminLayout() {
 
@@ -69,6 +74,13 @@ function AdminLayout() {
                                             <Route path="" element={<Dashboard />} />
                                             <Route path="users">
                                                 <Route path="" element={<UserManager />} />
+                                            </Route>
+                                            <Route path="courses">
+                                                <Route path="" element={<CourseManager />} />
+                                                <Route path="create" element={<CreateCourse />} />
+                                                <Route path=":id/edit" element={<EditCourse />} />
+                                                <Route path=":id/problem/create" element={<CreateProblemForCourse/> }/>
+                                                <Route path=":id" element={<CourseDashboard />} />
                                             </Route>
                                             <Route path="posts">
                                                 <Route path="" element={<PostManager />} />

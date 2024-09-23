@@ -141,6 +141,17 @@ const deleteCourseByID = async (courseId: string) => {
     }
 }
 
+// For ADMIN
+const getCoursesForAdmin = async () => {
+    try {
+        const response = await axiosInstance.get(`/admin/courses/list`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting courses:', error);
+        throw error;
+    }
+}
+
 export {
     getCourses,
     createCourse,
@@ -155,5 +166,7 @@ export {
     togglePublicCourse,
     toggleAutoJoin,
     updateCourse,
-    deleteCourseByID
+    deleteCourseByID,
+    // For ADMIN
+    getCoursesForAdmin
 };
