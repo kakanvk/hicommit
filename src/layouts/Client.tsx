@@ -31,6 +31,8 @@ import Contests from "@/pages/client/Contests";
 import Contest from "@/pages/client/Contest";
 import Discussion from "@/pages/client/Discussion";
 import GeminiChat from "@/pages/client/GeminiChat";
+import LeaderBoard from "@/pages/client/LeaderBoard";
+import Profile from "@/pages/client/Profile";
 
 function ClientLayout() {
 
@@ -99,6 +101,10 @@ function ClientLayout() {
                                                 <Route path="" element={<Forum />} />
                                                 <Route path=":slug" element={<ReadPost />} />
                                                 <Route path="create" element={<CreatePost />} />
+                                            </Route>
+                                            <Route path="leaderboard" element={<LeaderBoard />} />
+                                            <Route path="profile">
+                                                <Route path=":username" element={<Profile />} />
                                             </Route>
                                             <Route path="course-manager/">
                                                 <Route path="" element={<CourseManager />} />

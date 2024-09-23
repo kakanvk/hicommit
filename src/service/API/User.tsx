@@ -11,6 +11,16 @@ const getUsers = async () => {
     }
 }
 
+const getProfileByUsername = async (username: string) => {
+    try {
+        const response = await axiosInstance.get(`/users/profile/${username}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting profile by username:', error);
+        throw error;
+    }
+}
+
 const toggleFavouriteCourse = async (courseId: string) => {
     try {
         const response = await axiosInstance.put(`/users/favourite_course/${courseId}`);
@@ -44,6 +54,7 @@ const updateStatus = async (userId: string, status: string) => {
 export {
     toggleFavouriteCourse,
     getUsers,
+    getProfileByUsername,
     updateRole,
     updateStatus
 };

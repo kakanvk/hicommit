@@ -10,6 +10,17 @@ const getAnalysis = async () => {
     }
 }
 
+const getLeaderboard = async () => {
+    try {
+        const response = await axiosInstance.get('/users/analysis/leaderboard');
+        return response.data;
+    } catch (error) {
+        console.error('Error getting leaderboard:', error);
+        throw error;
+    }
+}
+
 export {
-    getAnalysis
+    getAnalysis,
+    getLeaderboard
 }
