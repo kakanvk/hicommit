@@ -63,6 +63,7 @@ import { toggleFavouriteCourse } from "@/service/API/User";
 import toast from "react-hot-toast";
 import { getMySubmited } from "@/service/API/Submission";
 import BlurFade from "@/components/magicui/blur-fade";
+import Loader from "@/components/ui/loader";
 
 function Course() {
 
@@ -71,6 +72,8 @@ function Course() {
     const [mySubmited, setMySubmited] = useState<any>({});
     const [mergedProblems, setMergedProblems] = useState<any>([]);
     const [inputKey, setInputKey] = useState<string>("");
+
+    const [loading, setLoading] = useState(false);
 
     const loginContext = useLogin();
 
@@ -102,6 +105,7 @@ function Course() {
 
     const handleJoinCourse = async () => {
         try {
+            setLoading(true);
             const response = await toast.promise(
                 joinToCourse(courseData.id as string, inputKey as string),
                 {
@@ -118,12 +122,17 @@ function Course() {
                         fontFamily: 'Plus Jakarta Sans',
                     }
                 });
-            // Đợi 1s và reload trang
+            console.log(response);
+            handleGetCourseData();
+            setInputKey("");
             setTimeout(() => {
-                window.location.reload();
-            }, 500);
-
+                setLoading(false);
+            }, 1000);
         } catch (error) {
+            setInputKey("");
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000);
             console.error('Error joining course:', error);
         }
     }
@@ -167,6 +176,10 @@ function Course() {
 
     return (
         <div className="Course p-6 px-8 flex flex-col gap-8">
+            {
+                loading &&
+                <Loader />
+            }
             <Breadcrumb>
                 <BlurFade delay={0.1} yOffset={0}>
                     <BreadcrumbList>
@@ -251,7 +264,7 @@ function Course() {
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </TooltipProvider>
-                                            <DialogContent>
+                                            <DialogContent className="max-w-[600px]">
                                                 <DialogHeader className="mb-3">
                                                     <DialogTitle className="mb-2 flex items-center">
                                                         Danh sách tham gia
@@ -267,10 +280,25 @@ function Course() {
                                                                 {
                                                                     courseData?.members && courseData?.members.map((member: any) => (
                                                                         <CommandItem className="gap-2.5 p-2.5 px-3 mb-1" key={member?.id}>
-                                                                            <Avatar>
-                                                                                <AvatarImage className="w-6 rounded-full" src={member?.avatar_url} />
-                                                                            </Avatar>
-                                                                            {member?.username}
+                                                                            <div className="flex gap-3 items-center">
+                                                                                <Avatar>
+                                                                                    <AvatarImage className="w-10 rounded-full border" src={member?.User ? member?.User?.avatar_url : 'https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3383.jpg'} />
+                                                                                </Avatar>
+                                                                                <div className="flex flex-col">
+                                                                                    {
+                                                                                        member?.User ?
+                                                                                            <p className="text-sm font-medium">
+                                                                                                {member?.User?.username}
+                                                                                                {(member?.User?.role === "ADMIN" || member?.User?.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
+                                                                                                {member?.User?.username === loginContext?.user?.username && <span className="text-primary font-medium italic"> (Bạn)</span>}
+                                                                                            </p> :
+                                                                                            <p className="text-[13px] font-medium italic text-primary">(Chờ đăng nhập)</p>
+                                                                                    }
+                                                                                    <p className="opacity-50">
+                                                                                        {member?.email}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
                                                                         </CommandItem>
                                                                     ))
                                                                 }
@@ -335,46 +363,48 @@ function Course() {
                             />
                         </div>
                     </BlurFade>
-
-                    <div className="">
-                        <Accordion type="multiple">
-                            {
-                                courseData?.units && courseData?.units.map((unit: any, index: number) => (
-                                    <BlurFade delay={0.15 + index * 0.05} >
-                                        <AccordionItem value={unit?.id} key={unit?.id}>
-                                            <AccordionTrigger className="hover:no-underline">
-                                                <span className="flex items-center font-semibold text-lg">
-                                                    <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />{unit?.name}
-                                                </span>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="text-base flex flex-col gap-1.5">
-                                                {
-                                                    unit?.children.length > 0 ? unit?.children.map((problem: any, index: number) => (
-                                                        <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
-                                                            <div className="flex items-center gap-3">
-                                                                {mySubmited[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
-                                                                {mySubmited[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
-                                                                {mySubmited[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
-                                                                {mySubmited[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
-                                                                {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
-                                                                <span className="line-clamp-1">{problem.name}</span>
-                                                                <Badge variant="secondary" className="px-1.5 rounded-sm">
-                                                                    {problem?.language === "c" && "C"}
-                                                                    {problem?.language === "cpp" && "C++"}
-                                                                    {problem?.language === "java" && "Java"}
-                                                                </Badge>
-                                                            </div>
-                                                            <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                                        </Link>
-                                                    )) : <span className="text-sm text-muted-foreground py-2">Không có bài tập nào trong phần này</span>
-                                                }
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    </BlurFade>
-                                ))
-                            }
-                        </Accordion>
-                    </div>
+                    {
+                        courseData.isJoined &&
+                            <div className="">
+                                <Accordion type="multiple">
+                                    {
+                                        courseData?.units && courseData?.units.map((unit: any, index: number) => (
+                                            <BlurFade delay={0.15 + index * 0.05} >
+                                                <AccordionItem value={unit?.id} key={unit?.id}>
+                                                    <AccordionTrigger className="hover:no-underline">
+                                                        <span className="flex items-center font-semibold text-lg">
+                                                            <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />{unit?.name}
+                                                        </span>
+                                                    </AccordionTrigger>
+                                                    <AccordionContent className="text-base flex flex-col gap-1.5">
+                                                        {
+                                                            unit?.children.length > 0 ? unit?.children.map((problem: any, index: number) => (
+                                                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
+                                                                    <div className="flex items-center gap-3">
+                                                                        {mySubmited[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
+                                                                        {mySubmited[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
+                                                                        {mySubmited[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
+                                                                        {mySubmited[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
+                                                                        {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
+                                                                        <span className="line-clamp-1">{problem.name}</span>
+                                                                        <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                                            {problem?.language === "c" && "C"}
+                                                                            {problem?.language === "cpp" && "C++"}
+                                                                            {problem?.language === "java" && "Java"}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
+                                                                </Link>
+                                                            )) : <span className="text-sm text-muted-foreground py-2">Không có bài tập nào trong phần này</span>
+                                                        }
+                                                    </AccordionContent>
+                                                </AccordionItem>
+                                            </BlurFade>
+                                        ))
+                                    }
+                                </Accordion>
+                            </div>
+                    }
                 </div>
                 {
                     courseData.isJoined ?

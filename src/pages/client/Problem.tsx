@@ -34,7 +34,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem, LayoutList } from 'lucide-react';
+import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem, LayoutList, Bot, ArrowRight } from 'lucide-react';
 import RingProgress from "@/components/ui/ringProcess";
 import { Button } from "@/components/ui/button";
 import CodeArea from "@/components/ui/code-area";
@@ -52,6 +52,7 @@ import { getProblemByIDorSlug } from "@/service/API/Problem";
 import { Label, Pie, PieChart } from "recharts"
 
 import NotAvailable from "@/assets/imgs/not-available.svg";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 import {
     Card,
@@ -258,7 +259,7 @@ function Problem() {
             <div className="flex gap-8 2xl:gap-10 items-start relative flex-col lg:flex-row">
                 <div className="flex-1 flex flex-col gap-6 w-full">
                     <BlurFade delay={0.2} yOffset={0} blur="2px">
-                        <div className="flex gap-4 justify-between">
+                        <div className="flex gap-4 justify-between items-start">
                             <div className="flex-1 flex flex-col gap-3">
                                 <h1 className="text-2xl font-bold">
                                     {problem?.name}
@@ -310,7 +311,19 @@ function Problem() {
                                             </div>
                                 }
                             </div>
-                            <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-2 ">
+                                <TooltipProvider delayDuration={100}>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <RainbowButton className="px-5 text-sm dark:text-black rounded-lg h-10">
+                                                <Bot className="size-[18px] mr-2" /> Trợ lý ảo AI
+                                            </RainbowButton>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom">
+                                            Chat với trợ lý ảo
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                                 {
                                     problem?.type !== "CONTEST" &&
                                     <TooltipProvider delayDuration={100}>
@@ -581,7 +594,7 @@ function Problem() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Toàn hệ thống</SelectItem>
+                                    <SelectItem value="all">Tất cả</SelectItem>
                                     <SelectItem value="me">Chỉ mình tôi</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -649,6 +662,10 @@ function Problem() {
                                 }
                             </ChartContainer>
                         </CardContent>
+                        <Link to="analysis" className="text-[13px] text-green-600 dark:text-green-500 w-full px-3 pb-3 text-end">
+                            Xem chi tiết
+                            <ChevronRight className="size-4 inline ml-1 -translate-y-[1px]" />
+                        </Link>
                     </Card>
                     {
                         problem?.type !== "CONTEST" ?

@@ -11,6 +11,7 @@ import { getLeaderboard } from "@/service/API/Analysis";
 import BlurFade from "@/components/magicui/blur-fade";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import moment from "moment";
 
 
 function Profile() {
@@ -121,16 +122,36 @@ function Profile() {
                     </TabsList>
                     <TabsContent value="completed_problems">
                         <div className="p-3">
-                            <div className="flex gap-3">
+                            <div className="flex gap-4 flex-col">
                                 {
-                                    profile?.completed_problems ?
-                                        profile?.completed_problems?.split(',')?.map((problem: string, index: number) => (
-                                            <Link key={index} to={`/problem/${problem}`} className="text-sm font-semibold bg-secondary/70 rounded-md px-2 py-1">
-                                                {problem}
-                                            </Link>
+                                    profile?.completed_problems?.length > 0 ?
+                                        profile?.completed_problems?.map((problem: any, index: number) => (
+                                            <BlurFade key={problem.id} delay={0.1 + 0.05 * index} yOffset={0}>
+                                                <Link className="font-semibold text-sm" to={`/problem/${problem.slug}`}>
+                                                    {
+                                                        problem.level === "EASY" &&
+                                                        <span className={`mr-1.5 rounded bg-green-500/20 border border-green-500 text-green-600 dark:text-green-400 text-[12px] p-0.5 px-1.5 font-medium leading-5 text-nowrap`} >
+                                                            Dễ
+                                                        </span >
+                                                    }
+                                                    {
+                                                        problem.level === "MEDIUM" &&
+                                                        <span className={`mr-1.5 rounded bg-sky-500/20 border border-sky-500 text-sky-600 dark:text-sky-400 text-[12px] p-0.5 px-1.5 font-medium leading-5 text-nowrap`} >
+                                                            Trung bình
+                                                        </span >
+                                                    }
+                                                    {
+                                                        problem.level === "HARD" &&
+                                                        <span className={`mr-1.5 rounded bg-orange-500/20 border border-orange-500 text-orange-600 dark:text-orange-400 text-[12px] p-0.5 px-1.5 font-medium leading-5 text-nowrap`} >
+                                                            Khó
+                                                        </span >
+                                                    }
+                                                    {problem.name}
+                                                </Link>
+                                            </BlurFade>
                                         )) :
                                         <p className="text-sm text-gray-500">
-                                            Chưa có bài tập nào được hoàn thành
+                                            Chưa tham gia cuộc thi nào
                                         </p>
                                 }
                             </div>
@@ -169,8 +190,31 @@ function Profile() {
                         </div>
                     </TabsContent>
                     <TabsContent value="joined_contests">
-                        <div>
-
+                        <div className="flex flex-col gap-5 p-3">
+                            {
+                                profile?.contests?.length > 0 ?
+                                    profile?.contests?.map((contest: any, index: number) => (
+                                        <BlurFade key={contest.id} delay={0.1 + 0.05 * index} yOffset={0}>
+                                            <Link className="font-semibold " to={`/contest/${contest.id}`}>
+                                                {
+                                                    contest?.start_time > moment(new Date().getTime()).unix() ?
+                                                        <span className="text-[13px] p-1 px-2 rounded-md italic text-amber-600 dark:text-amber-500 bg-amber-500/15 font-semibold dark:font-medium mr-1.5">
+                                                            Sắp diễn ra
+                                                        </span> :
+                                                        contest?.end_time > moment(new Date().getTime()).unix() ?
+                                                            <span className="text-[13px] p-1 px-2 rounded-md italic text-green-600 dark:text-green-500 bg-green-500/15 font-semibold dark:font-medium mr-1.5">
+                                                                Đang diễn ra
+                                                            </span> :
+                                                            <span className="text-[13px] p-1 px-2 rounded-md italic text-red-500 bg-red-500/15 font-semibold mr-1.5">Đã kết thúc</span>
+                                                }
+                                                {contest.name}
+                                            </Link>
+                                        </BlurFade>
+                                    )) :
+                                    <p className="text-sm text-gray-500">
+                                        Chưa tham gia cuộc thi nào
+                                    </p>
+                            }
                         </div>
                     </TabsContent>
                     <TabsContent value="posts">

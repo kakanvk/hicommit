@@ -32,6 +32,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
 const labelArr = {
     name: "Tên bài tập",
     slug: "Mã bài tập",
@@ -237,10 +246,21 @@ function LeaderBoard() {
     })
 
     return (
-        <div className="LeaderBoard p-6 px-8 flex flex-col gap-4">
+        <div className="LeaderBoard p-6 pt-5 px-8 flex flex-col gap-4">
             <div className="w-full">
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <Link to="/problems">Luyện tập</Link>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            Bảng xếp hạng
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
                 <div className="flex items-center py-4 gap-3 justify-between">
-                    <h1 className="text-xl font-bold">Bảng xếp hạng</h1>
+                    <h1 className="text-xl font-bold">Bảng xếp hạng - Luyện tập</h1>
                     <div className="relative max-w-[400px] flex-1">
                         <Search className="absolute left-3 top-[12px] h-4 w-4 text-muted-foreground" />
                         <Input

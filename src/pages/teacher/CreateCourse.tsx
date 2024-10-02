@@ -24,9 +24,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { KeyRound, Plus, TriangleAlert, Upload, X } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Plus, TriangleAlert, Upload, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Editor from "@/components/ui/editor";
 
@@ -43,6 +43,8 @@ import { createCourse } from "@/service/API/Course";
 import toast from 'react-hot-toast';
 
 function CreateCourse() {
+
+    const navigate = useNavigate();
 
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -65,6 +67,8 @@ function CreateCourse() {
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [loadingImage, setLoadingImage] = useState(false);
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const handleUploadThumbnail = () => {
         const input = document.createElement('input');
@@ -144,8 +148,8 @@ function CreateCourse() {
             console.log(response);
             // Chờ 1s rồi chuyển hướng
             setTimeout(() => {
-                window.location.href = `/course-manager`;
-            }, 1000);
+                navigate(`/course-manager`);
+            }, 500);
         } catch (error) {
             console.error('Error creating post:', error);
         }
@@ -228,15 +232,23 @@ function CreateCourse() {
                             {
                                 isPublicCourse &&
                                 <>
-                                    <div className="relative">
-                                        <KeyRound className="absolute left-3 top-[11px] h-4 w-4 text-muted-foreground ml-1" />
+                                    <div className="relative flex items-center">
+                                        <KeyRound className="absolute left-3 h-4 w-4 text-muted-foreground ml-1" />
                                         <Input
-                                            type="search"
+                                            type={isPasswordVisible ? "text" : "password"}
                                             placeholder="Đặt mật khẩu tham gia"
                                             className="w-full pl-11 bg-transparent"
                                             value={enrolKey}
                                             onChange={e => setEnrolKey(e.target.value)}
                                         />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                            className="absolute right-1 size-8"
+                                        >
+                                            {isPasswordVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </Button>
                                     </div>
                                 </>
                             }

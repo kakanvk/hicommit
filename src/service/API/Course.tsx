@@ -61,6 +61,36 @@ const getJoinedCourses = async () => {
     }
 }
 
+const addMemberToCourse = async (courseId: string, email: string) => {
+    try {
+        const response = await axiosInstance.post(`/courses/${courseId}/add-member`, { email });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding member to course:', error);
+        throw error;
+    }
+}
+
+const addMultipleMembersToCourse = async (courseId: string, emails: string[]) => {
+    try {
+        const response = await axiosInstance.post(`/courses/${courseId}/add-multiple-members`, { emails });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding multiple members to course:', error);
+        throw error;
+    }
+}
+
+const deleteMemberFromCourse = async (courseId: string, email: string) => {
+    try {
+        const response = await axiosInstance.delete(`/courses/${courseId}/delete-member`, { data: { email } });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting member from course:', error);
+        throw error;
+    }
+}
+
 const joinToCourse = async (courseId: string, join_key: string) => {
     try {
         const response = await axiosInstance.post(`/courses/join/${courseId}`, { join_key });
@@ -168,5 +198,8 @@ export {
     updateCourse,
     deleteCourseByID,
     // For ADMIN
-    getCoursesForAdmin
+    getCoursesForAdmin,
+    addMemberToCourse,
+    addMultipleMembersToCourse,
+    deleteMemberFromCourse
 };

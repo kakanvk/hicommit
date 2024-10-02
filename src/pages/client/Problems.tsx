@@ -12,7 +12,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Separator } from "@/components/ui/separator";
-import { ArrowUpDown, ChevronDown, EllipsisVertical, Eye, Plus, Search, Shuffle, Tag } from "lucide-react";
+import { ArrowRight, ArrowUpDown, ChevronDown, EllipsisVertical, Eye, MoveRight, Plus, Search, Shuffle, Tag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -65,6 +65,8 @@ import { formatTimeAgo } from "@/service/DateTimeService";
 import Loader2 from "@/components/ui/loader2";
 import { getMySubmited } from "@/service/API/Submission";
 import BlurFade from "@/components/magicui/blur-fade";
+
+import leaderboard from "@/assets/imgs/Star_Art.png";
 
 // Problem(id, name, slug, tags, language, description, input, output, limit, examples, testcases, created_by, type, level, score, parent)
 export type Problem = {
@@ -538,7 +540,14 @@ function Problems() {
                             </div>
                         </div>
                     </div>
-                    <BlurFade delay={0.3} yOffset={0} blur="2px">
+                    <BlurFade delay={0.3} yOffset={0} blur="2px" className="flex flex-col gap-4">
+                        <Link to="/leaderboard" className="border rounded-md p-4 px-6 flex items-center gap-5 bg-secondary/30 hover:bg-secondary/60">
+                            <img src={leaderboard} alt="leaderboard" className="w-[45px] opacity-90" />
+                            <div>
+                                <h2 className="text-lg font-bold">Bảng xếp hạng</h2>
+                                <Link to="/leaderboard" className="text-sm text-primary">Khám phá ngay<ArrowRight className="size-4 inline ml-1"/></Link>
+                            </div>
+                        </Link>
                         <div className="w-[280px] 2xl:w-[320px] sticky top-6">
                             <div className="border bg-secondary/10 rounded-md p-4 px-5 flex flex-col gap-4">
                                 <div className="flex flex-col gap-4">
@@ -562,7 +571,7 @@ function Problems() {
                                         {
                                             filteredTags.map((tag, index) => (
                                                 <BlurFade key={index} delay={0.15 + 0.05 * index} yOffset={0} blur="2px">
-                                                    <Badge variant={filterByTags.includes(tag) ? "default" : "secondary"} className={`text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer ${filterByTags.includes(tag) ? "text-white" : "text-black dark:text-white bg-secondary/50 dark:bg-secondary/60"}`}     onClick={() => handleOnClickTag(tag)}>
+                                                    <Badge variant={filterByTags.includes(tag) ? "default" : "secondary"} className={`text-[12px] p-0.5 px-3 font-normal leading-5 cursor-pointer ${filterByTags.includes(tag) ? "text-white" : "text-black dark:text-white bg-secondary/50 dark:bg-secondary/60"}`} onClick={() => handleOnClickTag(tag)}>
                                                         {tag}
                                                     </Badge>
                                                 </BlurFade>

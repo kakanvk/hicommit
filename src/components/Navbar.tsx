@@ -121,14 +121,14 @@ function Navbar() {
                                                 }}
                                                 style={{ whiteSpace: "nowrap" }}
                                             >
-                                                {expanded && "Các bài tập"}
+                                                {expanded && "Luyện tập"}
                                             </motion.span>
                                         </Link>
                                     </TooltipTrigger>
                                     {
                                         !expanded &&
                                         <TooltipContent side="right">
-                                            <p>Các bài tập</p>
+                                            <p>Luyện tập</p>
                                         </TooltipContent>
                                     }
                                 </Tooltip>
@@ -150,14 +150,14 @@ function Navbar() {
                                                 }}
                                                 style={{ whiteSpace: "nowrap" }}
                                             >
-                                                {expanded && "Các cuộc thi"}
+                                                {expanded && "Cuộc thi"}
                                             </motion.span>
                                         </Link>
                                     </TooltipTrigger>
                                     {
                                         !expanded &&
                                         <TooltipContent side="right">
-                                            <p>Các cuộc thi</p>
+                                            <p>Cuộc thi</p>
                                         </TooltipContent>
                                     }
                                 </Tooltip>
@@ -191,7 +191,7 @@ function Navbar() {
                                     }
                                 </Tooltip>
                             </TooltipProvider> */}
-                            <TooltipProvider delayDuration={100}>
+                            {/* <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>
                                         <Link className={`flex rounded-lg p-2 px-4 ${location.pathname.startsWith('/leaderboard') ? 'bg-zinc-200 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900'}`} to="leaderboard">
@@ -219,7 +219,7 @@ function Navbar() {
                                         </TooltipContent>
                                     }
                                 </Tooltip>
-                            </TooltipProvider>
+                            </TooltipProvider> */}
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>

@@ -48,6 +48,9 @@ import { formatTimeAgo, timestampChange, timestampToDateTime } from "@/service/D
 import moment from "moment";
 import toast from "react-hot-toast";
 
+import timeart from "@/assets/imgs/Time_Art.png";
+import flashart from "@/assets/imgs/Flash_Art.png";
+
 function Contests() {
 
     const navigate = useNavigate();
@@ -141,9 +144,12 @@ function Contests() {
                     color={["#84cc16", "#22c55e", "#16a34a"]}
                 >
                     <div className="p-4 pt-3 flex justify-between items-center w-full">
-                        <div>
-                            <h2 className="text-lg font-bold">Olympic Tin học sinh viên Việt Nam 2024</h2>
-                            <p className="text-sm dark:opacity-70">Cuộc thi lập trình dành cho học sinh, sinh viên lớn nhất Việt Nam được tổ chức hằng năm</p>
+                        <div className="flex items-center gap-3">
+                            <img src={flashart} alt="flashart" className="w-[25px]" />
+                            <div>
+                                <h2 className="text-lg font-bold">Olympic Tin học sinh viên Việt Nam 2024</h2>
+                                <p className="text-sm dark:opacity-70">Cuộc thi lập trình dành cho học sinh, sinh viên lớn nhất Việt Nam được tổ chức hằng năm</p>
+                            </div>
                         </div>
                         <Button>Tìm hiểu thêm<ArrowRight className="w-4 h-4 ml-2" /></Button>
                     </div>
@@ -252,7 +258,7 @@ function Contests() {
                                                 {
                                                     contest?.start_time > moment(new Date().getTime()).unix() ?
                                                         <p className="mt-3 italic">
-                                                            <Play className="size-3 inline -translate-y-[1px] mr-2"/>Bắt đầu sau
+                                                            <Play className="size-3 inline -translate-y-[1px] mr-2" />Bắt đầu sau
                                                             <span className="font-semibold text-green-600 dark:text-green-500 mx-1.5">
                                                                 {timestampChange(contest.start_time - moment(new Date().getTime()).unix()).hours > 0 && `${timestampChange(contest.start_time - moment(new Date().getTime()).unix()).hours} giờ `}{`${timestampChange(contest.start_time - moment(new Date().getTime()).unix()).minutes.toString().padStart(2, "0")} phút`}
                                                             </span>
