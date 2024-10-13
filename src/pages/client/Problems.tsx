@@ -266,7 +266,7 @@ function Problems() {
                 )
             },
             cell: ({ row }) => (
-                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-normal leading-5 cursor-pointer text-nowrap">
+                <Badge variant="secondary" className="rounded-md bg-secondary/50 dark:bg-secondary/60 text-[12px] p-0.5 px-2 font-semibold dark:font-normal leading-5 cursor-pointer text-nowrap">
                     {row.getValue("language") === "c" && "C"}
                     {row.getValue("language") === "cpp" && "C++"}
                     {row.getValue("language") === "java" && "Java"}

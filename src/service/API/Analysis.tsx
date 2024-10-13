@@ -20,7 +20,51 @@ const getLeaderboard = async () => {
     }
 }
 
+const countSubmissions60daysAgo = async (problem_slug: string) => {
+    try {
+        const response = await axiosInstance.get(`/problems/${problem_slug}/analysis/submissions`);
+        return response.data;
+    } catch (error) {
+        console.error('Error counting submissions:', error);
+        throw error;
+    }
+}
+
+const getCourseAnalysis = async (course_id: string) => {
+    try {
+        const response = await axiosInstance.get(`/courses/${course_id}/analysis`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting course analysis:', error);
+        throw error;
+    }
+}
+
+const analysisSubmissionOfCourse = async (course_id: string) => {
+    try {
+        const response = await axiosInstance.get(`/courses/${course_id}/analysis/submissions`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting course analysis:', error);
+        throw error;
+    }
+}
+
+const getProblemAnalysisOfCourse = async (course_id: string) => {
+    try {
+        const response = await axiosInstance.get(`/courses/${course_id}/analysis/problems`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting course analysis:', error);
+        throw error;
+    }
+}
+
 export {
     getAnalysis,
-    getLeaderboard
+    getLeaderboard,
+    countSubmissions60daysAgo,
+    getCourseAnalysis,
+    analysisSubmissionOfCourse,
+    getProblemAnalysisOfCourse
 }

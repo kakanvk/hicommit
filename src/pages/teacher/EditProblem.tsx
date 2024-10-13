@@ -152,6 +152,11 @@ function EditProblem() {
                     }
                 });
             console.log(response);
+
+            setTimeout(() => {
+                navigate(`/course-manager/${course_id}`);
+            }, 500);
+
         } catch (error) {
             console.error('Error creating post:', error);
         }

@@ -33,6 +33,9 @@ import Discussion from "@/pages/client/Discussion";
 import GeminiChat from "@/pages/client/GeminiChat";
 import LeaderBoard from "@/pages/client/LeaderBoard";
 import Profile from "@/pages/client/Profile";
+import ProblemAnalysis from "@/pages/client/ProblemAnalysis";
+import CourseAnalysis from "@/pages/client/CourseAnalysis";
+import CourseStatistic from "@/pages/teacher/CourseStatistic";
 
 function ClientLayout() {
 
@@ -89,12 +92,14 @@ function ClientLayout() {
                                             <Route path="courses" element={<Courses />} />
                                             <Route path="course/:course_id">
                                                 <Route path="" element={<Course />} />
+                                                <Route path="analysis" element={<CourseAnalysis />} />
                                                 <Route path="join" element={<JoinCourse />} />
                                             </Route>
                                             <Route path="problems" element={<Problems />} />
                                             <Route path="problem/:problem_id">
                                                 <Route path="" element={<Problem />} />
                                                 <Route path="submit" element={<SubmitProblem />} />
+                                                <Route path="analysis" element={<ProblemAnalysis />} />
                                                 <Route path="discussion/:discussion_id" element={<Discussion />} />
                                             </Route>
                                             <Route path="forum">
@@ -111,6 +116,7 @@ function ClientLayout() {
                                                 <Route path="create" element={<CreateCourse />} />
                                                 <Route path=":course_id">
                                                     <Route path="" element={<CourseManagerByID />} />
+                                                    <Route path="statistic" element={<CourseStatistic />} />
                                                     <Route path="edit" element={<EditCourse />} />
                                                     <Route path="problem/create" element={<CreateProblem />} />
                                                     <Route path="problem/:problem_id/edit" element={<EditProblem />} />

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 import {
     Breadcrumb,
@@ -56,6 +56,8 @@ function SubmitProblem() {
 
     const { theme } = useTheme();
 
+    const location = useLocation();
+    const { reSubmit, old_code } = location.state || {};
     const loginContext = useLogin();
 
     const githubAPI = createGitHubAPI(loginContext?.user.accessToken);
@@ -65,7 +67,7 @@ function SubmitProblem() {
     const navigate = useNavigate();
 
     const [selectedLanguage, setSelectedLanguage] = useState("c");
-    const [code, setCode] = useState("");
+    const [code, setCode] = useState(old_code || "");
     const [loading, setLoading] = useState(false);
     const [commitMessage, setCommitMessage] = useState("Submit code at " + new Date().toLocaleString() + " by HiCommit");
 
@@ -182,7 +184,7 @@ function SubmitProblem() {
             `#include <stdio.h>
 
 int main() {
-    return 0;
+  return 0;
 }`,
         "cpp":
             `#include <bits/stdc++.h>
@@ -190,24 +192,29 @@ int main() {
 using namespace std;
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+  ios_base::sync_with_stdio(false);
+  cin.tie(NULL);
     
-    return 0;
+  return 0;
 }`,
         "java":
             `import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
+  public static void main(String[] args) {
 
-    }
+  }
 }`
-    }
+  }
 
     useEffect(() => {
-        setCode(initialCodeForLanguage[selectedLanguage.toLowerCase() as keyof typeof initialCodeForLanguage]);
+        if (old_code) {
+            setCode(old_code);
+            setCommitMessage("Re-submit code at " + new Date().toLocaleString() + " by HiCommit");
+        } else {
+            setCode(initialCodeForLanguage[selectedLanguage.toLowerCase() as keyof typeof initialCodeForLanguage]);
+        }
     }, []);
 
     return (
@@ -377,7 +384,7 @@ public class Main {
                         }
                         onChange={(value) => setCode(value)}
                         extensions={[javascript({ jsx: true })]}
-                        height="400px"
+                        height="250px"
                         autoFocus
                     />
                 </div>
@@ -416,6 +423,7 @@ public class Main {
                                                 id="commit"
                                                 defaultValue={commitMessage}
                                                 onChange={(e) => setCommitMessage(e.target.value)}
+                                                spellCheck={false}
                                             />
                                         </div>
                                     </div>

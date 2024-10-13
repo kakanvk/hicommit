@@ -39,7 +39,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, BarChartBig, ChevronDown, Ellipsis, FileText, GitMerge, ListFilter, MoreHorizontal, Pencil, Pin, PinOff, Plus, Trash2, UserRoundPlus, UsersRound } from "lucide-react"
+import { ArrowUpDown, BarChartBig, ChevronDown, Ellipsis, FileText, GitMerge, ListFilter, MoreHorizontal, Pencil, Pin, PinOff, Plus, Trash2, TrendingUp, UserRoundPlus, UsersRound } from "lucide-react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -274,6 +274,11 @@ function CourseManager() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent side="top" align="end">
+                                        <Link to={`/admin/courses/${row.getValue("id")}/statistic`} className="cursor-pointer">
+                                            <DropdownMenuItem className="cursor-pointer">
+                                                <TrendingUp className="size-[13px] mr-3" />Phân tích
+                                            </DropdownMenuItem>
+                                        </Link>
                                         <Link to={`/admin/courses/${row.getValue("id")}`} className="cursor-pointer">
                                             <DropdownMenuItem className="cursor-pointer">
                                                 <BarChartBig className="size-[14px] mr-3" />Chi tiết

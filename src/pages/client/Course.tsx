@@ -17,7 +17,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import RingProgress from "@/components/ui/ringProcess";
-import { CornerDownRight, CalendarDays, UsersRound, GitMerge, Copy, ChevronRight, MessageCircle, Share2, History } from 'lucide-react';
+import { CornerDownRight, CalendarDays, UsersRound, GitMerge, Copy, ChevronRight, MessageCircle, Share2, History, Activity, BarChartBig } from 'lucide-react';
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -80,7 +80,7 @@ function Course() {
     const handleGetCourseData = async () => {
         const response = await getCourseById(course_id as string);
         setCourseData(response);
-        // console.log(response);
+        console.log(response);
     };
 
     const handleGetMySubmited = async () => {
@@ -316,7 +316,7 @@ function Course() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <TooltipProvider delayDuration={100}>
+                                    {/* <TooltipProvider delayDuration={100}>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button size="icon" variant="outline"><MessageCircle className="w-4" /></Button>
@@ -333,6 +333,18 @@ function Course() {
                                             </TooltipTrigger>
                                             <TooltipContent side="bottom">
                                                 Chia sẻ khoá học
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider> */}
+                                    <TooltipProvider delayDuration={100}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Link to={`analysis`}>
+                                                    <Button size="icon" variant="outline"><BarChartBig className="w-4" /></Button>
+                                                </Link>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="bottom">
+                                                Phân tích dữ liệu
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -356,7 +368,7 @@ function Course() {
 
                     <BlurFade delay={0.15} >
                         <div className="w-full flex flex-col gap-2">
-                            <span className="text-sm font-medium text-green-600 dark:text-green-500">Mô tả khoá học:</span>
+                            <span className="text-sm font-medium text-green-600 dark:text-green-500">Thông tin khoá học:</span>
                             <div
                                 className="ck-content hicommit-content leading-7 text-justify flex-1"
                                 dangerouslySetInnerHTML={{ __html: courseData?.description }}
@@ -365,45 +377,50 @@ function Course() {
                     </BlurFade>
                     {
                         courseData.isJoined &&
-                            <div className="">
-                                <Accordion type="multiple">
-                                    {
-                                        courseData?.units && courseData?.units.map((unit: any, index: number) => (
-                                            <BlurFade delay={0.15 + index * 0.05} >
-                                                <AccordionItem value={unit?.id} key={unit?.id}>
-                                                    <AccordionTrigger className="hover:no-underline">
-                                                        <span className="flex items-center font-semibold text-lg">
-                                                            <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />{unit?.name}
-                                                        </span>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent className="text-base flex flex-col gap-1.5">
-                                                        {
-                                                            unit?.children.length > 0 ? unit?.children.map((problem: any, index: number) => (
-                                                                <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
-                                                                    <div className="flex items-center gap-3">
-                                                                        {mySubmited[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
-                                                                        {mySubmited[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
-                                                                        {mySubmited[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
-                                                                        {mySubmited[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
-                                                                        {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
-                                                                        <span className="line-clamp-1">{problem.name}</span>
-                                                                        <Badge variant="secondary" className="px-1.5 rounded-sm">
-                                                                            {problem?.language === "c" && "C"}
-                                                                            {problem?.language === "cpp" && "C++"}
-                                                                            {problem?.language === "java" && "Java"}
-                                                                        </Badge>
+                        <div className="flex flex-col gap-4">
+                            <span className="text-[16px] font-medium text-green-600 dark:text-green-500">Bài tập thực hành:</span>
+                            <Accordion type="multiple">
+                                {
+                                    courseData?.units && courseData?.units.map((unit: any, index: number) => (
+                                        <BlurFade delay={0.15 + index * 0.05} >
+                                            <AccordionItem value={unit?.id} key={unit?.id}>
+                                                <AccordionTrigger className="hover:no-underline">
+                                                    <span className="flex items-center font-semibold text-lg">
+                                                        <GitMerge className="w-5 mr-2 text-green-600 dark:text-green-500" />{unit?.name}
+                                                    </span>
+                                                </AccordionTrigger>
+                                                <AccordionContent className="text-base flex flex-col gap-1.5">
+                                                    {
+                                                        unit?.children.length > 0 ? unit?.children.map((problem: any, index: number) => (
+                                                            <Link className="hover:bg-zinc-100 dark:hover:bg-zinc-900 p-2 pl-3.5 rounded-lg flex items-center justify-between group/work" to={`/problem/${problem?.slug || problem?.id}`} key={problem?.id}>
+                                                                <div className="flex items-center gap-2">
+                                                                    {mySubmited[problem?.slug] === "PASSED" && <i className="fa-solid fa-circle-check text-green-600"></i>}
+                                                                    {mySubmited[problem?.slug] === "FAILED" && <i className="fa-solid fa-circle-xmark text-red-500"></i>}
+                                                                    {mySubmited[problem?.slug] === "ERROR" && <i className="fa-solid fa-circle-exclamation text-amber-500"></i>}
+                                                                    {mySubmited[problem?.slug] === "COMPILE_ERROR" && <i className="fa-solid fa-triangle-exclamation text-zinc-400"></i>}
+                                                                    {(mySubmited[problem?.slug] === "PENDING" || !mySubmited[problem?.slug]) && <i className="fa-solid fa-circle-minus text-zinc-400"></i>}
+                                                                    <span className="line-clamp-1">{problem.name}</span>
+                                                                    <div className="flex gap-2 items-center">
+                                                                        {
+                                                                            problem?.tags?.length > 0 && problem?.tags.map((tag: any) => (
+                                                                                <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                                                    {tag}
+                                                                                </Badge>
+                                                                            ))
+                                                                        }
                                                                     </div>
-                                                                    <ChevronRight className="w-4 invisible group-hover/work:visible" />
-                                                                </Link>
-                                                            )) : <span className="text-sm text-muted-foreground py-2">Không có bài tập nào trong phần này</span>
-                                                        }
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            </BlurFade>
-                                        ))
-                                    }
-                                </Accordion>
-                            </div>
+                                                                </div>
+                                                                <ChevronRight className="w-4 invisible group-hover/work:visible" />
+                                                            </Link>
+                                                        )) : <span className="text-sm text-muted-foreground py-2">Không có bài tập nào trong phần này</span>
+                                                    }
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        </BlurFade>
+                                    ))
+                                }
+                            </Accordion>
+                        </div>
                     }
                 </div>
                 {

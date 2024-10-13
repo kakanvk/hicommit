@@ -130,12 +130,16 @@ function Header() {
                                     </DropdownMenuItem>
                                 </Link>
                             }
-                            <DropdownMenuItem className=" dark:hover:bg-zinc-800"><UserRound className="mr-2 w-4 aspect-square" />Tài khoản của tôi</DropdownMenuItem>
+                            <Link to={`/profile/${loginContext?.user.login}`}>
+                                <DropdownMenuItem className=" dark:hover:bg-zinc-800 hover:cursor-pointer">
+                                    <UserRound className="mr-2 w-4 aspect-square" />Tài khoản của tôi
+                                </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuItem className=" dark:hover:bg-zinc-800"><Star className="mr-2 w-4 aspect-square" />Được đánh dấu</DropdownMenuItem>
                             <DropdownMenuItem className=" dark:hover:bg-zinc-800"><Bell className="mr-2 w-4 aspect-square" />Thông báo</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setShowSettingDialog(true)} className=" dark:hover:bg-zinc-800">
                                 <Settings className="mr-2 w-4 aspect-square" />Cài đặt
-                                </DropdownMenuItem>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DialogTrigger asChild>
                                 <DropdownMenuItem >

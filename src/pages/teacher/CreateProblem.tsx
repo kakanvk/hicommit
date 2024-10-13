@@ -48,7 +48,7 @@ function CreateProblem() {
     const unit = new URLSearchParams(window.location.search).get('unit');
 
     const [course, setCourse] = useState<any>({});
-    const [tags, setTags] = useState<string[]>(['Cơ bản', 'Hicommit']);
+    const [tags, setTags] = useState<string[]>([]);
     const [tag, setTag] = useState<string>('');
 
     const [name, setName] = useState<string>('');
@@ -507,17 +507,19 @@ const TestCase = (props: any) => {
                 <div className="flex-1 relative">
                     <span className="text-[10px] font-normal absolute top-1 right-1 border px-1 pr-1.5 rounded opacity-60 bg-secondary"><ChevronsRight className="inline w-3 h-3 mr-0.5" />Input</span>
                     <AutosizeTextarea
-                        className="font-mono disabled:cursor-pointer bg-secondary/30"
+                        className="font-mono disabled:cursor-pointer bg-secondary/30 placeholder:italic"
                         value={testCase.input}
                         onChange={(e) => onChange(index, 'input', e.target.value)}
+                        spellCheck={false}
                     />
                 </div>
                 <div className="flex-1 relative">
                     <span className="text-[10px] font-normal absolute top-1 right-1 border px-1 pr-1.5 rounded opacity-60 bg-secondary"><ChevronsLeft className="inline w-3 h-3 mr-0.5" />Output</span>
                     <AutosizeTextarea
-                        className="font-mono disabled:cursor-pointer bg-secondary/30"
+                        className="font-mono disabled:cursor-pointer bg-secondary/30 placeholder:italic"
                         value={testCase.output}
                         onChange={(e) => onChange(index, 'output', e.target.value)}
+                        spellCheck={false}
                     />
                 </div>
             </div>

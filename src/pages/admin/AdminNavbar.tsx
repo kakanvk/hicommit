@@ -39,6 +39,24 @@ function AdminNavbar() {
                 <div className={`flex flex-col ${expanded ? 'gap-10' : 'gap-3'} p-2`}>
                     <div className="flex flex-col gap-3">
                         <div className="flex flex-col gap-2 font-medium">
+                            {
+                                expanded &&
+                                <motion.span
+                                    initial={{ opacity: 0.5 }}
+                                    animate={{
+                                        opacity: !expanded ? 0 : 0.5,
+                                    }}
+                                    transition={{
+                                        duration: !expanded ? 0 : 0.4,
+                                        delay: !expanded ? 0 : 0.4,
+                                        ease: "easeInOut",
+                                    }}
+                                    className='text-sm font-bold border-b px-3 py-1 pb-3'
+                                    style={{ whiteSpace: "nowrap" }}
+                                >
+                                    {expanded && "Admin Dashboard"}
+                                </motion.span>
+                            }
                             <TooltipProvider delayDuration={100}>
                                 <Tooltip>
                                     <TooltipTrigger>

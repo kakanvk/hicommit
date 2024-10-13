@@ -26,6 +26,7 @@ import CourseDashboard from "@/pages/admin/CourseDashboard";
 import EditCourse from "@/pages/admin/EditCourse";
 import CreateCourse from "@/pages/admin/CreateCourse";
 import CreateProblemForCourse from "@/pages/admin/CreateProblemForCourse";
+import CourseStatistic from "@/pages/admin/CourseStatistic";
 
 function AdminLayout() {
 
@@ -78,6 +79,7 @@ function AdminLayout() {
                                             <Route path="courses">
                                                 <Route path="" element={<CourseManager />} />
                                                 <Route path="create" element={<CreateCourse />} />
+                                                <Route path=":id/statistic" element={<CourseStatistic/>}/>
                                                 <Route path=":id/edit" element={<EditCourse />} />
                                                 <Route path=":id/problem/create" element={<CreateProblemForCourse/> }/>
                                                 <Route path=":id" element={<CourseDashboard />} />

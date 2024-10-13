@@ -183,18 +183,22 @@ const CourseTree = (props: any) => {
         return (
             node.isLeaf ?
                 <div ref={dragHandle as any} className="h-[50px] w-full flex items-center">
-                    <div className="w-full hover:bg-zinc-100 cursor-move dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center justify-between group/work">
+                    <div className="w-full hover:bg-zinc-100 cursor-move dark:hover:bg-zinc-900 p-2.5 pl-4 pr-3 pb-3 rounded-lg flex items-center gap-4 justify-between group/work">
                         <h3 className="flex items-start gap-3 flex-1">
                             <GripVertical className="w-5 h-5 opacity-70 translate-y-[2.5px]" />
-                            <p className="flex-1 line-clamp-1">
-                                <span className='mr-2.5'>
+                            <p className="flex-1 flex">
+                                <span className='mr-2.5 line-clamp-1'>
                                     {node.data.name}
                                 </span>
-                                <Badge variant="secondary" className="px-1.5 rounded-sm -translate-y-[1px]">
-                                    {node?.data?.language === "c" && "C"}
-                                    {node?.data?.language === "cpp" && "C++"}
-                                    {node?.data?.language === "java" && "Java"}
-                                </Badge>
+                                <div className="flex gap-2 items-center">
+                                    {
+                                        node?.data?.tags?.length > 0 && node?.data?.tags.map((tag: any) => (
+                                            <Badge variant="secondary" className="px-1.5 rounded-sm">
+                                                {tag}
+                                            </Badge>
+                                        ))
+                                    }
+                                </div>
                             </p>
                         </h3>
                         <div className='flex items-center gap-1 invisible group-hover/work:visible'>

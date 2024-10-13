@@ -10,7 +10,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus, Activity, Pencil, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import { CornerDownRight, CalendarDays, UsersRound, GitMerge, TrendingUp, Copy, ChevronRight, MessageCircle, Share2, GripVertical, AreaChartIcon, PieChart, Info, KeyRound, EllipsisVertical, Settings, ScanEye, Gem, Users, Key, Plus, Activity, Pencil, ArrowUp, ArrowDown, Trash2, ArrowRight, EyeOff, Eye, Link2, UserPlus, FileUp, FileInput, FileDown } from 'lucide-react';
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -79,7 +79,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
-import { deleteCourseByID, getCourseByIDForAdmin, updateKey, togglePublishCourse, updateUnits, toggleAutoJoin, togglePublicCourse } from "@/service/API/Course";
+import { deleteCourseByID, getCourseByIDForAdmin, updateKey, togglePublishCourse, updateUnits, toggleAutoJoin, togglePublicCourse, deleteMemberFromCourse, addMemberToCourse, addMultipleMembersToCourse } from "@/service/API/Course";
 import { formatTimeAgo } from "@/service/DateTimeService";
 import { set } from "date-fns";
 import { createUnit, updateUnitById } from "@/service/API/Unit";
@@ -89,6 +89,10 @@ import { NodeRendererProps, Tree, useSimpleTree } from "react-arborist";
 import CourseTree from "../teacher/CourseTree";
 import { useLogin } from "@/service/LoginContext";
 import { login } from "@/service/API/Auth";
+
+import Papa from 'papaparse';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { handleCopyText } from "@/service/UIService";
 
 const chartData = [
     {
@@ -147,6 +151,15 @@ function CourseDashboard() {
     const [enrolKey, setEnrolKey] = useState("");
 
     const [newLab, setNewLab] = useState('');
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const [isOpenAddMember, setIsOpenAddMember] = useState(false);
+    const [newMember, setNewMember] = useState('');
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isOpenCSVUpload, setIsOpenCSVUpload] = useState(false);
+    const [membersToAdd, setMembersToAdd] = useState<string[]>([]);
 
     useEffect(() => {
         setKey(prevKey => prevKey + 1);
@@ -276,6 +289,134 @@ function CourseDashboard() {
         } catch (error) {
             console.error('Error creating lab:', error);
         }
+    }
+
+    const handleAddMemberToCourse = async () => {
+        setNewMember('');
+        const response = await toast.promise(
+            addMemberToCourse(course_id as string, newMember),
+            {
+                loading: 'Đang thêm...',
+                success: 'Thêm thành viên thành công',
+                error: (err) => `${err.response.data.message}`,
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                    maxWidth: '700px',
+                }
+            });
+
+        handleGetCourseData();
+    }
+
+    const handleAddMultipleMembersToCourse = async () => {
+        console.log(membersToAdd);
+        const response = await toast.promise(
+            addMultipleMembersToCourse(course_id as string, membersToAdd),
+            {
+                loading: 'Đang thêm...',
+                success: 'Thêm thành viên thành công',
+                error: (err) => `${err.response.data.message}`,
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                    maxWidth: '700px',
+                }
+            });
+
+        handleGetCourseData();
+    }
+
+    const handleCSVUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            Papa.parse(file, {
+                complete: (results: any) => {
+                    const emails = results.data.slice(1).map((row: any) => row[0]).filter(Boolean);
+                    // Gọi API để thêm các email này vào khóa học
+                    const uniqueEmails = [...new Set(emails)];
+                    console.log(uniqueEmails);
+                    setMembersToAdd(uniqueEmails as string[]);
+                },
+                header: false
+            });
+            setIsOpenCSVUpload(true);
+        }
+        // clear file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const downloadCSVTemplate = () => {
+        const csvContent = "Email\nexample1@example.com\nexample2@example.com";
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "member_template.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const exportMembersToCSV = () => {
+        // Chuẩn bị dữ liệu
+        const data = [
+            ['Email'], // Header
+            ...members.map(member => [member.email])
+        ];
+
+        // Sử dụng Papa Parse để tạo chuỗi CSV
+        const csv = Papa.unparse(data);
+
+        // Tạo Blob và tải xuống file
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `members_${course?.name || course?.slug}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const handleDeleteMemberFromCourse = async (emailToDelete: string) => {
+        const response = await toast.promise(
+            deleteMemberFromCourse(course_id as string, emailToDelete),
+            {
+                loading: 'Đang xoá...',
+                success: 'Xoá thành viên thành công',
+                error: (err) => `${err.response.data.message}`,
+            },
+            {
+                style: {
+                    borderRadius: '8px',
+                    background: '#222',
+                    color: '#fff',
+                    paddingLeft: '15px',
+                    fontFamily: 'Plus Jakarta Sans',
+                    maxWidth: '700px',
+                }
+            });
+
+        handleGetCourseData();
     }
 
     const handleGetCourseData = async () => {
@@ -455,35 +596,40 @@ function CourseDashboard() {
                                                             <CommandEmpty>Không có kết quả phù hợp.</CommandEmpty>
                                                             {
                                                                 members?.map((member: any) => (
-                                                                    <CommandItem className="p-2.5 px-0 mb-1 justify-between items-center  aria-selected:bg-transparent">
-                                                                        <div className="flex gap-2.5 items-center">
+                                                                    <CommandItem className="p-2.5 px-0 mb-1 pb-3 justify-between items-center aria-selected:bg-transparent rounded-none border-b">
+                                                                        <div className="flex gap-3 items-center">
                                                                             <Avatar>
-                                                                                <AvatarImage className="w-6 rounded-full" src={member.avatar_url} />
+                                                                                <AvatarImage className="w-10 rounded-full" src={member?.User ? member?.User?.avatar_url : 'https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3383.jpg'} />
                                                                             </Avatar>
-                                                                            <span>
-                                                                                {member?.username}
-                                                                                {(member?.role === "ADMIN" || member?.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[11px] text-primary ml-1.5 -translate-y-[1px]"></i>}
-                                                                            </span>
+                                                                            <div className="flex flex-col">
+                                                                                {
+                                                                                    member?.User ?
+                                                                                        <p className="text-sm font-medium">
+                                                                                            {member?.User?.username}
+                                                                                            {(member?.User?.role === "ADMIN" || member?.User?.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
+                                                                                        </p> :
+                                                                                        <p className="text-[13px] font-medium italic text-primary">(Chờ đăng nhập)</p>
+                                                                                }
+                                                                                <p className="opacity-50">
+                                                                                    {member?.email}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            {
-                                                                                member?.username === loginContext?.user?.username ?
-                                                                                    <span className="text-primary font-medium">(Bạn)</span> :
-                                                                                    <div className="flex gap-2">
-                                                                                        <Button size="sm" className="text-xs h-7 px-2" variant="secondary">Xoá</Button>
-                                                                                        <Button size="sm" className="text-xs h-7 px-2">Chấp nhận</Button>
-                                                                                    </div>
+                                                                        <div className="pr-3">
+                                                                            {(() => {
+                                                                                if (member?.User?.username === loginContext?.user?.username) {
+                                                                                    return <span className="text-primary font-medium">(Bạn)</span>;
+                                                                                }
 
-                                                                                // <Select defaultValue="">
-                                                                                //     <SelectTrigger className="w-[180px] bg-transparent">
-                                                                                //         <SelectValue/>
-                                                                                //     </SelectTrigger>
-                                                                                //     <SelectContent>
-                                                                                //         <SelectItem value="accept">Duyệt</SelectItem>
-                                                                                //         <SelectItem value="notaccept">Không duyệt</SelectItem>
-                                                                                //     </SelectContent>
-                                                                                // </Select>
-                                                                            }
+                                                                                if (member?.status === "INACTIVE") {
+                                                                                    return (
+                                                                                        <div className="flex gap-2">
+                                                                                            <Button size="sm" className="text-xs h-7 px-2" variant="secondary">Xoá</Button>
+                                                                                            <Button size="sm" className="text-xs h-7 px-2">Chấp nhận</Button>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+                                                                            })()}
                                                                         </div>
                                                                     </CommandItem>
                                                                 ))
@@ -539,9 +685,6 @@ function CourseDashboard() {
                                                     <TabsTrigger value="general" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <Settings className="w-4 h-4 mr-2" />Chung
                                                     </TabsTrigger>
-                                                    <TabsTrigger value="advance" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
-                                                        <Gem className="w-4 h-4 mr-2" />Nâng cao
-                                                    </TabsTrigger>
                                                     <TabsTrigger value="access" className="pr-6 data-[state=active]:bg-secondary w-full justify-start rounded-md">
                                                         <ScanEye className="w-4 h-4 mr-2" />Quyền truy cập
                                                     </TabsTrigger>
@@ -562,7 +705,7 @@ function CourseDashboard() {
                                                             <div className="flex justify-between gap-5 items-center">
                                                                 <Label className="flex-1 flex flex-col gap-1.5">
                                                                     <h3 className="text-[16px]">Xoá khoá học này</h3>
-                                                                    <p className="text-sm opacity-50 dark:font-light">Sau khi xoá, sẽ không thể truy cập được.</p>
+                                                                    <p className="text-sm opacity-50 dark:font-light">Sau khi xoá, khoá học này sẽ không thể truy cập được.</p>
                                                                 </Label>
                                                                 <Dialog>
                                                                     <DialogTrigger>
@@ -591,40 +734,233 @@ function CourseDashboard() {
                                                         </div>
                                                     </TabsContent>
                                                     <TabsContent value="access" className="mt-0 min-h-[400px]">
-                                                        <div className="flex flex-col gap-4">
-                                                            <div className="flex justify-between gap-10 items-center">
-                                                                <Label className="flex-1 flex flex-col gap-1 cursor-pointer" htmlFor="public-course-switch">
-                                                                    <h3 className="text-[16px]">Hạn chế truy cập</h3>
-                                                                    <p className="text-sm opacity-50 dark:font-light">Yêu cầu người dùng nhập mật khẩu khi đăng ký tham gia khoá học này.</p>
-                                                                </Label>
-                                                                <Switch checked={!course?.public} onCheckedChange={() => handlePublicCourse()} id="public-course-switch" />
+                                                        <div className="flex flex-col gap-8">
+                                                            <div className="flex flex-col gap-4">
+                                                                <div className="flex justify-between gap-10 items-center">
+                                                                    <Label className="flex-1 flex flex-col gap-1 cursor-pointer" htmlFor="public-course-switch">
+                                                                        <h3 className="text-[16px]">Hạn chế truy cập</h3>
+                                                                        <p className="text-sm opacity-50 dark:font-light">Yêu cầu người dùng nhập mật khẩu khi đăng ký tham gia khoá học này.</p>
+                                                                    </Label>
+                                                                    <Switch checked={!course?.public} onCheckedChange={() => handlePublicCourse()} id="public-course-switch" />
+                                                                </div>
+                                                                {
+                                                                    !course?.public &&
+                                                                    <>
+                                                                        <div className="relative flex items-center">
+                                                                            <KeyRound className="absolute left-3 h-4 w-4 text-muted-foreground ml-1" />
+                                                                            <Input
+                                                                                type={isPasswordVisible ? "text" : "password"}
+                                                                                placeholder="Đặt mật khẩu tham gia"
+                                                                                className="w-full pl-11 h-[44px]"
+                                                                                value={enrolKey}
+                                                                                onChange={e => setEnrolKey(e.target.value)}
+                                                                            />
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                                                                                className="absolute right-2 size-8"
+                                                                            >
+                                                                                {isPasswordVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                                            </Button>
+                                                                        </div>
+                                                                        {
+                                                                            enrolKey.length > 0 && enrolKey !== course.join_key &&
+                                                                            <Button className="w-fit px-4" onClick={() => handleUpdateKey()}>Cập nhật mật khẩu</Button>
+                                                                        }
+                                                                    </>
+                                                                }
                                                             </div>
-                                                            {
-                                                                !course?.public &&
-                                                                <>
-                                                                    <div className="relative">
-                                                                        <KeyRound className="absolute left-3 top-[13px] h-4 w-4 text-muted-foreground ml-1" />
-                                                                        <Input
-                                                                            type="search"
-                                                                            placeholder="Đặt mật khẩu tham gia"
-                                                                            className="w-full pl-11 h-[44px]"
-                                                                            value={enrolKey}
-                                                                            onChange={e => setEnrolKey(e.target.value)}
-                                                                        />
-                                                                    </div>
-                                                                    {
-                                                                        enrolKey.length > 0 && enrolKey !== course.join_key &&
-                                                                        <Button className="w-fit px-4" onClick={() => handleUpdateKey()}>Cập nhật</Button>
-                                                                    }
-                                                                </>
-                                                            }
+                                                            <div className="flex flex-col gap-2">
+                                                                <p className="text-[16px] font-medium">Liên kết tham gia khoá học:</p>
+                                                                <div className="flex gap-2">
+                                                                    <span
+                                                                        className="text-sm flex-1 border rounded-md flex items-center justify-start pl-3 italic line-clamp-1"
+                                                                    >
+                                                                        <Link2 className="size-4 mr-2" />{(import.meta as any).env.VITE_HICOMMIT_HOST}/course/{course?.slug ? course?.slug : course_id}
+                                                                    </span>
+                                                                    <Button variant="outline" onClick={() => handleCopyText(`${(import.meta as any).env.VITE_HICOMMIT_HOST}/course/${course?.slug ? course?.slug : course_id}`)}>
+                                                                        Sao chép
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </TabsContent>
-                                                    <TabsContent value="advance" className="mt-0 min-h-[400px]">
-                                                        Advance Setting here
-                                                    </TabsContent>
                                                     <TabsContent value="member" className="mt-0 min-h-[400px]">
-                                                        Member Setting here
+                                                        <div className="flex flex-col gap-3">
+                                                            <h2 className="font-medium">Quản lý thành viên</h2>
+                                                            <Command className="bg-transparent w-full">
+                                                                <div className="flex gap-4 items-center w-full">
+                                                                    <CommandInput placeholder="Tìm kiếm..." />
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger>
+                                                                            <Button className="pl-4">
+                                                                                <UserPlus className="size-4 mr-1.5" />Thêm<i className="fa-solid fa-sort-down mb-1.5 ml-3 text-[12px]"></i>
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent side="bottom" align="start">
+                                                                            <DropdownMenuItem className="pr-6 cursor-pointer" onClick={() => setIsOpenAddMember(true)}>
+                                                                                <UserPlus className="size-4 mr-2" />Thêm người dùng
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem className="pr-6 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                                                                <FileUp className="size-4 mr-2" />Nhập file CSV
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem className="pr-6 cursor-pointer" onClick={() => exportMembersToCSV()}>
+                                                                                <FileInput className="size-4 mr-2" />Tải xuống danh sách
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem className="pr-6 cursor-pointer" onClick={downloadCSVTemplate}>
+                                                                                <FileDown className="size-4 mr-2" />Tải xuống CSV mẫu
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
+                                                                </div>
+                                                                <Dialog open={isOpenAddMember} onOpenChange={setIsOpenAddMember}>
+                                                                    <DialogContent>
+                                                                        <DialogHeader>
+                                                                            <DialogTitle>Thêm người dùng mới vào khoá học</DialogTitle>
+                                                                        </DialogHeader>
+                                                                        <div className="mt-2">
+                                                                            <Input
+                                                                                type="search"
+                                                                                className="placeholder:italic"
+                                                                                placeholder="Email hoặc tên người dùng"
+                                                                                value={newMember}
+                                                                                onChange={e => setNewMember(e.target.value)}
+                                                                            />
+                                                                        </div>
+                                                                        <DialogFooter className="mt-3">
+                                                                            <DialogClose asChild>
+                                                                                <Button variant="ghost">
+                                                                                    Đóng
+                                                                                </Button>
+                                                                            </DialogClose>
+                                                                            <DialogClose asChild>
+                                                                                <Button disabled={newMember === ''} onClick={() => handleAddMemberToCourse()}>
+                                                                                    Thêm người dùng
+                                                                                </Button>
+                                                                            </DialogClose>
+                                                                        </DialogFooter>
+                                                                    </DialogContent>
+                                                                </Dialog>
+                                                                <input
+                                                                    type="file"
+                                                                    accept=".csv"
+                                                                    ref={fileInputRef}
+                                                                    style={{ display: 'none' }}
+                                                                    onChange={handleCSVUpload}
+                                                                />
+                                                                <Dialog open={isOpenCSVUpload} onOpenChange={setIsOpenCSVUpload}>
+                                                                    <DialogContent>
+                                                                        <DialogHeader>
+                                                                            <DialogTitle>Thêm nhiều người dùng</DialogTitle>
+                                                                        </DialogHeader>
+                                                                        <div className="mt-2 ">
+                                                                            <ScrollArea className={'[&>[data-radix-scroll-area-viewport]]:max-h-[280px] pr-4 translate-x-1'}>
+                                                                                {
+                                                                                    membersToAdd?.length > 0 ?
+                                                                                        <div className="flex flex-col">
+                                                                                            {
+                                                                                                membersToAdd?.map((member: any, index: number) => (
+                                                                                                    <div className="flex gap-2 items-center justify-between group/item border-b py-2" key={index}>
+                                                                                                        <p>{index + 1}. {member}</p>
+                                                                                                        <Button variant="secondary" size="sm" className="h-7 px-2 invisible group-hover/item:visible" onClick={() => {
+                                                                                                            setMembersToAdd(membersToAdd.filter((_, i) => i !== index));
+                                                                                                        }}>
+                                                                                                            <Trash2 className="size-[14px]" />
+                                                                                                        </Button>
+                                                                                                    </div>
+                                                                                                ))
+                                                                                            }
+                                                                                        </div> :
+                                                                                        <div className="flex flex-col gap-2">
+                                                                                            <p className="text-sm italic">Không tìm thấy người dùng nào.</p>
+                                                                                        </div>
+                                                                                }
+                                                                            </ScrollArea>
+                                                                        </div>
+                                                                        <DialogFooter className="mt-2">
+                                                                            <DialogClose asChild>
+                                                                                <Button variant="ghost">
+                                                                                    Đóng
+                                                                                </Button>
+                                                                            </DialogClose>
+                                                                            <DialogClose asChild>
+                                                                                <Button disabled={membersToAdd?.length === 0} onClick={() => handleAddMultipleMembersToCourse()}>
+                                                                                    Thêm tất cả ({membersToAdd?.length})
+                                                                                </Button>
+                                                                            </DialogClose>
+                                                                        </DialogFooter>
+                                                                    </DialogContent>
+                                                                </Dialog>
+                                                                <CommandList className="mt-4">
+                                                                    <CommandEmpty>Không có kết quả phù hợp.</CommandEmpty>
+                                                                    {
+                                                                        members?.map((member: any) => (
+                                                                            <CommandItem className="p-2.5 px-0 mb-1 pb-3 justify-between items-center aria-selected:bg-transparent rounded-none border-b">
+                                                                                <div className="flex gap-3 items-center">
+                                                                                    <Avatar>
+                                                                                        <AvatarImage className="w-10 rounded-full" src={member?.User ? member?.User?.avatar_url : 'https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3383.jpg'} />
+                                                                                    </Avatar>
+                                                                                    <div className="flex flex-col">
+                                                                                        {
+                                                                                            member?.User ?
+                                                                                                <p className="text-sm font-medium">
+                                                                                                    {member?.User?.username}
+                                                                                                    {(member?.User?.role === "ADMIN" || member?.User?.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
+                                                                                                </p> :
+                                                                                                <p className="text-[13px] font-medium italic text-primary">(Chờ đăng nhập)</p>
+                                                                                        }
+                                                                                        <p className="opacity-50">
+                                                                                            {member?.email}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="pr-3">
+                                                                                    {(() => {
+                                                                                        if (member?.User?.username === loginContext?.user?.username) {
+                                                                                            return <span className="text-primary font-medium">(Bạn)</span>;
+                                                                                        }
+
+                                                                                        if (member?.status === "INACTIVE") {
+                                                                                            return (
+                                                                                                <div className="flex gap-2">
+                                                                                                    <Button size="sm" className="text-xs h-7 px-2" variant="secondary">Xoá</Button>
+                                                                                                    <Button size="sm" className="text-xs h-7 px-2">Chấp nhận</Button>
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+
+                                                                                        return (
+                                                                                            <Dialog>
+                                                                                                <DialogTrigger>
+                                                                                                    <Button size="sm" className="text-xs h-7 px-2" variant="secondary">Xoá</Button>
+                                                                                                </DialogTrigger>
+                                                                                                <DialogContent>
+                                                                                                    <DialogHeader>
+                                                                                                        <DialogTitle>Xoá người dùng này?</DialogTitle>
+                                                                                                    </DialogHeader>
+                                                                                                    <DialogDescription>
+                                                                                                        Bạn có chắc chắn muốn xoá người dùng này khỏi khoá học này?
+                                                                                                    </DialogDescription>
+                                                                                                    <DialogFooter>
+                                                                                                        <DialogClose asChild>
+                                                                                                            <Button variant="ghost">Đóng</Button>
+                                                                                                        </DialogClose>
+                                                                                                        <DialogClose asChild>
+                                                                                                            <Button variant="destructive" onClick={() => handleDeleteMemberFromCourse(member?.email)}>Vâng, tôi muốn xoá</Button>
+                                                                                                        </DialogClose>
+                                                                                                    </DialogFooter>
+                                                                                                </DialogContent>
+                                                                                            </Dialog>
+                                                                                        );
+                                                                                    })()}
+                                                                                </div>
+                                                                            </CommandItem>
+                                                                        ))
+                                                                    }
+                                                                </CommandList>
+                                                            </Command>
+                                                        </div>
                                                     </TabsContent>
                                                 </div>
                                             </Tabs>
@@ -685,9 +1021,14 @@ function CourseDashboard() {
                         <Switch checked={course?.publish} id="publish-course" onCheckedChange={() => handlePublishCourse()} />
                     </div>
                     <div className="bg-zinc-100/30 dark:bg-zinc-900/30 border rounded-lg flex flex-col items-center">
-                        <div className="flex flex-col w-full pl-6 2xl:pl-7 pt-4 2xl:pt-5">
-                            <h3 className="font-bold text-xl 2xl:text-2xl align-left">Thống kê</h3>
-                            <p className="text-sm 2xl:text-base opacity-60">Trong toàn khoá học</p>
+                        <div className="flex justify-between items-start w-full pl-6 2xl:pl-7 pt-4 2xl:pt-5 pr-4">
+                            <div className="flex flex-col">
+                                <h3 className="font-bold text-xl 2xl:text-2xl align-left">Thống kê</h3>
+                                <p className="text-sm 2xl:text-base opacity-60">Trong toàn khoá học</p>
+                            </div>
+                            <Link to={`/admin/courses/${course_id}/statistic`} className="mt-1 text-sm 2xl:text-base text-primary">
+                                Chi tiết<ArrowRight className="size-4 inline -translate-y-[1px] ml-1" />
+                            </Link>
                         </div>
                         <ChartContainer
                             config={{

@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactDOMServer from 'react-dom/server';
 
 import {
@@ -81,6 +81,7 @@ function Result() {
     const { socket } = useSocket() as any;
 
     const loginContext = useLogin();
+    const navigate = useNavigate();
 
     const { theme } = useTheme();
 
@@ -185,6 +186,15 @@ function Result() {
             });
 
         getSubmission();
+    }
+
+    const handleReSubmit = async () => {
+        navigate(`/problem/${submission?.problem?.slug}/submit`, {
+            state: {
+                reSubmit: true,
+                old_code: code
+            }
+        });
     }
 
     useEffect(() => {
@@ -387,9 +397,7 @@ function Result() {
                                                             <Button variant="ghost" className="mr-1">Đóng</Button>
                                                         </DialogClose>
                                                         <DialogClose asChild>
-                                                            <Link to={`/problem/${submission?.problem?.slug}/submit`}>
-                                                                <Button>Nộp lại</Button>
-                                                            </Link>
+                                                            <Button onClick={() => handleReSubmit()}>Nộp lại</Button>
                                                         </DialogClose>
                                                     </DialogFooter>
                                                 </DialogContent>
@@ -705,7 +713,7 @@ function Result() {
                             </BlurFade>
                         }
                         {
-                            submission?.review?.suggestions?.length > 0 &&
+                            submission?.problem?.type !== "CONTEST" && submission?.review?.suggestions?.length > 0 &&
                             <BlurFade delay={0.6} yOffset={0} blur="2px" className="flex flex-col gap-2">
                                 <h3 className="font-semibold">Các gợi ý chỉnh sửa:</h3>
                                 <div className="flex flex-col gap-2 pl-1">

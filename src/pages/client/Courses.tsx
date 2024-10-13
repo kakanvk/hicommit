@@ -28,7 +28,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getCourses, getJoinedCourses } from "@/service/API/Course";
 import { Link } from "react-router-dom";
 import { toggleFavouriteCourse } from "@/service/API/User";
@@ -36,6 +36,7 @@ import toast from "react-hot-toast";
 import { useLogin } from "@/service/LoginContext";
 import ReactHtmlParser from "react-html-parser";
 import BlurFade from "@/components/magicui/blur-fade";
+import { debounce } from 'lodash';
 
 function transform(node: any) {
     if (node.name === 'figure' || node.name === 'table') {
@@ -48,6 +49,7 @@ function Courses() {
     const [courses, setCourses] = useState<any[]>([]);
     const [joinedCourses, setJoinedCourses] = useState<any[]>([]);
     const [searchKeyWord, setSearchKeyWord] = useState<string>("");
+    const [debouncedSearchKeyWord, setDebouncedSearchKeyWord] = useState<string>("");
     const [filterClass, setFilterClass] = useState<string>("all");
     const [filterStatus, setFilterStatus] = useState<string>("all");
 
@@ -104,21 +106,52 @@ function Courses() {
         }
     }
 
+    const debouncedSearch = useCallback(
+        debounce((value: string) => {
+            setDebouncedSearchKeyWord(value);
+        }, 300),
+        []
+    );
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchKeyWord(e.target.value);
+        debouncedSearch(e.target.value);
+    };
+
     useEffect(() => {
         // Lọc khoá học
         let filtered = courses;
-        if (searchKeyWord) {
-            filtered = filtered.filter((course) => course.name.toLowerCase().includes(searchKeyWord.toLowerCase()));
+        if (debouncedSearchKeyWord) {
+            filtered = filtered.filter((course) => course.name.toLowerCase().includes(debouncedSearchKeyWord.toLowerCase()));
+        }
+        if (filterClass !== "all") {
+            filtered = filtered.filter((course) => course.class_name === filterClass);
+        }
+        if (filterStatus !== "all") {
+            filtered = filtered.filter((course) => {
+                if (filterStatus === "public") {
+                    return course.public === true;
+                } else if (filterStatus === "private") {
+                    return course.public === false;
+                }
+                return true; // Trường hợp mặc định, giữ lại tất cả các khóa học
+            });
         }
         setFilteredCourses(filtered);
 
         // Lọc khoá học đã tham gia
         let filteredJoined = joinedCourses;
-        if (searchKeyWord) {
-            filteredJoined = filteredJoined.filter((course) => course.name.toLowerCase().includes(searchKeyWord.toLowerCase()));
+        if (debouncedSearchKeyWord) {
+            filteredJoined = filteredJoined.filter((course) => course.name.toLowerCase().includes(debouncedSearchKeyWord.toLowerCase()));
+        }
+        if (filterClass !== "all") {
+            filteredJoined = filteredJoined.filter((course) => course.class_name === filterClass);
+        }
+        if (filterStatus !== "all") {
+            filteredJoined = filteredJoined.filter((course) => course.public === (filterStatus === "public"));
         }
         setFilteredJoinedCourses(filteredJoined);
-    }, [searchKeyWord, courses, joinedCourses]);
+    }, [debouncedSearchKeyWord, courses, joinedCourses, filterClass, filterStatus]);
 
     useEffect(() => {
         handleGetCreatedCourse();
@@ -153,10 +186,18 @@ function Courses() {
                                             <Badge className="px-1.5 min-w-[22px] flex justify-center ml-2">{joinedCourses.length}</Badge>
                                         </TabsTrigger>
                                         <div className="flex gap-2 ml-3">
-                                            <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
-                                                DA20TTB
-                                                <X className="w-4 h-4 ml-3 hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" />
-                                            </Badge>
+                                            {filterClass !== "all" && (
+                                                <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80">
+                                                    {filterClass}
+                                                    <X className="w-4 h-4 ml-3 hover:bg-zinc-400 dark:hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" onClick={() => setFilterClass("all")} />
+                                                </Badge>
+                                            )}
+                                            {filterStatus !== "all" && (
+                                                <Badge variant="secondary" className="text-[11px] p-1 px-1.5 pl-2.5 bg-secondary/80 uppercase">
+                                                    {filterStatus === "public" ? "Công khai" : "Riêng tư"}
+                                                    <X className="w-4 h-4 ml-3 hover:bg-zinc-400 dark:hover:bg-zinc-700 rounded-full p-[1px] duration-100 cursor-pointer" onClick={() => setFilterStatus("all")} />
+                                                </Badge>
+                                            )}
                                         </div>
                                         <TooltipProvider delayDuration={200}>
                                             <Tooltip>
@@ -174,24 +215,27 @@ function Courses() {
                                                                 Tuỳ chỉnh lọc
                                                             </DialogTitle>
                                                         </DialogHeader>
-                                                        <DialogDescription className="flex flex-col gap-4">
+                                                        <div className="flex flex-col gap-4">
                                                             <div className="flex flex-col gap-1.5">
-                                                                <span>Lớp học</span>
-                                                                <Select defaultValue="all">
-                                                                    <SelectTrigger className="bg-secondary">
+                                                                <span className="text-sm">Lớp học</span>
+                                                                <Select value={filterClass} onValueChange={(value) => setFilterClass(value)}>
+                                                                    <SelectTrigger>
                                                                         <SelectValue />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
                                                                         <SelectItem value="all">Tất cả</SelectItem>
-                                                                        <SelectItem value="DA20TTB">DA20TTB</SelectItem>
-                                                                        <SelectItem value="DA21TTB">DA21TTB</SelectItem>
+                                                                        {
+                                                                            courses.map((course) => (
+                                                                                <SelectItem key={course.id} value={course.class_name}>{course.class_name}</SelectItem>
+                                                                            ))
+                                                                        }
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
                                                             <div className="flex flex-col gap-1.5">
-                                                                <span>Trạng thái khoá học</span>
-                                                                <Select defaultValue="all">
-                                                                    <SelectTrigger className="bg-secondary">
+                                                                <span className="text-sm">Trạng thái khoá học</span>
+                                                                <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value)}>
+                                                                    <SelectTrigger>
                                                                         <SelectValue />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
@@ -201,7 +245,7 @@ function Courses() {
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
-                                                        </DialogDescription>
+                                                        </div>
                                                         <DialogFooter className="mt-3">
                                                             <div className="flex gap-2.5">
                                                                 <DialogClose asChild>
@@ -209,7 +253,6 @@ function Courses() {
                                                                         Đóng
                                                                     </Button>
                                                                 </DialogClose>
-                                                                <Button>Lọc</Button>
                                                             </div>
                                                         </DialogFooter>
                                                     </DialogContent>
@@ -228,7 +271,7 @@ function Courses() {
                                                 placeholder="Tìm kiếm khoá học"
                                                 className="w-full rounded-md pl-9 flex-1 bg-transparent"
                                                 value={searchKeyWord}
-                                                onChange={(e) => setSearchKeyWord(e.target.value)}
+                                                onChange={handleSearchChange}
                                             />
                                         </div>
                                         <Button variant="outline" size="icon">
@@ -239,108 +282,124 @@ function Courses() {
                             </BlurFade>
                         </div>
                         <TabsContent value="all-courses">
-                            <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
+                            <div>
                                 {
-                                    filteredCourses.map((course, index) => (
-                                        <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
-                                            <div className="h-full flex flex-col border rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
-                                                <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
-                                                    <img src={course?.thumbnail} />
-                                                    <Button variant={`${loginContext.user.favourite_course.includes(course.id) ? 'default' : 'secondary'}`} size="icon" className="absolute right-3 top-3 active:scale-90" onClick={(e) => handleAddFavouriteCourse(e, course.id)}>
-                                                        <Star className="w-4 h-4" />
-                                                    </Button>
-                                                </Link>
-                                                <div className="flex flex-col p-4 justify-between flex-1 gap-2">
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="flex gap-2 text-sm">
-                                                            <span className="opacity-60 dark:font-light text-[13px]">
-                                                                Được tạo bởi
-                                                            </span>
-                                                            <HoverCard openDelay={300}>
-                                                                <HoverCardTrigger className="flex gap-2 group/avatar cursor-pointer">
-                                                                    <Avatar className="w-5 h-5 rounded-full">
-                                                                        <AvatarImage src={course?.author.avatar_url} />
-                                                                    </Avatar>
-                                                                    <span className="font-semibold text-green-600 dark:text-green-500 group-hover/avatar:underline">
-                                                                        {course?.author.username}
-                                                                        {(course?.author.role === "ADMIN" || course?.author.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
-                                                                    </span>
-                                                                </HoverCardTrigger>
-                                                                <HoverCardContent className="w-70" side="bottom" align="start">
-                                                                    <div className="flex gap-4">
-                                                                        <Avatar>
-                                                                            <AvatarImage className="w-14 rounded-full" src={course?.author.avatar_url} />
-                                                                        </Avatar>
-                                                                        <div className="space-y-1">
-                                                                            <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">
-                                                                                @{course?.author.username}
-                                                                                {(course?.author.role === "ADMIN" || course?.author.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
-                                                                            </h4>
-                                                                            <p className="text-sm">
-                                                                                Khoa Kỹ thuật & Công nghệ
-                                                                            </p>
-                                                                            <div className="flex items-center pt-2">
-                                                                                <CalendarDays className="mr-2 h-4 w-4 opacity-70" />{" "}
-                                                                                <span className="text-xs text-muted-foreground">
-                                                                                    Tham gia từ tháng 10, 2023
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </HoverCardContent>
-                                                            </HoverCard>
-                                                        </div>
-                                                        <Link className="font-bold text-lg line-clamp-2" to={`/course/${course.slug || course.id}`}>
-                                                            {
-                                                                course.class_name &&
-                                                                <Badge className="mr-2 rounded text-[9px] px-[5px] py-[1px] -translate-y-[2px] font-bold leading-4">
-                                                                    {course?.class_name}
-                                                                </Badge>
-                                                            }
-                                                            {course?.name}
-                                                        </Link>
-                                                        <p className="text-sm opacity-50 dark:font-light line-clamp-2">
-                                                            {ReactHtmlParser(course?.description, { transform })}
-                                                        </p>
-                                                        <div className="flex flex-wrap gap-2 mt-3">
-                                                            <Badge variant="secondary" className="text-[12px] p-1 px-3">
-                                                                <GitMerge className="w-3 h-3 mr-1.5" />
-                                                                {course?.problem_count} bài tập
-                                                            </Badge>
-                                                            <Badge variant="secondary" className="text-[11.5px] p-1 px-3">
-                                                                <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
-                                                            </Badge>
-                                                        </div>
-                                                    </div>
-                                                    <div className="mt-5 flex gap-2">
-                                                        <Link to={`/course/${course.slug || course.id}`} className="flex-1">
-                                                            <Button className="w-full">
-                                                                Tham gia
-                                                            </Button>
-                                                        </Link>
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger>
-                                                                <Button size="icon" variant="secondary">
-                                                                    <EllipsisVertical className="w-4 h-4" />
+                                    filteredCourses.length > 0 ? (
+                                        <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
+                                            {
+                                                filteredCourses.map((course, index) => (
+                                                    <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
+                                                        <div className="h-full flex flex-col border rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
+                                                            <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>
+                                                                <img src={course?.thumbnail} />
+                                                                <Button variant={`${loginContext.user.favourite_course.includes(course.id) ? 'default' : 'secondary'}`} size="icon" className="absolute right-3 top-3 active:scale-90" onClick={(e) => handleAddFavouriteCourse(e, course.id)}>
+                                                                    <Star className="w-4 h-4" />
                                                                 </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent side="top" align="end" className="w-[160px] dark:bg-zinc-900">
-                                                                <DropdownMenuLabel>Tuỳ chọn</DropdownMenuLabel>
-                                                                <DropdownMenuSeparator />
-                                                                <DropdownMenuItem>
-                                                                    <Braces className="mr-2 w-4 h-4" />Xem chi tiết
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <Star className="mr-2 w-4 h-4" />Đánh dấu
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
+                                                            </Link>
+                                                            <div className="flex flex-col p-4 justify-between flex-1 gap-2">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="flex gap-2 text-sm">
+                                                                        <span className="opacity-60 dark:font-light text-[13px]">
+                                                                            Được tạo bởi
+                                                                        </span>
+                                                                        <HoverCard openDelay={300}>
+                                                                            <HoverCardTrigger className="flex gap-2 group/avatar cursor-pointer">
+                                                                                <Avatar className="w-5 h-5 rounded-full">
+                                                                                    <AvatarImage src={course?.author.avatar_url} />
+                                                                                </Avatar>
+                                                                                <span className="font-semibold text-green-600 dark:text-green-500 group-hover/avatar:underline">
+                                                                                    {course?.author.username}
+                                                                                    {(course?.author.role === "ADMIN" || course?.author.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
+                                                                                </span>
+                                                                            </HoverCardTrigger>
+                                                                            <HoverCardContent className="w-70" side="bottom" align="start">
+                                                                                <div className="flex gap-4">
+                                                                                    <Avatar>
+                                                                                        <AvatarImage className="w-14 rounded-full" src={course?.author.avatar_url} />
+                                                                                    </Avatar>
+                                                                                    <div className="space-y-1">
+                                                                                        <h4 className="text-sm font-semibold text-green-600 dark:text-green-500">
+                                                                                            @{course?.author.username}
+                                                                                            {(course?.author.role === "ADMIN" || course?.author.role === "TEACHER") && <i className="fa-solid fa-circle-check text-[10px] text-primary ml-1 -translate-y-[1px]"></i>}
+                                                                                        </h4>
+                                                                                        <p className="text-sm">
+                                                                                            Khoa Kỹ thuật & Công nghệ
+                                                                                        </p>
+                                                                                        <div className="flex items-center pt-2">
+                                                                                            <CalendarDays className="mr-2 h-4 w-4 opacity-70" />{" "}
+                                                                                            <span className="text-xs text-muted-foreground">
+                                                                                                Tham gia từ tháng 10, 2023
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </HoverCardContent>
+                                                                        </HoverCard>
+                                                                    </div>
+                                                                    <Link className="font-bold text-lg line-clamp-2" to={`/course/${course.slug || course.id}`}>
+                                                                        {
+                                                                            course.class_name &&
+                                                                            <Badge className="mr-2 rounded text-[9px] px-[5px] py-[1px] -translate-y-[2px] font-bold leading-4">
+                                                                                {course?.class_name}
+                                                                            </Badge>
+                                                                        }
+                                                                        {course?.name}
+                                                                    </Link>
+                                                                    <p className="text-sm opacity-50 dark:font-light line-clamp-2">
+                                                                        {ReactHtmlParser(course?.description, { transform })}
+                                                                    </p>
+                                                                    <div className="flex flex-wrap gap-2 mt-3">
+                                                                        <Badge variant="secondary" className="text-[12px] p-1 px-3">
+                                                                            <GitMerge className="w-3 h-3 mr-1.5" />
+                                                                            {course?.problem_count} bài tập
+                                                                        </Badge>
+                                                                        <Badge variant="secondary" className="text-[11.5px] p-1 px-3">
+                                                                            <UsersRound className="h-3 w-3 mr-2" />{course?.members?.length || 123}
+                                                                        </Badge>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mt-5 flex gap-2">
+                                                                    <Link to={`/course/${course.slug || course.id}`} className="flex-1">
+                                                                        <Button className="w-full">
+                                                                            Tham gia
+                                                                        </Button>
+                                                                    </Link>
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger>
+                                                                            <Button size="icon" variant="secondary">
+                                                                                <EllipsisVertical className="w-4 h-4" />
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent side="top" align="end" className="w-[160px] dark:bg-zinc-900">
+                                                                            <DropdownMenuLabel>Tuỳ chọn</DropdownMenuLabel>
+                                                                            <DropdownMenuSeparator />
+                                                                            <DropdownMenuItem>
+                                                                                <Braces className="mr-2 w-4 h-4" />Xem chi tiết
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem>
+                                                                                <Star className="mr-2 w-4 h-4" />Đánh dấu
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </BlurFade>
-                                    ))
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </BlurFade>
+                                                ))
+                                            }
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-[500px]">
+                                            <LayoutList className="w-20 h-20 opacity-30" />
+                                            <h3 className="text-lg font-semibold mt-4">
+                                                Không tìm thấy khoá học nào
+                                            </h3>
+                                            <p className="text-sm opacity-60 mt-2">
+                                                Hãy thay đổi các bộ lọc để tìm kiếm khoá học
+                                            </p>
+                                        </div>
+                                    )
                                 }
                             </div>
                             <Pagination className="mt-20">
@@ -366,17 +425,14 @@ function Courses() {
                                 filteredJoinedCourses.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-[500px]">
                                         <LayoutList className="w-20 h-20 opacity-30" />
-                                        <h3 className="text-lg font-semibold mt-4">
-                                            Bạn chưa tham gia khoá học nào
-                                        </h3>
                                         <p className="text-sm opacity-60 mt-2">
-                                            Hãy tham gia khoá học để bắt đầu học tập
+                                            Không có kết quả phù hợp
                                         </p>
                                     </div>
                                 ) : <>
                                     <div className="w-full grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-5 2xl:gap-6">
                                         {
-                                            joinedCourses.map((course, index) => (
+                                            filteredJoinedCourses.map((course, index) => (
                                                 <BlurFade key={course?.id} delay={0.15 + index * 0.05} yOffset={0}>
                                                     <div className="flex flex-col border h-full rounded-xl flex-1 bg-secondary/30 dark:bg-secondary/10 overflow-hidden">
                                                         <Link className="bg-secondary dark:bg-secondary/50 w-full aspect-[3/2] relative" to={`/course/${course.slug || course.id}`}>

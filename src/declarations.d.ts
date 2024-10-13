@@ -14,3 +14,5 @@ declare module "*.png" {
 }
 
 declare module 'papaparse';
+
+declare module 'lodash';

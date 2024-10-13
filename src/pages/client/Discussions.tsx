@@ -154,11 +154,11 @@ function Discussions() {
                             <div className="flex flex-col gap-4 mt-1">
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm">Tiêu đề</span>
-                                    <Input placeholder="Tiêu đề câu hỏi" className="placeholder:italic" value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    <Input placeholder="Tiêu đề câu hỏi" className="placeholder:italic" value={title} onChange={(e) => setTitle(e.target.value)} spellCheck={false} />
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <span className="text-sm">Mô tả</span>
-                                    <Textarea placeholder="Mô tả vấn đề" className="placeholder:italic min-h-[6lh]" value={description} onChange={(e) => setDescription(e.target.value)} />
+                                    <Textarea placeholder="Mô tả vấn đề" className="placeholder:italic min-h-[6lh]" value={description} onChange={(e) => setDescription(e.target.value)} spellCheck={false} />
                                 </div>
                             </div>
                             <DialogFooter className="mt-5">

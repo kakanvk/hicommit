@@ -34,7 +34,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem, LayoutList, Bot, ArrowRight } from 'lucide-react';
+import { CornerDownRight, MessageSquareCode, ChevronRight, Info, ChevronLeft, History, MessagesSquare, Code, AlignLeft, Tags, Tag, CodeXml, Gem, LayoutList, Bot, ArrowRight, Copy } from 'lucide-react';
 import RingProgress from "@/components/ui/ringProcess";
 import { Button } from "@/components/ui/button";
 import CodeArea from "@/components/ui/code-area";
@@ -89,6 +89,7 @@ import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 import Discussions from "./Discussions";
 import { getDiscussions } from "@/service/API/Discussion";
 import { useSocket } from "@/service/SocketContext";
+import { handleCopyText } from "@/service/UIService";
 
 const chartConfig = {
     quanlity: {
@@ -244,7 +245,7 @@ function Problem() {
                             <>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink asChild>
-                                        <Link to="/problems">Các bài tập</Link>
+                                        <Link to="/problems">Luyện tập</Link>
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
@@ -312,7 +313,7 @@ function Problem() {
                                 }
                             </div>
                             <div className="flex items-center gap-2 ">
-                                <TooltipProvider delayDuration={100}>
+                                {/* <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <RainbowButton className="px-5 text-sm dark:text-black rounded-lg h-10">
@@ -323,7 +324,7 @@ function Problem() {
                                             Chat với trợ lý ảo
                                         </TooltipContent>
                                     </Tooltip>
-                                </TooltipProvider>
+                                </TooltipProvider> */}
                                 {
                                     problem?.type !== "CONTEST" &&
                                     <TooltipProvider delayDuration={100}>
@@ -377,6 +378,19 @@ function Problem() {
                             </TabsList>
                             <TabsContent value="content">
                                 <div className="p-4 py-7 flex flex-col gap-6">
+
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-sm font-bold text-green-600 dark:text-green-500">Mã bài tập:</span>
+                                        <div className=" text-justify dark:font-normal font-medium flex items-center gap-2">
+                                            <span className="bg-secondary/40 border rounded-md px-2 py-1 text-sm italic">
+                                                {problem?.slug}
+                                            </span>
+                                            <Button variant="ghost" size="icon" className="size-8" onClick={() => handleCopyText(problem?.slug)}>
+                                                <Copy className="w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+
                                     <div className="flex flex-col gap-2">
                                         <span className="text-sm font-bold text-green-600 dark:text-green-500">Mô tả đề bài:</span>
                                         <div className=" text-justify dark:font-normal font-medium">

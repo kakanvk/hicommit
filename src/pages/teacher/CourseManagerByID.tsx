@@ -1013,17 +1013,20 @@ function CourseManagerByID() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-green-600 dark:text-green-500">Mô tả khoá học:</span>
+                        <span className="text-sm font-medium text-green-600 dark:text-green-500">Thông tin khoá học:</span>
                         <div
                             className="ck-content hicommit-content leading-7 text-justify flex-1"
                             dangerouslySetInnerHTML={{ __html: course?.description }}
                         />
                     </div>
 
-                    {
-                        dataFromAPI.length > 0 &&
-                        <CourseTree dataFromAPI={dataFromAPI} setDataFromAPI={setDataFromAPI} refresh={handleRefreshCourseData} courseId={course_id} key={key} />
-                    }
+                    <div className="flex flex-col gap-3">
+                        <span className="text-[16px] font-medium text-green-600 dark:text-green-500">Bài tập thực hành:</span>
+                        {
+                            dataFromAPI.length > 0 &&
+                            <CourseTree dataFromAPI={dataFromAPI} setDataFromAPI={setDataFromAPI} refresh={handleRefreshCourseData} courseId={course_id} key={key} />
+                        }
+                    </div>
 
                     <Dialog>
                         <DialogTrigger asChild>
@@ -1066,7 +1069,7 @@ function CourseManagerByID() {
                                 <h3 className="font-bold text-xl 2xl:text-2xl align-left">Thống kê</h3>
                                 <p className="text-sm 2xl:text-base opacity-60">Trong toàn khoá học</p>
                             </div>
-                            <Link to={`/teacher/course/${course_id}/statistic`} className="mt-1 text-sm 2xl:text-base text-primary">
+                            <Link to={`/course-manager/${course_id}/statistic`} className="mt-1 text-sm 2xl:text-base text-primary">
                                 Chi tiết<ArrowRight className="size-4 inline -translate-y-[1px] ml-1" />
                             </Link>
                         </div>

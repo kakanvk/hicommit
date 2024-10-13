@@ -506,6 +506,7 @@ function Discussion() {
                             className="rounded-lg bg-secondary/10 dark:bg-secondary/20 placeholder:italic"
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
+                            spellCheck={false}
                         />
                         <Button className="ml-auto px-4" size="sm" disabled={newComment.length === 0} onClick={() => handleCreateComment()}>Gửi câu trả lời</Button>
                     </BlurFade>
